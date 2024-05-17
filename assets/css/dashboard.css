@@ -1,0 +1,22 @@
+.home{
+    position: absolute !important;
+    left: 250px !important;
+    height: 100vh !important;
+    width: calc(100% - 250px) !important;
+    background-color: var(--body-color) !important;
+    transition: var(--tran-05) !important;
+    padding: 12px 60px !important;
+}
+
+.sidebar{
+    position: absolute !important;
+    left: 0 !important;
+    z-index: 100 !important;
+}
+
+.home .text{
+    font-size: 30px !important;
+    font-weight: 500 !important;
+    color: var(--text-color) !important;
+    
+}
