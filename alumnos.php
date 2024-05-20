@@ -1,4 +1,4 @@
-<!--<?php
+<?php
 require_once __DIR__ . '/php/login/index.php';
 
 session_start();
@@ -23,7 +23,7 @@ if (!$VerifySession['success']) {
         $userPhone = $GetCurrentUserData['phone'];
     }
 }
-?>-->
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -132,11 +132,12 @@ if (!$VerifySession['success']) {
                             <table class="table" id="studentTable">
                                 <thead>
                                     <tr>
-                                        <th>No. Control</th>
-                                        <th>Nombre</th>
-                                        <th>Email</th>
-                                        <th>Teléfono</th>
-                                        <th>Acciones</th>
+                                        <th class="text-center">ID</th>
+                                        <th class="text-center">No. Control</th>
+                                        <th class="text-center">Nombre</th>
+                                        <th class="text-center">Email</th>
+                                        <th class="text-center">Teléfono</th>
+                                        <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -155,6 +156,103 @@ if (!$VerifySession['success']) {
 </body>
 </html>
 
+<!-- Modal EDIT -->
+<div class="modal fade modal-lg" id="StutentEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="StutentEditModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="StutentEditModalLabel">Editar Alumno</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="updateStudent">
+            <div class="row g-2">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" value="">
+                    <label for="controlNumber">No. Control</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentName" value="">
+                    <label for="studentName">Nombre del Alumno</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2 py-3">
+                <div class="col-md">
+                    <div class="form-floating">
+                        <select class="form-select" id="studentGender">
+                            <option selected>Genero</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <label for="studentGender">Selecciona</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="date" class="form-control" id="studentBirthday" value="">
+                    <label for="studentBirthday">Fecha de nacimiento</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2 py-3">
+                <div class="col-md">
+                    <div class="form-floating">
+                        <select class="form-select" id="studentState">
+                            <option selected>Estado civil</option>
+                            <option value="Solter@">Solter@</option>
+                            <option value="Casad@">Casad@</option>
+                            <option value="Divorsiad@">Divorsiad@</option>
+                            <option value="Unión Libre">Unión Libre</option>
+                            <option value="Viud@">Viud@</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <label for="studentState">Selecciona</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentNation" value="">
+                    <label for="studentNation">Nacionalidad</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2 py-3">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentCurp" value="">
+                    <label for="studentCurp">CURP</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2 py-3">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentPhone" value="">
+                    <label for="studentPhone">Teléfono</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentEmail" value="">
+                    <label for="studentEmail">Email</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </div>        
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Boostrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -168,4 +266,7 @@ if (!$VerifySession['success']) {
 
 <!-- datables -->
 <script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
-<script src="js/datatables/index.js"></script>
+
+
+<!-- Custom JS -->
+<script type="module" src="js/students/index.js"></script>

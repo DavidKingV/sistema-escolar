@@ -58,7 +58,7 @@ if (!$VerifySession['success']) {
                 </a>
             </li>
             <li class="py-1">
-                <a href="alumnos.html" class="nav-link link-dark">
+                <a href="alumnos.php" class="nav-link link-dark">
                     <i class="bi bi-person-badge-fill px-3"></i>
                 Alumnos
                 </a>

@@ -82,7 +82,7 @@ class LoginControl{
         }
     
         // Si no se encontró una sesión de PHP y un JWT válido simultáneamente, devolver un error
-        return array("status" => "error", "message" => "Sesión inválida");
+        return array("success" => false, "message" => "Sesión inválidaaaa");
     }
 
     /*public function VerifySessionCookie($jwt){
