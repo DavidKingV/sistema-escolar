@@ -1,5 +1,6 @@
 //llenado de los inputs para edicion
 function FillTable(response){
+    $("#idStudentDB").val(response.id);
     $("#controlNumber").val(response.no_control);
     $("#studentName").val(response.name);
 
@@ -17,4 +18,18 @@ function FillTable(response){
     $("#studentEmail").val(response.email);
 }
 
-export { FillTable };
+//funcion para limpiar los inputs
+function ClearInputsEditEstudents(){
+    $("#idStudentDB").val("");
+    $("#controlNumber").val("");
+    $("#studentName").val("");
+    $("#studentGender").val("");
+    $("#studentBirthday").val("");
+    $("#studentState").val("");
+    $("#studentNation").val("");
+    $("#studentCurp").val("");
+    $("#studentPhone").val("");
+    $("#studentEmail").val("");
+}
+
+export { FillTable, ClearInputsEditEstudents };

@@ -53,7 +53,7 @@ if (!$VerifySession['success']) {
         <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; min-height: calc(100vh);">
             <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item py-1">
-                <a href="#" class="nav-link link-dark" aria-current="page">
+                <a href="dashboard.php" class="nav-link link-dark" aria-current="page">
                     <i class="bi bi-house-fill px-3"></i>
                 Inicio
                 </a>
@@ -65,8 +65,9 @@ if (!$VerifySession['success']) {
                     Alumnos
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Agregar</a></li>
-                        <li><a class="dropdown-item" href="#">Usuarios</a></li>
+                        <li><a class="dropdown-item" href="alumnos/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="alumnos.php">Lista</a></li>
+                        <li><a class="dropdown-item" href="alumnos/usuarios.php">Usuarios</a></li>
                     </ul>
                 </div>
             </li>
@@ -135,8 +136,8 @@ if (!$VerifySession['success']) {
                                         <th class="text-center">ID</th>
                                         <th class="text-center">No. Control</th>
                                         <th class="text-center">Nombre</th>
-                                        <th class="text-center">Email</th>
                                         <th class="text-center">Teléfono</th>
+                                        <th class="text-center">Email</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
@@ -169,41 +170,51 @@ if (!$VerifySession['success']) {
             <div class="row g-2">
                 <div class="col-md">
                     <div class="form-floating">
+                    <input type="text" class="form-control" id="idStudentDB" name="idStudentDB" readonly>
+                    <label for="idStudentDB">ID</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
                     <input type="text" class="form-control" id="controlNumber" name="controlNumber" value="">
                     <label for="controlNumber">No. Control</label>
                     </div>
+                    <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentName" value="">
+                    <input type="text" class="form-control" id="studentName" name="studentName" value="">
                     <label for="studentName">Nombre del Alumno</label>
                     </div>
+                    <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
-            <div class="row g-2 py-3">
+            <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                        <select class="form-select" id="studentGender">
-                            <option selected>Genero</option>
+                        <select class="form-select" id="studentGender" name="studentGender">
+                            <option selected value="0">Genero</option>
                             <option value="Masculino">Masculino</option>
                             <option value="Femenino">Femenino</option>
                             <option value="Otro">Otro</option>
                         </select>
                         <label for="studentGender">Selecciona</label>
                     </div>
+                    <label id="studentGender-error" class="error text-bg-danger" for="studentGender" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="date" class="form-control" id="studentBirthday" value="">
+                    <input type="date" class="form-control" id="studentBirthday" name="studentBirthday" value="">
                     <label for="studentBirthday">Fecha de nacimiento</label>
                     </div>
+                    <label id="studentBirthday-error" class="error text-bg-danger" for="studentBirthday" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
-            <div class="row g-2 py-3">
+            <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                        <select class="form-select" id="studentState">
-                            <option selected>Estado civil</option>
+                        <select class="form-select" id="studentState" name="studentState">
+                            <option selected value="0">Estado civil</option>
                             <option value="Solter@">Solter@</option>
                             <option value="Casad@">Casad@</option>
                             <option value="Divorsiad@">Divorsiad@</option>
@@ -213,42 +224,47 @@ if (!$VerifySession['success']) {
                         </select>
                         <label for="studentState">Selecciona</label>
                     </div>
+                    <label id="studentState-error" class="error text-bg-danger" for="studentState" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentNation" value="">
+                    <input type="text" class="form-control" id="studentNation" name="studentNation" value="">
                     <label for="studentNation">Nacionalidad</label>
                     </div>
+                    <label id="studentNation-error" class="error text-bg-danger" for="studentNation" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
-            <div class="row g-2 py-3">
+            <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentCurp" value="">
+                    <input type="text" class="form-control" id="studentCurp" name="studentCurp" value="">
                     <label for="studentCurp">CURP</label>
                     </div>
+                    <label id="studentCurp-error" class="error text-bg-danger" for="studentCurp" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
-            <div class="row g-2 py-3">
+            <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentPhone" value="">
+                    <input type="text" class="form-control" id="studentPhone" name="studentPhone" value="">
                     <label for="studentPhone">Teléfono</label>
                     </div>
+                    <label id="studentPhone-error" class="error text-bg-danger" for="studentPhone" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentEmail" value="">
+                    <input type="text" class="form-control" id="studentEmail" name="studentEmail" value="">
                     <label for="studentEmail">Email</label>
                     </div>
+                    <label id="studentEmail-error" class="error text-bg-danger" for="studentEmail" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
+            </div>        
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         </form>
-        </div>        
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary">Guardar Cambios</button>
-      </div>
+            </div>
     </div>
   </div>
 </div>
@@ -263,6 +279,7 @@ if (!$VerifySession['success']) {
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js" integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
 
 <!-- datables -->
 <script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
@@ -270,3 +287,4 @@ if (!$VerifySession['success']) {
 
 <!-- Custom JS -->
 <script type="module" src="js/students/index.js"></script>
+<script src="js/utils/validate.js"></script>
