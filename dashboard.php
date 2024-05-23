@@ -34,7 +34,7 @@ if (!$VerifySession['success']) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/all.min.css">
     <!--<link rel="stylesheet" href="assets/css/dashboard.css">-->
-    <title>Document</title>
+    <title>Inicio</title>
 </head>
 <body>
 
@@ -58,16 +58,30 @@ if (!$VerifySession['success']) {
                 </a>
             </li>
             <li class="py-1">
-                <a href="alumnos.php" class="nav-link link-dark">
-                    <i class="bi bi-person-badge-fill px-3"></i>
-                Alumnos
-                </a>
+                <div class="dropdown">
+                    <a  href="alumnos.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
+                        <i class="bi bi-person-badge-fill px-3"></i>
+                    Alumnos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="alumnos/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="alumnos.php">Lista</a></li>
+                        <li><a class="dropdown-item" href="alumnos/usuarios.php">Usuarios</a></li>
+                    </ul>
+                </div>
             </li>
             <li class="py-1">
-                <a href="#" class="nav-link link-dark">
-                    <i class="bi bi-person-workspace px-3"></i>
-                Profesores
-                </a>
+                <div class="dropdown">
+                    <a href="profesores.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-workspace px-3"></i>
+                    Profesores
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="profesores/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="profesores.php">Lista</a></li>
+                        <li><a class="dropdown-item" href="profesores/usuarios.php">Usuarios</a></li>
+                    </ul>
+                </div>                
             </li>
             <li class="py-1">
                 <a href="#" class="nav-link link-dark">

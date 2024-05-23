@@ -35,7 +35,7 @@ if (!$VerifySession['success']) {
     <link rel="stylesheet" href="assets/css/all.min.css">
     <link rel="stylesheet" href="assets/css/alumnos.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
-    <title>Alumnos</title>
+    <title>Profesores</title>
 </head>
 <body>
 
@@ -60,7 +60,7 @@ if (!$VerifySession['success']) {
             </li>
             <li class="py-1">
                 <div class="dropdown">
-                    <a  href="alumnos.html" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" >
+                    <a  href="alumnos.html" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
                         <i class="bi bi-person-badge-fill px-3"></i>
                     Alumnos
                     </a>
@@ -73,14 +73,14 @@ if (!$VerifySession['success']) {
             </li>
             <li class="py-1">
                 <div class="dropdown">
-                    <a href="profesores.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown">
+                    <a href="profesores.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">
                         <i class="bi bi-person-workspace px-3"></i>
                     Profesores
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="profesores/altas.php">Agregar</a></li>
-                        <li><a class="dropdown-item" href="profesores.php">Lista</a></li>
-                        <li><a class="dropdown-item" href="profesores/usuarios.php">Usuarios</a></li>
+                        <li><a class="dropdown-item" href="alumnos/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="alumnos.php">Lista</a></li>
+                        <li><a class="dropdown-item" href="alumnos/usuarios.php">Usuarios</a></li>
                     </ul>
                 </div>     
             </li>
@@ -123,7 +123,7 @@ if (!$VerifySession['success']) {
     </nav>
       
     <section class="home" id="home">           
-        <div class="text">Alumnos</div>
+        <div class="text">Profesores</div>
         <hr class="border-top border-2 border-dark mx-auto w-25">
 
         <div class="row">
@@ -137,11 +137,10 @@ if (!$VerifySession['success']) {
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table" id="studentTable">
+                            <table class="table" id="teachersTable">
                                 <thead>
                                     <tr>
                                         <th class="text-center">ID</th>
-                                        <th class="text-center">No. Control</th>
                                         <th class="text-center">Nombre</th>
                                         <th class="text-center">Teléfono</th>
                                         <th class="text-center">Email</th>
@@ -164,117 +163,95 @@ if (!$VerifySession['success']) {
 </body>
 </html>
 
-<!-- Modal EDIT -->
-<div class="modal fade modal-lg" id="StutentEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="StutentEditModalLabel" aria-hidden="true">
+<!-- Modal edit -->
+<div class="modal fade modal-lg" id="TeacherEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="TeacherEditModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="StutentEditModalLabel">Editar Alumno</h1>
+        <h1 class="modal-title fs-5" id="TeacherEditModalLabel">Editar Alumno</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <form id="updateStudent">
-            <div class="row g-2">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="idStudentDB" name="idStudentDB" readonly>
-                    <label for="idStudentDB">ID</label>
+      <div class="modal-body
+        ">
+            <form id="editTeacherForm">
+                <div class="row g-2 py-4">
+                    <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="idTeacherEdit" name="idTeacherEdit" readonly>
+                        <label for="idTeacherEdit">ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="teacherNameEdit" name="teacherNameEdit" value="" readonly>
+                        <label for="teacherNameEdit">Nombre del Profesor</label>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" value="">
-                    <label for="controlNumber">No. Control</label>
+                <div class="row g-2 py-1">
+                    <div class="col-md">
+                        <div class="form-floating">
+                            <select class="form-select" id="teacherGenderEdit" name="teacherGenderEdit">
+                                <option selected value="0">Genero</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                            <label for="teacherGenderEdit">Selecciona</label>
+                        </div>
+                        <label id="teacherGenderEdit-error" class="error text-bg-danger" for="teacherGenderEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     </div>
-                    <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentName" name="studentName" value="">
-                    <label for="studentName">Nombre del Alumno</label>
+                    <div class="col-md">
+                        <div class="form-floating">
+                            <input type="date" class="form-control" id="teacherBirthdayEdit" name="teacherBirthdayEdit" value="">
+                            <label for="teacherBirthdayEdit">Fecha de nacimiento</label>
+                        </div>
+                        <label id="teacherBirthdayEdit-error" class="error text-bg-danger" for="teacherBirthdayEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     </div>
-                    <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                        <select class="form-select" id="studentGender" name="studentGender">
-                            <option selected value="0">Genero</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Femenino">Femenino</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <label for="studentGender">Selecciona</label>
+                    <div class="col-md">
+                        <div class="form-floating">
+                            <select class="form-select" id="teacherStateEdit" name="teacherStateEdit">
+                                <option selected value="0">Estado civil</option>
+                                <option value="Solter@">Solter@</option>
+                                <option value="Casad
+                                @">Casad@</option>
+                                <option value="Divorsiad@">Divorsiad@</option>
+                                <option value="Unión Libre">Unión Libre</option>
+                                <option value="Viud@">Viud@</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                            <label for="teacherStateEdit">Selecciona</label>
+                        </div>
+                        <label id="teacherStateEdit-error" class="error text-bg-danger" for="teacherStateEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     </div>
-                    <label id="studentGender-error" class="error text-bg-danger" for="studentGender" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="date" class="form-control" id="studentBirthday" name="studentBirthday" value="">
-                    <label for="studentBirthday">Fecha de nacimiento</label>
+                </div>                
+                <div class="row g-2 py-1">
+                    <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="teacherPhoneEdit" name="teacherPhoneEdit" value="">
+                        <label for="teacherPhoneEdit">Teléfono</label>
+                        </div>
+                        <label id="teacherPhoneEdit-error" class="error text-bg-danger" for="teacherPhoneEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     </div>
-                    <label id="studentBirthday-error" class="error text-bg-danger" for="studentBirthday" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                        <select class="form-select" id="studentState" name="studentState">
-                            <option selected value="0">Estado civil</option>
-                            <option value="Solter@">Solter@</option>
-                            <option value="Casad@">Casad@</option>
-                            <option value="Divorsiad@">Divorsiad@</option>
-                            <option value="Unión Libre">Unión Libre</option>
-                            <option value="Viud@">Viud@</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <label for="studentState">Selecciona</label>
+                    <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="teacherEmailEdit" name="teacherEmailEdit" value="">
+                        <label for="teacherEmailEdit">Email</label>
+                        </div>
+                        <label id="teacherEmailEdit-error" class="error text-bg-danger" for="teacherEmailEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     </div>
-                    <label id="studentState-error" class="error text-bg-danger" for="studentState" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentNation" name="studentNation" value="">
-                    <label for="studentNation">Nacionalidad</label>
-                    </div>
-                    <label id="studentNation-error" class="error text-bg-danger" for="studentNation" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentCurp" name="studentCurp" value="">
-                    <label for="studentCurp">CURP</label>
-                    </div>
-                    <label id="studentCurp-error" class="error text-bg-danger" for="studentCurp" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentPhone" name="studentPhone" value="">
-                    <label for="studentPhone">Teléfono</label>
-                    </div>
-                    <label id="studentPhone-error" class="error text-bg-danger" for="studentPhone" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentEmail" name="studentEmail" value="">
-                    <label for="studentEmail">Email</label>
-                    </div>
-                    <label id="studentEmail-error" class="error text-bg-danger" for="studentEmail" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            </div>        
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </form>
             </div>
+        </form>
+        </div>
     </div>
-  </div>
+    </div>
 </div>
+
 
 <!-- Boostrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -293,5 +270,5 @@ if (!$VerifySession['success']) {
 
 
 <!-- Custom JS -->
-<script type="module" src="js/students/index.js"></script>
+<script type="module" src="js/teachers/index.js"></script>
 <script src="js/utils/validate.js"></script>

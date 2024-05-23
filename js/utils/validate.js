@@ -266,6 +266,58 @@ $("#editStudentsUsers").validate({
     }
 });
 
+$("#editTeacherForm").validate({
+    rules: {
+        teacherGenderEdit: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        teacherBirthdayEdit: {
+            required: true,
+            date: true
+        },
+        teacherStateEdit: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        teacherPhoneEdit: {
+            required: true,
+            number: true,
+            minlength: 10,
+            maxlength: 12
+        },
+        teacherEmailEdit: {
+            required: true,
+            email: true
+        }
+    }, messages: {
+        teacherGenderEdit: {
+            required: "Por favor, ingresa un nombre",
+        },
+        teacherBirthdayEdit: {
+            required: "Por favor, ingresa tu fecha de nacimiento",
+            date: "Por favor, ingresa una fecha válida"
+        },
+        teacherStateEdit: {
+            required: "Por favor, ingresa tu estado civil"
+        },
+        teacherPhoneEdit: {
+            required: "Por favor ingresa tu número de teléfono",
+            number: "Por favor, ingresa solo números",
+            minlength: "El número de teléfono debe tener al menos 10 caracteres",
+            maxlength: "El número de teléfono debe tener 12 caracteres"
+        },
+        teacherEmailEdit: {
+            required: "Por favor, ingresa tu correo electrónico",
+            email: "Por favor, ingresa un correo electrónico válido"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
 
 $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);
