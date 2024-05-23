@@ -80,6 +80,53 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+            case 'addStudentUser':
+                    
+                    $studentUserData = $_POST['studentUserData'];
+                    parse_str($studentUserData, $studentDataArray);
+        
+                    $addStudentUser = new StudentsControl($con, $sesion);
+                    $add = $addStudentUser->AddStudentUser($studentDataArray);
+        
+                    header('Content-Type: application/json');
+                    echo json_encode($add);
+        
+                    break;
+
+            case 'updateStudentUser': 
+                $studentEditUserData = $_POST['studentUserData'];
+                parse_str($studentEditUserData, $studentEditDataArray);
+
+                $updateStudentUser = new StudentsControl($con, $sesion);
+                $update = $updateStudentUser->UpdateStudentUser($studentEditDataArray);
+
+                header('Content-Type: application/json');
+                echo json_encode($update);
+
+                break;
+
+            case 'desactivateStudentUser':
+                $studentId = $_POST['studentId'];
+
+                $desactivateStudent = new StudentsControl($con, $sesion);
+                $desactivate = $desactivateStudent->DesactivateStudentUser($studentId);
+
+                header('Content-Type: application/json');
+                echo json_encode($desactivate);
+
+                break;
+
+            case 'reactivateStudentUser':
+                $studentId = $_POST['studentId'];
+
+                $reactivateStudent = new StudentsControl($con, $sesion);
+                $reactivate = $reactivateStudent->ReactivateStudentUser($studentId);
+
+                header('Content-Type: application/json');
+                echo json_encode($reactivate);
+
+                break;
+
         default:
         echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }

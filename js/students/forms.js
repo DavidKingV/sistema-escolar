@@ -32,4 +32,16 @@ function ClearInputsEditEstudents(){
     $("#studentEmail").val("");
 }
 
-export { FillTable, ClearInputsEditEstudents };
+function ClearStudensAddUser(){
+    $("#addStudentsUsers")[0].reset();
+    $("#addStudentsUsers").validate().resetForm();
+    (".userError", ".userSuccess").html("");
+}
+
+function ClearStudensEditUser(){
+    $("#editStudentsUsers")[0].reset();
+    $("#editStudentsUsers").validate().resetForm();
+    $(".userError", ".userSuccess").html("");
+}
+
+export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser};

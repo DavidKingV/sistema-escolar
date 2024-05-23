@@ -77,9 +77,11 @@ function initializeStudentsUsersTable() {
                 "render": function(data, type, row) {
 
                     if (row.status == "Activo") {
-                        return '<button id="editUser" data-id="'+row.id+'" class="btn btn-primary btn-circle" data-bs-toggle="modal" data-bs-target="#StutentUserEditModal"><i class="bi bi-pencil-square"></i></button><button id="desactivateUser" data-id="'+row.id+'" class="btn btn-danger btn-circle"><i class="bi bi-arrow-down-square-fill"></i></button>';
+                        return '<button data-id="'+row.id+'" data-name="'+row.name+'" data-user="'+row.user+'" class="btn btn-primary btn-circle editStudentUser" data-bs-toggle="modal" data-bs-target="#StutentUserEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle desactivateStudentUser"><i class="bi bi-arrow-down-square-fill"></i></button>';
                     }
-
+                    else if (row.status == "Inactivo") {
+                        return '<button data-id="'+row.id+'" class="btn btn-warning btn-circle reactivateStudentUser"><i class="bi bi-arrow-clockwise"></i></button>';
+                    }
                     return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle addUserStudents" data-bs-toggle="modal" data-bs-target="#StutentUserModal"><i class="bi bi-arrow-up-square-fill"></i></button>';
                 
                 },

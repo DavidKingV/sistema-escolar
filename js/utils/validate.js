@@ -1,4 +1,4 @@
-import { VerifyUser } from './../students/index.js';
+/*import { VerifyUser } from './../students/index.js';*/
 
 $("#controlNumber, #studentName, #studentCurp").on("input", function(event) {
     event.preventDefault();
@@ -220,12 +220,44 @@ $("#addStudentsUsers").validate({
     rules:{
         studentUserAdd: {
             required: true,
-            uniqueUser: true
+            minlength: 4,
+        },
+        studentUserPass: {
+            required: true,
+            minlength: 8,
         }
     }, messages: {
         studentUserAdd: {
             required: "Por favor, ingresa un usuario",
-            uniqueUser: "El usuario ya está asignado a un estudiante"
+        },
+        studentUserPass: {
+            required: "Por favor, ingresa una contraseña",
+            minlength: "La contraseña debe tener al menos 8 caracteres"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#editStudentsUsers").validate({
+    rules:{
+        studentUserAddEdit: {
+            required: true,
+            minlength: 4,
+        },
+        studentUserPassEdit: {
+            required: true,
+            minlength: 8,
+        }
+    }, messages: {
+        studentUserAddEdit: {
+            required: "Por favor, ingresa un usuario",
+        },
+        studentUserPassEdit: {
+            required: "Por favor, ingresa una contraseña",
+            minlength: "La contraseña debe tener al menos 8 caracteres"
         },
         errorPlacement: function(error, element) {
             var elementId = element.attr("id");
@@ -239,7 +271,6 @@ $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);
 }, "Por favor, ingresa solo letras");
 
-
 $.validator.addMethod("specialChars", function(value) {
     return /^[a-zA-Z0-9]*$/.test(value);
 }, "Por favor, ingresa solo letras y números");
@@ -249,13 +280,7 @@ $.validator.addMethod("valueNotEquals", function(value, element, arg){
     return arg !== value;
 }, "Por favor, selecciona una opción");
 
-$.validator.addMethod('uniqueUser', function(value, element) {
-    var isValid = false;
-    VerifyUser(value).then((response) => {
-        isValid = response;
-    });
-    return isValid;
-}, 'El usuario ya está asignado a un estudiante');
+
 
 
 /*terminan las reglas de validación para el formulario de registro de productos*/

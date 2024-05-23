@@ -1,4 +1,4 @@
-import { FillTable, ClearInputsEditEstudents } from './forms.js';
+import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser } from './forms.js';
 import { initializeStudentDataTable, initializeStudentsUsersTable } from '../datatables/index.js';
 
 initializeStudentDataTable();
@@ -107,6 +107,7 @@ $("#addStudents").on( "submit", function( event ) {
 $("#studentsUsersTable").on( "click", ".addUserStudents", function() {
     let studentId = $(this).data('id');
     let studentName = $(this).data('name');
+    $("#submitUser").attr('disabled', true);
     if(studentId && studentName){
         $("#studentUserId").val(studentId);
         $("#studentUserName").val(studentName);
@@ -120,7 +121,26 @@ $("#studentsUsersTable").on( "click", ".addUserStudents", function() {
     }
 });
 
-/*$("#studentUserAdd").on("blur", function(){
+$("#studentsUsersTable").on( "click", ".editStudentUser", function() {
+    let studentId = $(this).data('id');
+    let studentName = $(this).data('name');
+    let studentUser = $(this).data('user');
+    if(studentId && studentName){
+        $("#studentUserIdEdit").val(studentId);
+        $("#studentUserNameEdit").val(studentName);
+        $("#studentUserAddEdit").val(studentUser);
+    }
+    else{
+        Swal.fire({
+            icon: 'error',
+            title: 'ID del estudiante no proporcionado',
+            text: 'Por favor proporciona un ID válido para asignar un usuario.'
+        });
+    }
+});
+
+$("#studentUserAdd").on("blur", function(){
+    $(".userSuccess").text('');
     let studentUserAdd = $(this).val();
     if(studentUserAdd){
         setTimeout(() => {
@@ -129,9 +149,261 @@ $("#studentsUsersTable").on( "click", ".addUserStudents", function() {
     }else{
         $("#studentUserAdd-error").text('Por favor, ingresa un usuario.');
     }
-});*/
+});
 
-export const VerifyUser = async (studentUserAdd) => {
+$("#studentUserAddEdit").on("blur", function(){
+    $(".userSuccess").html('');
+    let studentUserAdd = $(this).val();
+    if(studentUserAdd){
+        setTimeout(() => {
+            VerifyUser(studentUserAdd);
+        }, 1000);
+    }else{
+        $("#studentUserAddEdit-error").text('Por favor, ingresa un usuario.');
+    }
+});
+
+$("#addStudentsUsers").on( "submit", function( event ) {
+    event.preventDefault();
+    const studentUserData = $(this).serialize();
+    Swal.fire({
+        title: '¿Estás seguro de agregar el usuario al estudiante?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(48, 133, 214)',
+        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonText: 'Sí, agregar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            if($(this).valid()){
+                AddStudentUser(studentUserData);
+            }else{
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en la validación',
+                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                });
+            }
+        }
+    });
+});
+
+$("#studentsUsersTable").on("click", ".reactivateStudentUser", function(){
+    let studentId = $(this).data('id');
+    if(studentId){
+        Swal.fire({
+            title: '¿Estás seguro de reactivar el usuario?',            
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(48, 133, 214)',
+            cancelButtonColor: 'rgb(221, 51, 51);',
+            confirmButtonText: 'Sí, reactivar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                ReactivateStudentUser(studentId);
+            }
+        });
+    }
+    else{
+        Swal.fire({
+            icon: 'error',
+            title: 'ID del estudiante no proporcionado',
+            text: 'Por favor proporciona un ID válido para reactivar el usuario.'
+        });
+    }
+});
+
+$("#studentsUsersTable").on("click", ".desactivateStudentUser", function(){
+    let studentId = $(this).data('id');
+    if(studentId){
+        Swal.fire({
+            title: '¿Estás seguro de desactivar el usuario?',            
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(48, 133, 214)',
+            cancelButtonColor: 'rgb(221, 51, 51);',
+            confirmButtonText: 'Sí, desactivar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                DesactivateStudentUser(studentId);
+            }
+        });
+    }
+    else{
+        Swal.fire({
+            icon: 'error',
+            title: 'ID del estudiante no proporcionado',
+            text: 'Por favor proporciona un ID válido para desactivar el usuario.'
+        });
+    }
+});
+
+$("#editStudentsUsers").on( "submit", function( event ) {
+    event.preventDefault();
+    const studentUserData = $(this).serialize();
+    Swal.fire({
+        title: '¿Estás seguro de actualizar el usuario del estudiante?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(48, 133, 214)',
+        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            if($(this).valid()){
+                UpdateStudentUser(studentUserData);
+            $('#StutentUserEditModal').modal('hide');
+            }else{
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en la validación',
+                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                });
+            }
+        }
+    });
+});
+
+const UpdateStudentUser = async (studentUserData) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/students/routes.php',
+            type: 'POST',
+            data: {studentUserData: studentUserData, action: 'updateStudentUser'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Usuario actualizado',
+                text: response.message
+            });
+            // Reload the table
+            $('#studentsUsersTable').DataTable().ajax.reload();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al actualizar el usuario',
+                text: response.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al actualizar el usuario',
+            text: 'Ocurrió un error al actualizar el usuario, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const DesactivateStudentUser = async (studentId) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/students/routes.php',
+            type: 'POST',
+            data: {studentId: studentId, action: 'desactivateStudentUser'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Usuario desactivado',
+                text: response.message
+            });
+            // Reload the table
+            $('#studentsUsersTable').DataTable().ajax.reload();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al desactivar el usuario',
+                text: response.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al desactivar el usuario',
+            text: 'Ocurrió un error al desactivar el usuario, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const ReactivateStudentUser = async (studentId) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/students/routes.php',
+            type: 'POST',
+            data: {studentId: studentId, action: 'reactivateStudentUser'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Usuario reactivado',
+                text: response.message
+            });
+            // Reload the table
+            $('#studentsUsersTable').DataTable().ajax.reload();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al reactivar el usuario',
+                text: response.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al reactivar el usuario',
+            text: 'Ocurrió un error al reactivar el usuario, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const AddStudentUser = async (studentUserData) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/students/routes.php',
+            type: 'POST',
+            data: {studentUserData: studentUserData, action: 'addStudentUser'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Usuario agregado',
+                text: response.message
+            });
+            // Reload the table
+            $('#studentsUsersTable').DataTable().ajax.reload();
+            $('#StutentUserModal').modal('hide');
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al agregar el usuario',
+                text: response.message
+            });
+        }
+    }
+    catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al agregar el usuario',
+            text: 'Ocurrió un error al agregar el usuario, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const VerifyUser = async (studentUserAdd) => {
     try {
         const response = await $.ajax({
             url: '../php/students/routes.php',
@@ -139,14 +411,24 @@ export const VerifyUser = async (studentUserAdd) => {
             data: {studentUserAdd: studentUserAdd, action: 'verifyStudentUser'}
         });
         if(response.success){
-            return !response.user;
+            if(!response.user){
+                $(".userError").text('El usuario ya está asignado a un estudiante.');
+            }else{
+                $("#submitUser").attr('disabled', false);
+                $(".userError").text('');
+                $(".userSuccess").text('Usuario disponible.');
+            }
         }else{
             Swal.fire({
                 icon: 'error',
                 title: 'Error al verificar el usuario',
-                text: response.message
+                text: response.message,
+                confirmButtonText: 'Iniciar sesión'
+            }).then((result) => {
+                if(result.isConfirmed){
+                    window.location.href = '../index.html';
+                }
             });
-            return false;
         }
     }
     catch (error) {
@@ -155,7 +437,6 @@ export const VerifyUser = async (studentUserAdd) => {
             title: 'Error al verificar el usuario',
             text: 'Ocurrió un error al verificar el usuario, por favor intenta de nuevo más tarde.'
         });
-        return false;
     }
 }
 
@@ -295,11 +576,44 @@ const DeleteStudent = async (studentId) => {
     }
 }
 
+//miselanios
+$("#showPasswordToggle").on("click", function(){
+    let password = $("#studentUserPass");
+    if(password.attr('type') == 'password'){
+        password.attr('type', 'text');
+    }else{
+        password.attr('type', 'password');
+    }
+});
 
+$("#showPasswordToggleEdit").on("click", function(){
+    let password = $("#studentUserPassEdit");
+    if(password.attr('type') == 'password'){
+        password.attr('type', 'text');
+    }else{
+        password.attr('type', 'password');
+    }
+});
 
+$("#editUserNameStudent").on("click", function(){
+    let inputuser = $("#studentUserAddEdit");
+    if (inputuser.attr('readonly')) {
+        inputuser.attr('readonly', false);
+    }else{
+        inputuser.attr('readonly', true);
+    }
+});
 
 
 //al cerra el modal limpiar los inputs
 $('#StutentEditModal').on('hidden.bs.modal', function() {
     ClearInputsEditEstudents();
+});
+
+$('#StutentUserModal').on('hidden.bs.modal', function() {
+    ClearStudensAddUser();
+});
+
+$('#StutentUserEditModal').on('hidden.bs.modal', function() {
+    ClearStudensEditUser();
 });

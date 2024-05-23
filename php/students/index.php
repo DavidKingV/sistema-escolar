@@ -201,21 +201,112 @@ class StudentsControl {
 
     function VerifyStudentUser($studentUser){
             
-            if(!$this->sesion['success']){
-                return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-            }else{
-                $sql = "SELECT * FROM login_students WHERE user = ?";
-                $stmt = $this->con->prepare($sql);
-                $stmt->bind_param('s', $studentUser);
-                $stmt->execute();
-                $query = $stmt->get_result();
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "SELECT * FROM login_students WHERE user = ?";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('s', $studentUser);
+            $stmt->execute();
+            $query = $stmt->get_result();
     
-                if($query->num_rows > 0){
-                    return array("success" => true, "user" => true,"message" => "El usuario ya existe");
-                }else{
-                    return array("success" => true, "user" => false,"message" => "Usuario disponible");
-                }
+            if($query->num_rows > 0){
+                return array("success" => true, "user" => false,"message" => "El usuario ya existe");
+            }else{
+                return array("success" => true, "user" => true,"message" => "Usuario disponible");
             }
+        }
+    }
+
+    function AddStudentUser($studentDataArray){
+                
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $status = 'Activo'; 
+            $sql = "INSERT INTO login_students (student_id, user, password, status) VALUES (?, ?, ?, ?)";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('isss', $studentDataArray['studentUserId'], $studentDataArray['studentUserAdd'], $studentDataArray['studentUserPass'], $status);
+            $stmt->execute();
+            
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->con->close();
+                return array("success" => true, "message" => "Usuario registrado correctamente");
+            }else{
+                $stmt->close();
+                $this->con->close();
+                return array("success" => false, "message" => "Error al registrar el usuario, por favor intente de nuevo más tarde");
+            }
+        }
+    }
+
+    function UpdateStudentUser($studentEditDataArray){
+            
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "UPDATE login_students SET user = ?, password = ? WHERE student_id = ?";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('ssi', $studentEditDataArray['studentUserAddEdit'], $studentEditDataArray['studentUserPassEdit'], $studentEditDataArray['studentUserIdEdit']);
+            $stmt->execute();
+    
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->con->close();
+                return array("success" => true, "message" => "Usuario actualizado correctamente");
+            }else{
+                $stmt->close();
+                $this->con->close();
+                return array("success" => false, "message" => "Error al actualizar el usuario, por favor intente de nuevo más tarde");
+            }
+        }
+    }
+
+    function DesactivateStudentUser($studentId){
+            
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $status = 'Inactivo';
+            $sql = "UPDATE login_students SET status = ? WHERE student_id = ?";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('si', $status, $studentId);
+            $stmt->execute();
+    
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->con->close();
+                return array("success" => true, "message" => "Usuario desactivado correctamente");
+            }else{
+                $stmt->close();
+                $this->con->close();
+                return array("success" => false, "message" => "Error al desactivar el usuario, por favor intente de nuevo más tarde");
+            }
+        }
+    }
+
+    function ReactivateStudentUser($studentId){
+            
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $status = 'Activo';
+            $sql = "UPDATE login_students SET status = ? WHERE student_id = ?";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('si', $status, $studentId);
+            $stmt->execute();
+    
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->con->close();
+                return array("success" => true, "message" => "Usuario reactivado correctamente");
+            }else{
+                $stmt->close();
+                $this->con->close();
+                return array("success" => false, "message" => "Error al reactivar el usuario, por favor intente de nuevo más tarde");
+            }
+        }
     }
 
 }

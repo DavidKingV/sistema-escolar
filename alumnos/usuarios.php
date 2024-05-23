@@ -187,25 +187,87 @@ if (!$VerifySession['success']) {
                     <label for="studentUserAdd">Usuario</label>
                     </div>
                     <label id="studentUserAdd-error" class="error text-bg-danger" for="studentUserAdd" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label class="error text-bg-danger userError" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label class="error text-bg-success userSuccess" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentUserPass" name="studentUserPass" value="">
-                    <label for="studentUserPass">Contraseña</label>
+                    <div class="form-floating input-group">
+                        <input type="password" class="form-control" id="studentUserPass" name="studentUserPass" value="">
+                        <label for="studentUserPass">Contraseña</label>
+                        <button class="btn btn-outline-secondary" type="button" id="showPasswordToggle">
+                            <i class="bi bi-eye"></i>
+                        </button>
                     </div>
                     <label id="studentUserPass-error" class="error text-bg-danger" for="studentUserPass" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
+                </div>        
             </div>        
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary">Guardar</button>
+        <button type="submit" id="submitUser" class="btn btn-primary">Guardar</button>
       </div>
       </form>
     </div>
   </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade modal-lg" id="StutentUserEditModal" tabindex="-1" aria-labelledby="StutentUserEditModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="StutentUserEditModalTitle">Editar Usuario</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editStudentsUsers">
+            <div class="row g-2 py-3">            
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentUserIdEdit" name="studentUserIdEdit" readonly>
+                    <label for="studentUserIdEdit">ID</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentUserNameEdit" name="studentUserNameEdit" readonly>
+                    <label for="studentUserNameEdit">Nombre del alumno</label>
+                    </div>                   
+                </div>
+            </div>
+            <div class="row g-2 py-3">
+                <div class="col-md">
+                    <div class="form-floating input-group">
+                    <input type="text" class="form-control" id="studentUserAddEdit" name="studentUserAddEdit" value="" readonly>
+                    <label for="studentUserAddEdit">Usuario</label>
+                    <button class="btn btn-outline-secondary" type="button" id="editUserNameStudent">
+                    <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    </div>
+                    <label id="studentUserAddEdit-error" class="error text-bg-danger" for="studentUserAddEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label class="error text-bg-danger userError" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label class="error text-bg-success userSuccess" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating input-group">
+                    <input type="password" class="form-control" id="studentUserPassEdit" name="studentUserPassEdit" value="">
+                    <label for="studentUserPassEdit">Contraseña</label>
+                    <button class="btn btn-outline-secondary" type="button" id="showPasswordToggleEdit">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    </div>
+                    <label id="studentUserPassEdit-error" class="error text-bg-danger" for="studentUserPassEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                </div>                
+            </div>        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="submit" id="submitEditUserStudent" class="btn btn-primary">Guardar</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <!-- Boostrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
