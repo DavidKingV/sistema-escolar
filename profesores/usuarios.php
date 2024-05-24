@@ -60,27 +60,27 @@ if (!$VerifySession['success']) {
             </li>
             <li class="py-1">
                 <div class="dropdown">
-                    <a  href="../alumnos.html" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" >
+                    <a  href="../alumnos.html" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
                         <i class="bi bi-person-badge-fill px-3"></i>
                     Alumnos
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="../alumnos/altas.php">Agregar</a></li>
                         <li><a class="dropdown-item" href="../alumnos.php">Lista</a></li>
-                        <li><a class="dropdown-item" href="usuarios.php">Usuarios</a></li>
+                        <li><a class="dropdown-item" href="../alumnos/usuarios.php">Usuarios</a></li>
                     </ul>
                 </div>
             </li>
             <li class="py-1">
                 <div class="dropdown">
-                    <a href="../profesores.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown">
+                    <a href="../profesores.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">
                         <i class="bi bi-person-workspace px-3"></i>
                     Profesores
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="../profesores/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="altas.php">Agregar</a></li>
                         <li><a class="dropdown-item" href="../profesores.php">Lista</a></li>
-                        <li><a class="dropdown-item" href="../profesores/usuarios.php">Usuarios</a></li>
+                        <li><a class="dropdown-item" href="usuarios.php">Usuarios</a></li>
                     </ul>
                 </div>     
             </li>
@@ -133,11 +133,11 @@ if (!$VerifySession['success']) {
                 <!-- Overflow Hidden -->
                 <div class="card mb-4">
                     <div class="card-header py-1">
-                        <h6 class="m-0 font-weight-bold text-primary">Alumnos</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Profesores</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table" id="studentsUsersTable">
+                            <table class="table" id="teacherUsersTable">
                                 <thead>
                                     <tr>
                                         <th class="text-center">ID</th>
@@ -164,48 +164,48 @@ if (!$VerifySession['success']) {
 </html>
 
 <!-- Modal -->
-<div class="modal fade modal-lg" id="StutentUserModal" tabindex="-1" aria-labelledby="StutentUserModal" aria-hidden="true">
+<div class="modal fade modal-lg" id="teacherUserModal" tabindex="-1" aria-labelledby="teacherUserModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="StutentUserModalTitle">Alta de Usuario</h1>
+        <h1 class="modal-title fs-5" id="teacherUserModalTitle">Alta de Usuario</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="addStudentsUsers">
+        <form id="addTeachersUsers">
             <div class="row g-2 py-3">            
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentUserId" name="studentUserId" readonly>
-                    <label for="studentUserId">ID</label>
+                    <input type="text" class="form-control" id="teacherUserId" name="teacherUserId" readonly>
+                    <label for="teacherUserId">ID</label>
                     </div>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentUserName" name="studentUserName" readonly>
-                    <label for="studentUserName">Nombre del alumno</label>
+                    <input type="text" class="form-control" id="teacherUserName" name="teacherUserName" readonly>
+                    <label for="teacherUserName">Nombre del alumno</label>
                     </div>                   
                 </div>
             </div>
             <div class="row g-2 py-3">
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentUserAdd" name="studentUserAdd" value="">
-                    <label for="studentUserAdd">Usuario</label>
+                    <input type="text" class="form-control" id="teacherUserAdd" name="teacherUserAdd" value="">
+                    <label for="teacherUserAdd">Usuario</label>
                     </div>
-                    <label id="studentUserAdd-error" class="error text-bg-danger" for="studentUserAdd" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="teacherUserAdd-error" class="error text-bg-danger" for="teacherUserAdd" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     <label class="error text-bg-danger userError" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     <label class="error text-bg-success userSuccess" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating input-group">
-                        <input type="password" class="form-control" id="studentUserPass" name="studentUserPass" value="">
-                        <label for="studentUserPass">Contraseña</label>
+                        <input type="password" class="form-control" id="teacherUserPass" name="teacherUserPass" value="">
+                        <label for="teacherUserPass">Contraseña</label>
                         <button class="btn btn-outline-secondary" type="button" id="showPasswordToggle">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
-                    <label id="studentUserPass-error" class="error text-bg-danger" for="studentUserPass" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="teacherUserPass-error" class="error text-bg-danger" for="teacherUserPass" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>        
             </div>        
       </div>
@@ -219,57 +219,57 @@ if (!$VerifySession['success']) {
 </div>
 
 <!-- Modal -->
-<div class="modal fade modal-lg" id="StutentUserEditModal" tabindex="-1" aria-labelledby="StutentUserEditModal" aria-hidden="true">
+<div class="modal fade modal-lg" id="TeacherUserEditModal" tabindex="-1" aria-labelledby="TeacherUserEditModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="StutentUserEditModalTitle">Editar Usuario</h1>
+        <h1 class="modal-title fs-5" id="TeacherUserEditModalTitle">Editar Usuario</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="editStudentsUsers">
+        <form id="editTeachersUsers">
             <div class="row g-2 py-3">            
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentUserIdEdit" name="studentUserIdEdit" readonly>
-                    <label for="studentUserIdEdit">ID</label>
+                    <input type="text" class="form-control" id="teacherUserIdEdit" name="teacherUserIdEdit" readonly>
+                    <label for="teacherUserIdEdit">ID</label>
                     </div>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentUserNameEdit" name="studentUserNameEdit" readonly>
-                    <label for="studentUserNameEdit">Nombre del alumno</label>
+                    <input type="text" class="form-control" id="teacherUserNameEdit" name="teacherUserNameEdit" readonly>
+                    <label for="teacherUserNameEdit">Nombre del alumno</label>
                     </div>                   
                 </div>
             </div>
             <div class="row g-2 py-3">
                 <div class="col-md">
                     <div class="form-floating input-group">
-                    <input type="text" class="form-control" id="studentUserAddEdit" name="studentUserAddEdit" value="" readonly>
-                    <label for="studentUserAddEdit">Usuario</label>
-                    <button class="btn btn-outline-secondary" type="button" id="editUserNameStudent">
+                    <input type="text" class="form-control" id="teacherUserAddEdit" name="teacherUserAddEdit" value="" readonly>
+                    <label for="teacherUserAddEdit">Usuario</label>
+                    <button class="btn btn-outline-secondary" type="button" id="editUserNameteacher">
                     <i class="bi bi-pencil-fill"></i>
                     </button>
                     </div>
-                    <label id="studentUserAddEdit-error" class="error text-bg-danger" for="studentUserAddEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="teacherUserAddEdit-error" class="error text-bg-danger" for="teacherUserAddEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     <label class="error text-bg-danger userError" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                     <label class="error text-bg-success userSuccess" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating input-group">
-                    <input type="password" class="form-control" id="studentUserPassEdit" name="studentUserPassEdit" value="">
-                    <label for="studentUserPassEdit">Contraseña</label>
+                    <input type="password" class="form-control" id="teacherUserPassEdit" name="teacherUserPassEdit" value="">
+                    <label for="teacherUserPassEdit">Contraseña</label>
                     <button class="btn btn-outline-secondary" type="button" id="showPasswordToggleEdit">
                         <i class="bi bi-eye"></i>
                     </button>
                     </div>
-                    <label id="studentUserPassEdit-error" class="error text-bg-danger" for="studentUserPassEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="teacherUserPassEdit-error" class="error text-bg-danger" for="teacherUserPassEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>                
             </div>        
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="submit" id="submitEditUserStudent" class="btn btn-primary">Guardar</button>
+        <button type="submit" id="submitEditUserTeacher" class="btn btn-primary">Guardar</button>
       </div>
       </form>
     </div>
@@ -293,5 +293,5 @@ if (!$VerifySession['success']) {
 
 
 <!-- Custom JS -->
-<script type="module" src="../js/students/index.js"></script>
+<script type="module" src="../js/teachers/index.js"></script>
 <script type="module" src="../js/utils/validate.js"></script>

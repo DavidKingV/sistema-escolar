@@ -78,9 +78,9 @@ if (!$VerifySession['success']) {
                     Profesores
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="alumnos/altas.php">Agregar</a></li>
-                        <li><a class="dropdown-item" href="alumnos.php">Lista</a></li>
-                        <li><a class="dropdown-item" href="alumnos/usuarios.php">Usuarios</a></li>
+                        <li><a class="dropdown-item" href="profesores/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="../profesores.php">Lista</a></li>
+                        <li><a class="dropdown-item" href="profesores/usuarios.php">Usuarios</a></li>
                     </ul>
                 </div>     
             </li>

@@ -21,6 +21,19 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+        case 'addTeacher':
+
+            $teacherData = $_POST['teacherData'];
+            parse_str($teacherData, $teacher);
+
+            $addTeacher = new TeachersControl($con, $sesion);
+            $add = $addTeacher->AddTeacher($teacher);
+
+            header('Content-Type: application/json');
+            echo json_encode($add);
+
+            break;
+
         case 'updateTeacherData': 
 
             $teacherEditData = $_POST['teacherEditData'];
@@ -44,6 +57,78 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             header('Content-Type: application/json');
             echo json_encode($delete);
     
+            break;
+
+        case 'getTeachersUsers':
+
+            $getTeachersUsers = new TeachersControl($con, $sesion);
+            $teachers = $getTeachersUsers->GetTeachersUsers();
+
+            header('Content-Type: application/json');
+            echo json_encode($teachers);
+
+            break;
+
+        case'verifyTeacherUser':
+
+            $teacherUserAdd = $_POST['teacherUserAdd'];
+
+            $verifyTeacherUser = new TeachersControl($con, $sesion);
+            $verify = $verifyTeacherUser->VerifyTeacherUser($teacherUserAdd);
+
+            header('Content-Type: application/json');
+            echo json_encode($verify);
+
+            break;
+
+        case 'addTeacherUser':
+                
+            $teacherUserAdd = $_POST['teacherUserData'];
+            parse_str($teacherUserAdd, $teacherUserAddArray);
+
+            $addTeacherUser = new TeachersControl($con, $sesion);
+            $add = $addTeacherUser->AddTeacherUser($teacherUserAddArray);
+    
+            header('Content-Type: application/json');
+            echo json_encode($add);
+    
+            break;
+
+        case 'desactivateTeacherUser':
+                
+            $teacherUserId = $_POST['teacherUserId'];
+
+            $desactivateTeacherUser = new TeachersControl($con, $sesion);
+            $desactivate = $desactivateTeacherUser->DesactivateTeacherUser($teacherUserId);
+
+            header('Content-Type: application/json');
+            echo json_encode($desactivate);
+
+            break;
+
+        case 'reactivateTeacherUser':
+                
+            $teacherUserId = $_POST['teacherUserId'];
+
+            $reactivateTeacherUser = new TeachersControl($con, $sesion);
+            $reactivate = $reactivateTeacherUser->ReactivateTeacherUser($teacherUserId);
+
+            header('Content-Type: application/json');
+            echo json_encode($reactivate);
+
+            break;
+
+        case 'UpdateTeacherUserData':
+
+            $teacherUserEditData = $_POST['teacherUserEditData'];
+            parse_str($teacherUserEditData, $teacherUserDataArray);
+
+            $updateTeacherUserData = new TeachersControl($con, $sesion);
+            $update = $updateTeacherUserData->UpdateTeacherUserData($teacherUserDataArray);
+
+            header('Content-Type: application/json');
+            echo json_encode($update);
+
             break;
 
         default:

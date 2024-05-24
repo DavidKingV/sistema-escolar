@@ -1,6 +1,6 @@
 /*import { VerifyUser } from './../students/index.js';*/
 
-$("#controlNumber, #studentName, #studentCurp").on("input", function(event) {
+$("#controlNumber, #studentName, #studentCurp, #teacherName").on("input", function(event) {
     event.preventDefault();
     var cursorPosition = $(this).prop('selectionStart');
         
@@ -310,6 +310,118 @@ $("#editTeacherForm").validate({
         teacherEmailEdit: {
             required: "Por favor, ingresa tu correo electrónico",
             email: "Por favor, ingresa un correo electrónico válido"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#addTeachers").validate({
+    rules: {
+        teacherName: {
+            required: true,
+            lettersonly: true,
+            minlength: 4,
+        },
+        teacherGender: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        teacherBirthday: {
+            required: true,
+            date: true
+        },
+        teacherState: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        teacherPhone: {
+            required: true,
+            number: true,
+            minlength: 10,
+            maxlength: 12
+        },
+        teacherEmail: {
+            required: true,
+            email: true
+        }
+    }, messages: {
+        teacherName: {
+            required: "Por favor, ingresa un nombre",
+            lettersonly: "Por favor, ingresa solo letras",
+            minlength: "El nombre debe tener al menos 4 caracteres"
+        },
+        teacherGender: {
+            required: "Por favor, selecciona un género"
+        },
+        teacherBirthday: {
+            required: "Por favor, ingresa tu fecha de nacimiento",
+            date: "Por favor, ingresa una fecha válida"
+        },
+        teacherState: {
+            required: "Por favor, ingresa tu estado civil"
+        },
+        teacherPhone: {
+            required: "Por favor ingresa tu número de teléfono",
+            number: "Por favor, ingresa solo números",
+            minlength: "El número de teléfono debe tener al menos 10 caracteres",
+            maxlength: "El número de teléfono debe tener 12 caracteres"
+        },
+        teacherEmail: {
+            required: "Por favor, ingresa tu correo electrónico",
+            email: "Por favor, ingresa un correo electrónico válido"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#addTeachersUsers").validate({
+    rules:{
+        teacherUserAdd: {
+            required: true,
+            minlength: 4,
+        },
+        teacherUserPass: {
+            required: true,
+            minlength: 8,
+        }
+    }, messages: {
+        teacherUserAdd: {
+            required: "Por favor, ingresa un usuario",
+        },
+        teacherUserPass: {
+            required: "Por favor, ingresa una contraseña",
+            minlength: "La contraseña debe tener al menos 8 caracteres"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#editTeachersUsers").validate({
+    rules:{
+        teacherUserAddEdit: {
+            required: true,
+            minlength: 4,
+        },
+        teacherUserPassEdit: {
+            required: true,
+            minlength: 8,
+        }
+    }, messages: {
+        teacherUserAddEdit: {
+            required: "Por favor, ingresa un usuario",
+        },
+        teacherUserPassEdit: {
+            required: "Por favor, ingresa una contraseña",
+            minlength: "La contraseña debe tener al menos 8 caracteres"
         },
         errorPlacement: function(error, element) {
             var elementId = element.attr("id");

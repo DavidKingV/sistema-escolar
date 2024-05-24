@@ -136,4 +136,52 @@ function initializeTeachersDataTable() {
     
 }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable };
+function initializeTeachersUsersTable(){
+    $("#teacherUsersTable").DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+        },
+        ordering: false,
+        paging: true,
+        processing: true,
+        ajax: {
+            url: "../php/teachers/routes.php", 
+            type: "POST",
+            data: { action: "getTeachersUsers" },
+            dataSrc: function(data){
+                if(!data[0].success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+                return data;
+            }
+        },
+        "columns": [
+            // Define las columnas
+            { "data": "id", "className": "text-center" },
+            { "data": "name", "className": "text-center" },
+            { "data": "user", "className": "text-center", "defaultContent": "No asignado"},
+            { "data": "status", "className": "text-center", "defaultContent": "Inactivo"},
+            {
+                "data": null,
+                "render": function(data, type, row) {
+
+                    if (row.status == "Activo") {
+                        return '<button data-id="'+row.id+'" data-name="'+row.name+'" data-user="'+row.user+'" class="btn btn-primary btn-circle editTeacherUser" data-bs-toggle="modal" data-bs-target="#TeacherUserEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle desactivateTeacherUser"><i class="bi bi-arrow-down-square-fill"></i></button>';
+                    }
+                    else if (row.status == "Inactivo") {
+                        return '<button data-id="'+row.id+'" class="btn btn-warning btn-circle reactivateTeacherUser"><i class="bi bi-arrow-clockwise"></i></button>';
+                    }
+                    return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle addUserTeachers" data-bs-toggle="modal" data-bs-target="#teacherUserModal"><i class="bi bi-arrow-up-square-fill"></i></button>';
+                
+                },
+                "className": "text-center"
+            }
+        ]
+    });
+}
+
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable };

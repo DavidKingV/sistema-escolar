@@ -15,7 +15,7 @@ function FillTable(response){
 }
 
 function ClearInputsEditTeacher(){
-    $("#editTeacherForm").trigger("reset");
+    $("#editTeacherForm")[0].reset();
     $("#editTeacherForm").validate().resetForm();
 
     $("#idTeacherEdit").val("");
@@ -27,4 +27,14 @@ function ClearInputsEditTeacher(){
     $("#teacherEmailEdit").val("");
 }
 
-export { FillTable,ClearInputsEditTeacher };
+function ClearInputsUserTeacher(){
+    $("#addTeachersUsers")[0].reset();
+    $("#addTeachersUsers").validate().resetForm();
+
+    $("#teacherUserId").val("");
+    $("#teacherUserName").val("");
+    $("#teacherUserAdd").val("");
+    $("#teacherUserPass").val("");
+}
+
+export { FillTable, ClearInputsEditTeacher, ClearInputsUserTeacher };
