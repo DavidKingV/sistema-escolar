@@ -1,0 +1,123 @@
+{
+    "Ciencias sociales, administración y derecho": {
+        "Negocios_y_Administración": [
+            "Administración y gestión de empresas",
+            "Contabilidad y fiscalización",
+            "Finanzas, banca y seguros",
+            "Mercadotecnia y publicidad",
+            "Negocios y administración, programas multidisciplinarios o generales",
+            "Negocios y comercio"
+        ],
+        "Ciencias_Sociales_y_Estudios_del_Comportamiento": [
+            "Ciencias políticas",
+            "Economía",
+            "Psicología",
+            "Sociología y antropología",
+            "Trabajo y atención social"
+        ],
+        "Ciencias de la información": [
+            "Comunicación y periodismo"
+        ],
+        "Derecho": [
+            "Criminología",
+            "Derecho"
+        ]
+    },
+    "Ingeniería, manufactura y construcción": {
+        "Arquitectura y construcción": [
+            "Arquitectura y urbanismo",
+            "Construcción e ingeniería civil"
+        ],
+        "Ingeniería industrial, mecánica, electrónica y tecnología": [
+            "Electricidad y generación de energía",
+            "Electrónica y automatización",
+            "Ingeniería de vehículos de motor, barcos y aeronaves",
+            "Ingeniería industrial, mecánica, electrónica y tecnología, programas multidisciplinarios o generales",
+            "Ingeniería mecánica y metalurgia",
+            "Ingeniería química",
+            "Tecnología y protección del medio ambiente"
+        ],
+        "Manufacturas y procesos": [
+            "Industria de la alimentación",
+            "Manufacturas y procesos, programas multidisciplinarios o generales",
+            "Minería y extracción"
+        ]
+    },
+    "Educación ": {
+        "Formación docente": [
+            "Bellas artes",
+            "Formación docente para educación básica, nivel preescolar",
+            "Formación docente para educación básica, nivel primaria",
+            "Formación docente para educación básica, nivel secundaria",
+            "Formación docente para educación física, artística o tecnológica",
+            "Formación docente para la enseñanza de asignaturas específicas",
+            "Formación docente para otros servicios educativos",
+            "Formación docente, programas multidisciplinarios o generales"
+        ],
+        "Educación": [
+            "Ciencias de la educación",
+            "Didáctica, pedagogía y currículo",
+            "Orientación y asesoría educativa"
+        ]
+    },
+    "Ciencias naturales, exactas y de la computación": {
+        "Ciencias naturales": [
+            "Biología y bioquímica",
+            "Ciencias ambientales"
+        ],
+        "Ciencias de la computación": [
+            "Ciencias de la computación"
+        ],
+        "Ciencias físicas, químicas y de la tierra": [
+            "Ciencias de la tierra y la atmósfera",
+            "Física",
+            "Química"
+        ],
+        "Matemáticas y estadística": [
+            "Estadística",
+            "Matemáticas"
+        ]
+    },
+    "Servicios": {
+        "Servicios personales": [
+            "Deportes"
+        ],
+        "Servicios de transporte": [
+            "Servicios de transporte"
+        ]
+    },
+    "Artes y humanidades": {
+        "Artes": [
+            "Diseño",
+            "Música y artes escénicas",
+            "Técnicas audiovisuales y producción de medios"
+        ],
+        "Humanidades": [
+            "Filosofía y ética",
+            "Historia y arqueología",
+            "Lenguas extranjeras",
+            "Literatura"
+        ]
+    },
+    "Salud": {
+        "Enfermería y cuidados": [
+            "Estomatología y odontología",
+            "Medicina",
+            "Salud pública"
+        ],
+        "Fisioterapia": [
+            "Fisioterapia",
+            "Especialidad en rehabilitación integral"
+        ]
+    },
+    "Agronomía y veterinaria": {
+        "Agronomía, silvicultura y pesca": [
+            "Producción y explotación agrícola y ganadera"
+        ],
+        "Veterinaria": [
+            "Veterinaria"
+        ]
+    }
+}
+      
+   

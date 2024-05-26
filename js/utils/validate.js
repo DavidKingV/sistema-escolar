@@ -430,6 +430,42 @@ $("#editTeachersUsers").validate({
     }
 });
 
+$("#updateCareer").validate({
+    rules: {
+        careerNameEdit: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        carreerAreaEdit: {
+            required: true
+        },
+        careerSubareaEdit: {
+            required: true
+        },
+        careerComents: {
+            lettersonly: true
+        }
+    }, messages: {
+        careerNameEdit: {
+            required: "Por favor, ingresa un nombre",
+            specialChars: "Por favor, ingresa solo letras y números"
+        },
+        carreerAreaEdit: {
+            required: "Por favor, selecciona un área"
+        },
+        careerSubareaEdit: {
+            required: "Por favor, selecciona una subárea"
+        },
+        careerComents: {
+            lettersonly: "Por favor, ingresa solo letras"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
 
 $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);

@@ -184,4 +184,46 @@ function initializeTeachersUsersTable(){
     });
 }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable };
+function initializeCarreersDataTable() {
+        
+    $("#carreersTable").DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+        },
+        ordering: false,
+        paging: true,
+        processing: true,
+        ajax: {
+            url: "php/carreers/routes.php", 
+            type: "POST",
+            data: { action: "getCareers" },
+            dataSrc: function(data){
+                if(!data[0].success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+                return data;
+            }
+        },
+        "columns": [
+            // Define las columnas
+            { "data": "id", "className": "text-center" },
+            { "data": "name", "className": "text-center" },
+            { "data": "area", "className": "text-center" },
+            { "data": "subarea", "className": "text-center" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editCarreer" data-bs-toggle="modal" data-bs-target="#CareerEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteCareer"><i class="bi bi-trash-fill"></i></button>';
+                    
+                },
+                "className": "text-center"
+            }
+        ]
+    });  
+}
+
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable };

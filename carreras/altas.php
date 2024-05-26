@@ -35,6 +35,9 @@ if (!$VerifySession['success']) {
     <link rel="stylesheet" href="../assets/css/all.min.css">
     <!--<link rel="stylesheet" href="../assets/css/alumnos.css">-->
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+
     <title>Altas</title>
 </head>
 <body>
@@ -60,7 +63,7 @@ if (!$VerifySession['success']) {
             </li>
             <li class="py-1">
                 <div class="dropdown">
-                    <a  href="../alumnos.html" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" >
+                    <a  href="../alumnos.html" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
                         <i class="bi bi-person-badge-fill px-3"></i>
                     Alumnos
                     </a>
@@ -91,10 +94,16 @@ if (!$VerifySession['success']) {
                 </a>
             </li>
             <li class="py-1">
-                <a href="#" class="nav-link link-dark">
-                    <i class="bi bi-mortarboard-fill px-3"></i>
-                Carreras
-                </a>
+                <div class="dropdown">
+                    <a href="carreras.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown"> 
+                        <i class="bi bi-mortarboard-fill px-3"></i>
+                    Carreras
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="../carreras.php">Lista</a></li>
+                    </ul>
+                </div>
             </li>
             <li class="py-1">
                 <a href="#" class="nav-link link-dark">
@@ -123,7 +132,7 @@ if (!$VerifySession['success']) {
     </nav>
       
     <section class="home" id="home">           
-        <div class="text">Alta de Alumnos</div>
+        <div class="text">Alta de Carreras</div>
         <hr class="border-top border-2 border-dark mx-auto w-25">
 
         <div class="row">
@@ -136,72 +145,32 @@ if (!$VerifySession['success']) {
                         <h6 class="m-0 font-weight-bold text-primary">Datos</h6>
                     </div>
                     <div class="card-body">
-                        <form id="addStudents">
+                        <form id="addCareers">
                             <div class="row g-2">
                                 <div class="col-md py-3">
-                                    <label for="controlNumber" class="form-label">No. Control</label>
-                                    <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" placeholder="123456">
-                                </div>
-                                <div class="col-md py-3">
-                                    <label for="studentName" class="form-label">Nombre Completo</label>
-                                    <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="studentName" name="studentName">
-                                </div>
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-md py-3">
-                                    <label for="studentGender" class="form-label">Genero</label>
-                                    <label id="studentGender-error" class="error text-bg-danger" for="studentGender" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <select class="form-select" id="studentGender" name="studentGender">
-                                        <option selected value="0">Selecciona</option>
-                                        <option value="Masculino">Masculino</option>
-                                        <option value="Femenino">Femenino</option>
-                                        <option value="Otro">Otro</option>
+                                    <label for="careerName" class="form-label">Nombre de la Carrera/Especialidad</label>
+                                    <label id="careerName-error" class="error text-bg-danger" for="careerName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <select class="form-select" id="careerName" name="careerName">
+                                        <option selected value="0">Selecciona</option>                                        
                                     </select>
                                 </div>
                                 <div class="col-md py-3">
-                                    <label for="studentBirthday" class="form-label">Fecha de nacimiento</label>
-                                    <label id="studentBirthday-error" class="error text-bg-danger" for="studentBirthday" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="date" class="form-control" id="studentBirthday" name="studentBirthday">
+                                    <label for="careerArea" class="form-label">Área de la Carrera/Especialidad</label>
+                                    <label id="careerArea-error" class="error text-bg-danger" for="careerArea" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="careerArea" name="careerArea">
                                 </div>
                                 <div class="col-md py-3">
-                                    <label for="studentState" class="form-label">Estado Civil</label>
-                                    <label id="studentState-error" class="error text-bg-danger" for="studentState" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <select class="form-select" id="studentState" name="studentState">
-                                        <option selected value="0">Selecciona</option>
-                                        <option value="Solter@">Solter@</option>
-                                        <option value="Casad@">Casad@</option>
-                                        <option value="Divorsiad@">Divorsiad@</option>
-                                        <option value="Unión Libre">Unión Libre</option>
-                                        <option value="Viud@">Viud@</option>
-                                        <option value="Otro">Otro</option>
-                                    </select>
+                                    <label for="careerSubarea" class="form-label">Subárea de la Carrera/Especialidad</label>
+                                    <label id="careerSubarea-error" class="error text-bg-danger" for="careerSubarea" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="careerSubarea" name="careerSubarea">
                                 </div>
                             </div>
                             <div class="row g-2">
                                 <div class="col-md py-3">
-                                    <label for="studentNation" class="form-label">Nacionalidad</label>
-                                    <label id="studentNation-error" class="error text-bg-danger" for="studentNation" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="studentNation" name="studentNation">
-                                </div>
-                                <div class="col-md py-3">
-                                    <label for="studentCurp" class="form-label">CURP</label>
-                                    <label id="studentCurp-error" class="error text-bg-danger" for="studentCurp" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="studentCurp" name="studentCurp">
-                                </div>
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-md py-3">
-                                    <label for="studentPhone" class="form-label">Teléfono</label>
-                                    <label id="studentPhone-error" class="error text-bg-danger" for="studentPhone" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="studentPhone" name="studentPhone">
-                                </div>
-                                <div class="col-md py-3">
-                                    <label for="studentEmail" class="form-label">Email</label>
-                                    <label id="studentEmail-error" class="error text-bg-danger" for="studentEmail" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="studentEmail" name="studentEmail">
-                                </div>
+                                    <label for="careerDes" class="form-label">Comentarios</label>
+                                    <label id="careerDes-error" class="error text-bg-danger" for="careerDes" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <textarea type="text" class="form-control" id="careerDes" name="careerDes"></textarea>
+                                </div>                            
                             </div>
 
                             <div class="row g-2">
@@ -237,7 +206,9 @@ if (!$VerifySession['success']) {
 <!-- datables -->
 <script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
 
+<!-- select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="../js/students/index.js"></script>
+<script type="module" src="../js/carreers/index.js"></script>
 <script src="../js/utils/validate.js"></script>

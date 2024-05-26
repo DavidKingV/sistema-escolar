@@ -1,0 +1,13 @@
+.form-floating .select2-container--bootstrap-5 .select2-selection {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+}
+
+.form-floating .select2-container--bootstrap-5 .select2-selection>.select2-selection__rendered {
+    margin-top: 0.6rem;
+    margin-left: 0.25rem;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+    background-position: right .75rem center !important;
+}
