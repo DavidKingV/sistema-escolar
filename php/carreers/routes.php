@@ -32,6 +32,29 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+        case 'updateCarreer':
+            $carreerDataEdit = $_POST['carreerDataEdit'];
+            parse_str($carreerDataEdit, $carreerDataEditArray);
+
+            $updateCarreer = new CareersControl($con, $sesion);
+            $update = $updateCarreer->updateCarreer($carreerDataEditArray);
+
+            header('Content-Type: application/json');
+            echo json_encode($update);
+
+            break;
+
+        case 'deleteCarreer':
+            $idCarreer = $_POST['idCarreer'];
+
+            $deleteCarreer = new CareersControl($con, $sesion);
+            $delete = $deleteCarreer->deleteCarreer($idCarreer);
+
+            header('Content-Type: application/json');
+            echo json_encode($delete);
+
+            break;
+
     
     }
 

@@ -217,7 +217,7 @@ function initializeCarreersDataTable() {
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editCarreer" data-bs-toggle="modal" data-bs-target="#CareerEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteCareer"><i class="bi bi-trash-fill"></i></button>';
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editCarreer" data-bs-toggle="modal" data-bs-target="#CareerEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteCarreer"><i class="bi bi-trash-fill"></i></button>';
                     
                 },
                 "className": "text-center"

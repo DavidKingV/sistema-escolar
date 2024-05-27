@@ -442,7 +442,7 @@ $("#updateCareer").validate({
         careerSubareaEdit: {
             required: true
         },
-        careerComents: {
+        careerComentsEdit: {
             lettersonly: true
         }
     }, messages: {
@@ -456,7 +456,7 @@ $("#updateCareer").validate({
         careerSubareaEdit: {
             required: "Por favor, selecciona una subárea"
         },
-        careerComents: {
+        careerComentsEdit: {
             lettersonly: "Por favor, ingresa solo letras"
         },
         errorPlacement: function(error, element) {

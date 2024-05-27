@@ -181,13 +181,13 @@ if (!$VerifySession['success']) {
       <div class="modal-body">
         <form id="updateCareer">
             <div class="row g-2">
-                <div class="col-md">
+                <div class="col-md hidden">
                     <div class="form-floating">
                     <input type="text" class="form-control" id="idCarreerDB" name="idCarreerDB" readonly>
                     <label for="idCarreerDB">ID</label>
                     </div>
                 </div>                
-                <div class="col-md">
+                <div class="col-md py-1">
                     <div class="form-floating">
                     <select class="form-select" id="careerNameEdit" name="careerNameEdit"  aria-label="Floating label select example">
                         <option selected value="0">Área</option>   
@@ -211,15 +211,17 @@ if (!$VerifySession['success']) {
                     <label for="careerSubareaEdit">Subarea</label>
                     </div>
                     <label id="careerSubareaEdit-error" class="error text-bg-danger" for="careerSubareaEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
+                </div>                
+            </div>   
+            <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="careerComents" name="careerComents" value="">
-                    <label for="careerComents">Comentarios</label>
+                    <input type="text" class="form-control" id="careerComentsEdit" name="careerComentsEdit" value="">
+                    <label for="careerComentsEdit">Comentarios</label>
                     </div>
-                    <label id="careerComents-error" class="error text-bg-danger" for="careerComents" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="careerComentsEdit-error" class="error text-bg-danger" for="careerComentsEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
-            </div>   
+            </div>
             </div>        
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

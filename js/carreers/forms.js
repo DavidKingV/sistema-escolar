@@ -1,7 +1,20 @@
 function FillTable(response){
     $("#idCarreerDB").val(response.id);
 
-    $("#careerComents").val(response.description);
+    $("#careerComentsEdit").val(response.description);
 }
 
-export { FillTable };
+function ClearInputsEditTeachers(){
+    $("#idCarreerDB").val("");
+    $("#careerNameEdit").empty();
+    $("#carreerAreaEdit").val("");
+    $("#careerSubareaEdit").val("");
+    $("#careerComentsEdit").val("");
+
+    $("#updateCareer")[0].reset();
+    $("#updateCareer").validate().resetForm();
+}
+
+
+
+export { FillTable, ClearInputsEditTeachers };

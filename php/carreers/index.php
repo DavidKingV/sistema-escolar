@@ -101,4 +101,46 @@ class CareersControl{
             }
         }
     }
+
+    public function updateCarreer($carreerDataEditArray){
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "UPDATE carreers SET nombre = ?, area = ?, subarea = ?, descripcion = ? WHERE id = ?";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('ssssi', $carreerDataEditArray['careerNameEdit'], $carreerDataEditArray['carreerAreaEdit'], $carreerDataEditArray['careerSubareaEdit'], $carreerDataEditArray['careerComentsEdit'], $carreerDataEditArray['idCarreerDB']);
+            $stmt->execute();
+
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->con->close();
+                return array("success" => true, "message" => "Carrera actualizada correctamente");
+            }else{
+                $stmt->close();
+                $this->con->close();
+                return array("success" => false, "message" => "Error al actualizar la carrera");
+            }
+        }
+    }
+
+    public function deleteCarreer($idCarreer){
+        if(!$this->sesion['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "DELETE FROM carreers WHERE id = ?";
+            $stmt = $this->con->prepare($sql);
+            $stmt->bind_param('i', $idCarreer);
+            $stmt->execute();
+
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->con->close();
+                return array("success" => true, "message" => "Carrera eliminada correctamente");
+            }else{
+                $stmt->close();
+                $this->con->close();
+                return array("success" => false, "message" => "Error al eliminar la carrera");
+            }
+        }
+    }
 }

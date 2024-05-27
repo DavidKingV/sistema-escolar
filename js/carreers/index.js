@@ -1,5 +1,5 @@
 import { initializeCarreersDataTable } from '../datatables/index.js';
-import { FillTable } from '../carreers/forms.js';
+import { FillTable, ClearInputsEditTeachers } from '../carreers/forms.js';
 
 initializeCarreersDataTable();
 
@@ -48,7 +48,8 @@ $(function() {
    
 });
 
-$("#carreersTable").on("click", ".editCareer", function() {
+$("#carreersTable").on("click", ".editCarreer", function(e) {
+    e.preventDefault();
     let idCarreer = $(this).data("id");
 
     if(idCarreer){
@@ -108,6 +109,94 @@ $("#updateCareer").on("submit", function(event) {
         }
     });
 });
+
+$("#carreersTable").on("click", ".deleteCarreer", function() {
+    let idCarreer = $(this).data("id");
+    Swal.fire({
+        title: '¿Estás seguro de eliminar la carrera?', 
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(48, 133, 214)',
+        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            DeleteCarreer(idCarreer);
+        }
+    });
+});
+
+const DeleteCarreer = async (idCarreer) => {
+    try {
+        const response = await $.ajax({
+            url: 'php/carreers/routes.php',
+            type: 'POST',
+            data: {idCarreer: idCarreer, action: 'deleteCarreer'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Carrera eliminada',
+                text: response.message
+            });
+            // Reload the table
+            $('#carreersTable').DataTable().ajax.reload();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al eliminar la carrera',
+                text: response.message
+            });
+        }
+    }
+    catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al eliminar la carrera',
+            text: 'Ocurrió un error al eliminar la carrera, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const UpdateCarreer = async (carreerDataEdit) => {
+    try {
+        const response = await $.ajax({
+            url: 'php/carreers/routes.php',
+            type: 'POST',
+            data: {carreerDataEdit: carreerDataEdit, action: 'updateCarreer'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Carrera actualizada',
+                text: response.message
+            });
+            // Reload the table
+            $('#carreersTable').DataTable().ajax.reload();
+            $('#CareerEditModal').modal('hide');
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al actualizar la carrera',
+                text: response.message
+            });
+        }
+    }
+    catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al actualizar la carrera',
+            text: 'Ocurrió un error al actualizar la carrera, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
 
 const GetCarreerData = async (idCarreer) => {
     try {
@@ -225,3 +314,9 @@ const AddCareer = async (carreerData) => {
         });
     }
 }
+
+//miselanius
+
+$("#CareerEditModal").on("hidden.bs.modal", function() {
+    ClearInputsEditTeachers();
+});
