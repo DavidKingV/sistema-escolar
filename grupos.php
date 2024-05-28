@@ -33,9 +33,11 @@ if (!$VerifySession['success']) {
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/alumnos.css">
-    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
-    <title>Alumnos</title>
+    <link rel="stylesheet" href="assets/css/groups.css">
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    <title>Grupos</title>
 </head>
 <body>
 
@@ -60,7 +62,7 @@ if (!$VerifySession['success']) {
             </li>
             <li class="py-1">
                 <div class="dropdown">
-                    <a  href="alumnos.html" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" >
+                    <a  href="alumnos.html" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
                         <i class="bi bi-person-badge-fill px-3"></i>
                     Alumnos
                     </a>
@@ -83,9 +85,9 @@ if (!$VerifySession['success']) {
                     </ul>
                 </div>     
             </li>
-            <li class="py-1">
+            <li class="py-1">                
                 <div class="dropdown">
-                    <a  href="grupos.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
+                    <a  href="grupos.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" >
                         <i class="bi bi-person-badge-fill px-3"></i>
                     Grupos
                     </a>
@@ -134,7 +136,7 @@ if (!$VerifySession['success']) {
     </nav>
       
     <section class="home" id="home">           
-        <div class="text">Alumnos</div>
+        <div class="text">Grupos</div>
         <hr class="border-top border-2 border-dark mx-auto w-25">
 
         <div class="row">
@@ -148,14 +150,15 @@ if (!$VerifySession['success']) {
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table" id="studentTable">
+                            <table class="table" id="groupsTable">
                                 <thead>
                                     <tr>
                                         <th class="text-center">ID</th>
-                                        <th class="text-center">No. Control</th>
+                                        <th class="text-center">Carrera</th>
+                                        <th class="text-center">Clave</th>
                                         <th class="text-center">Nombre</th>
-                                        <th class="text-center">Teléfono</th>
-                                        <th class="text-center">Email</th>
+                                        <th class="text-center">Fecha inicio</th>
+                                        <th class="text-center">Fecha termino</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
@@ -176,106 +179,71 @@ if (!$VerifySession['success']) {
 </html>
 
 <!-- Modal EDIT -->
-<div class="modal fade modal-lg" id="StutentEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="StutentEditModalLabel" aria-hidden="true">
+<div class="modal fade modal-lg" id="GroupsEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="GroupsEditModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="StutentEditModalLabel">Editar Alumno</h1>
+        <h1 class="modal-title fs-5" id="GroupsEditModalLabel">Editar Alumno</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="updateStudent">
+        <form id="updateGroup">
             <div class="row g-2">
-                <div class="col-md">
+                <div class="col-md hidden">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="idStudentDB" name="idStudentDB" readonly>
-                    <label for="idStudentDB">ID</label>
+                    <input type="text" class="form-control" id="idGroupDB" name="idGroupDB" readonly>
+                    <label for="idGroupDB">ID</label>
                     </div>
+                    <input type="text" class="form-control hidden" id="idCarreerHidden" name="idCarreerHidden" readonly>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">                   
+                    <select class="form-select" id="carreerNameGroupEdit" name="carreerNameGroupEdit"  aria-label="Floating label select example">
+                        <option selected value="0">Carrera</option>   
+                    </select>
+                    <label for="floatingSelect">Selecciona</label>
+                    </div>
+                    <label id="carreerNameGroupEdit-error" class="error text-bg-danger" for="carreerNameGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" value="">
-                    <label for="controlNumber">No. Control</label>
+                    <input type="text" class="form-control" id="keyGroupEdit" name="keyGroupEdit" value="">
+                    <label for="keyGroupEdit">Clave del grupo</label>
                     </div>
-                    <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="keyGroupEdit-error" class="error text-bg-danger" for="keyGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentName" name="studentName" value="">
-                    <label for="studentName">Nombre del Alumno</label>
+                    <input type="text" class="form-control" id="nameGroupEdit" name="nameGroupEdit" value="">
+                    <label for="nameGroupEdit">Nombre</label>
                     </div>
-                    <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                        <select class="form-select" id="studentGender" name="studentGender">
-                            <option selected value="0">Genero</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Femenino">Femenino</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <label for="studentGender">Selecciona</label>
-                    </div>
-                    <label id="studentGender-error" class="error text-bg-danger" for="studentGender" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="date" class="form-control" id="studentBirthday" name="studentBirthday" value="">
-                    <label for="studentBirthday">Fecha de nacimiento</label>
-                    </div>
-                    <label id="studentBirthday-error" class="error text-bg-danger" for="studentBirthday" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="nameGroupEdit-error" class="error text-bg-danger" for="nameGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
             <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                        <select class="form-select" id="studentState" name="studentState">
-                            <option selected value="0">Estado civil</option>
-                            <option value="Solter@">Solter@</option>
-                            <option value="Casad@">Casad@</option>
-                            <option value="Divorsiad@">Divorsiad@</option>
-                            <option value="Unión Libre">Unión Libre</option>
-                            <option value="Viud@">Viud@</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <label for="studentState">Selecciona</label>
+                    <input type="date" class="form-control" id="startDateEdit" name="startDateEdit" value="">
+                    <label for="startDateEdit">Fecha de Inicio</label>
                     </div>
-                    <label id="studentState-error" class="error text-bg-danger" for="studentState" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="startDateEdit-error" class="error text-bg-danger" for="startDateEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentNation" name="studentNation" value="">
-                    <label for="studentNation">Nacionalidad</label>
+                    <input type="date" class="form-control" id="endDateEdit" name="endDateEdit" value="">
+                    <label for="endDateEdit">Fecha de Termino</label>
                     </div>
-                    <label id="studentNation-error" class="error text-bg-danger" for="studentNation" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <label id="endDateEdit-error" class="error text-bg-danger" for="endDateEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                 </div>
             </div>
             <div class="row g-2 py-1">
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="studentCurp" name="studentCurp" value="">
-                    <label for="studentCurp">CURP</label>
+                    <input type="text" class="form-control" id="descriptionGroupEdit" name="descriptionGroupEdit" value="">
+                    <label for="descriptionGroupEdit">Descripción</label>
                     </div>
-                    <label id="studentCurp-error" class="error text-bg-danger" for="studentCurp" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentPhone" name="studentPhone" value="">
-                    <label for="studentPhone">Teléfono</label>
-                    </div>
-                    <label id="studentPhone-error" class="error text-bg-danger" for="studentPhone" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="studentEmail" name="studentEmail" value="">
-                    <label for="studentEmail">Email</label>
-                    </div>
-                    <label id="studentEmail-error" class="error text-bg-danger" for="studentEmail" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
+                    <label id="descriptionGroupEdit-error" class="error text-bg-danger" for="descriptionGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                </div>                
             </div>
             </div>        
             <div class="modal-footer">
@@ -302,7 +270,9 @@ if (!$VerifySession['success']) {
 <!-- datables -->
 <script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
 
+<!-- select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="js/students/index.js"></script>
+<script type="module" src="js/groups/index.js"></script>
 <script src="js/utils/validate.js"></script>

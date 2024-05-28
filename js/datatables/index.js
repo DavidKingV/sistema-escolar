@@ -226,4 +226,51 @@ function initializeCarreersDataTable() {
     });  
 }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable };
+function initializeGroupsDataTable() {
+            
+        $("#groupsTable").DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+            },
+            ordering: false,
+            paging: true,
+            processing: true,
+            ajax: {
+                url: "php/groups/routes.php", 
+                type: "POST",
+                data: { action: "getGroups" },
+                dataSrc: function(data){
+                    console.log(data);
+                    if(!data[0].success) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data[0].message,
+                        });
+
+                        return [];
+                    }
+                    return data;
+                }
+            },
+            "columns": [
+                // Define las columnas
+                { "data": "id", "className": "text-center" },
+                { "data": "id_carreer", "className": "text-center" },
+                { "data": "key", "className": "text-center" },
+                { "data": "name", "className": "text-center" },
+                { "data": "startDate", "className": "text-center" },
+                { "data": "endDate", "className": "text-center" },
+                {
+                    "data": null,
+                    "render": function(data, type, row) {
+                        return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
+                        
+                    },
+                    "className": "text-center"
+                }
+            ]
+        });  
+    }
+
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable };

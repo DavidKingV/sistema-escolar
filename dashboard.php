@@ -84,10 +84,16 @@ if (!$VerifySession['success']) {
                 </div>                
             </li>
             <li class="py-1">
-                <a href="#" class="nav-link link-dark">
-                    <i class="bi bi-people-fill px-3"></i>
-                Grupos
-                </a>
+                <div class="dropdown">
+                    <a  href="grupos.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
+                        <i class="bi bi-person-badge-fill px-3"></i>
+                    Grupos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="grupos/altas.php">Agregar</a></li>
+                        <li><a class="dropdown-item" href="grupos.php">Lista</a></li>
+                    </ul>
+                </div>
             </li>
             <li class="py-1">                
                 <div class="dropdown">

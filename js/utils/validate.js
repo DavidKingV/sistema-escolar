@@ -1,6 +1,6 @@
 /*import { VerifyUser } from './../students/index.js';*/
 
-$("#controlNumber, #studentName, #studentCurp, #teacherName").on("input", function(event) {
+$("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nameGroupEdit, #descriptionGroupEdit, #keyGroup, #nameGroup, #descriptionGroup").on("input", function(event) {
     event.preventDefault();
     var cursorPosition = $(this).prop('selectionStart');
         
@@ -458,6 +458,106 @@ $("#updateCareer").validate({
         },
         careerComentsEdit: {
             lettersonly: "Por favor, ingresa solo letras"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#updateGroup").validate({
+    rules: {
+        carreerNameGroupEdit: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        keyGroupEdit: {
+            required: true,
+            specialChars: true
+        },
+        nameGroupEdit: {
+            required: true,
+            specialChars: true
+        },
+        startDateEdit: {
+            required: true,
+            date: true
+        },
+        endDateEdit: {
+            required: true,
+            date: true
+        },
+        descriptionGroupEdit: {
+            lettersonly: true
+        }
+    }, messages: {
+        carreerNameGroupEdit: {
+            required: "Por favor, selecciona una carrera"
+        },
+        keyGroupEdit: {
+            required: "Por favor, ingresa una clave",
+            specialChars: "Por favor, ingresa solo letras y números"
+        },
+        nameGroupEdit: {
+            required: "Por favor, ingresa un nombre",
+            specialChars: "Por favor, ingresa solo letras y números"
+        },
+        startDateEdit: {
+            required: "Por favor, ingresa una fecha de inicio",
+            date: "Por favor, ingresa una fecha válida"
+        },
+        endDateEdit: {
+            required: "Por favor, ingresa una fecha de término",
+            date: "Por favor, ingresa una fecha válida"
+        },
+        descriptionGroupEdit: {
+            lettersonly: "Por favor, ingresa solo letras"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#addGroups").validate({
+    rules: {
+        carreerNameGroup: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        keyGroup: {
+            required: true
+        },
+        nameGroup: {
+            required: true
+        },
+        startDate: {
+            required: true,
+            date: true
+        },
+        endDate: {
+            required: true,
+            date: true
+        },        
+    }, messages: {
+        carreerNameGroup: {
+            required: "Por favor selecciona una carrera"
+        },
+        keyGroup: {
+            required: "Por favor, ingresa una clave"
+        },
+        nameGroup: {
+            required: "Por favor, ingresa un nombre"
+        },
+        startDate: {
+            required: "Por favor, ingresa una fecha de inicio",
+            date: "Por favor, ingresa una fecha válida"
+        },
+        endDate: {
+            required: "Por favor, ingresa una fecha de término",
+            date: "Por favor, ingresa una fecha válida"
         },
         errorPlacement: function(error, element) {
             var elementId = element.attr("id");
