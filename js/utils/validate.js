@@ -1,6 +1,6 @@
 /*import { VerifyUser } from './../students/index.js';*/
 
-$("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nameGroupEdit, #descriptionGroupEdit, #keyGroup, #nameGroup, #descriptionGroup").on("input", function(event) {
+$("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nameGroupEdit, #descriptionGroupEdit, #keyGroup, #nameGroup, #descriptionGroup, #descriptionSubjectEdit, #subjectNameEdit, #subjectName, #subjectDes").on("input", function(event) {
     event.preventDefault();
     var cursorPosition = $(this).prop('selectionStart');
         
@@ -566,13 +566,60 @@ $("#addGroups").validate({
     }
 });
 
+$("#updateSubject").validate({
+    rules: {
+        subjectNameEdit: {
+            required: true,
+            specialChars: true
+        },
+        descriptionSubjectEdit: {
+            lettersonly: true
+        }
+    }, messages: {
+        subjectNameEdit: {
+            required: "Por favor, ingresa un nombre",
+            specialChars: "Por favor, ingresa solo letras y números"
+        },
+        descriptionSubjectEdit: {
+            lettersonly: "Por favor, ingresa solo letras"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
+$("#addSubjects").validate({
+    rules: {
+        subjectName: {
+            required: true,
+            specialChars: true
+        },
+        descriptionSubject: {
+            lettersonly: true
+        }
+    }, messages: {
+        subjectName: {
+            required: "Por favor, ingresa un nombre",
+            specialChars: "Por favor, ingresa solo letras y números"
+        },
+        descriptionSubject: {
+            lettersonly: "Por favor, ingresa solo letras"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
 
 $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);
 }, "Por favor, ingresa solo letras");
 
 $.validator.addMethod("specialChars", function(value) {
-    return /^[a-zA-Z0-9]*$/.test(value);
+    return /^[a-zA-Z0-9\s]*$/.test(value);
 }, "Por favor, ingresa solo letras y números");
 
 //metodo para validar un select no tenga un valor vacio

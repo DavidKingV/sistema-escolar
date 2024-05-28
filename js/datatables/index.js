@@ -273,4 +273,47 @@ function initializeGroupsDataTable() {
         });  
     }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable };
+function initializeSubjectsDataTable(){
+    $("#subjectsTable").DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+        },
+        ordering: false,
+        paging: true,
+        processing: true,
+        ajax: {
+            url: "php/subjects/routes.php", 
+            type: "POST",
+            data: { action: "getSubjects" },
+            dataSrc: function(data){
+                if(!data[0].success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data[0].message,
+                    });
+
+                    return [];
+                }
+                return data;
+            }
+        },
+        "columns": [
+            // Define las columnas
+            { "data": "id", "className": "text-center" },
+            { "data": "name", "className": "text-center" },
+            { "data": "description", "className": "text-center" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editSubject" data-bs-toggle="modal" data-bs-target="#SubjectsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteSubject"><i class="bi bi-trash-fill"></i></button>';
+                    
+                },
+                "className": "text-center"
+            }
+        ]
+    });  
+
+}
+
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeSubjectsDataTable };
