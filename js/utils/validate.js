@@ -12,7 +12,7 @@ $("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nam
     $(this).prop('selectionEnd', cursorPosition);
 });
 
-$("#studentNation").on("input", function(event) {
+$("#studentNation, #studentEmail").on("input", function(event) {
     event.preventDefault();
     var cursorPosition = $(this).prop('selectionStart');
 
@@ -120,7 +120,7 @@ $("#updateStudent").validate({
         },
         errorPlacement: function(error, element) {
             var elementId = element.attr("id");
-            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+            error.insertAfter($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
         }
     }
     

@@ -16,8 +16,9 @@ function initializeStudentDataTable() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message,
+                        text: data[0].message,
                     });
+                    return [];
                 }
                 return data;
             }
@@ -29,6 +30,7 @@ function initializeStudentDataTable() {
             { "data": "name", "className": "text-center" },
             { "data": "phone", "className": "text-center" },
             { "data": "email", "className": "text-center" },
+            { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},
             {
                 "data": null,
                 "render": function(data, type, row) {

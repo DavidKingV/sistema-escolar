@@ -29,7 +29,7 @@ class StudentsControl {
         if(!$this->sesion['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $sql = "SELECT * FROM students";
+            $sql = "SELECT groups.nombre as nombre_grupo, students.* FROM students LEFT JOIN groups ON students.id_group = groups.id";
             $query = $this->con->query($sql);
 
             if(!$query){
@@ -44,11 +44,12 @@ class StudentsControl {
                             'no_control' => $row['no_control'],
                             'name' => $row['nombre'],
                             'phone' => $row['telefono'],
-                            'email' => $row['email']
+                            'email' => $row['email'],
+                            'group_name' => $row['nombre_grupo']
                         );
                     }
                 }else{
-                    return array("success" => false, "message" => "No se encontraron alumnos registrados");
+                    $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
                 }
                 $this->con->close();
 

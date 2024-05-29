@@ -140,7 +140,7 @@ $("#studentsUsersTable").on( "click", ".editStudentUser", function() {
 });
 
 $("#studentUserAdd").on("blur", function(){
-    $(".userSuccess").text('');
+    $(".userSuccess").hide();
     let studentUserAdd = $(this).val();
     if(studentUserAdd){
         setTimeout(() => {
@@ -152,7 +152,7 @@ $("#studentUserAdd").on("blur", function(){
 });
 
 $("#studentUserAddEdit").on("blur", function(){
-    $(".userSuccess").html('');
+    $(".userSuccess").hide();
     let studentUserAdd = $(this).val();
     if(studentUserAdd){
         setTimeout(() => {
@@ -412,10 +412,12 @@ const VerifyUser = async (studentUserAdd) => {
         });
         if(response.success){
             if(!response.user){
+                $(".userSuccess").hide();
                 $(".userError").text('El usuario ya está asignado a un estudiante.');
             }else{
                 $("#submitUser").attr('disabled', false);
-                $(".userError").text('');
+                $(".userError").hide();
+                $(".userSuccess").show();
                 $(".userSuccess").text('Usuario disponible.');
             }
         }else{
@@ -496,7 +498,12 @@ const AddStudent = async (studentData) => {
             Swal.fire({
                 icon: 'error',
                 title: 'Error al agregar el estudiante',
-                text: response.message
+                text: response.message,
+                confirmButtonText: 'Iniciar sesión'
+            }).then((result) => {
+                if(result.isConfirmed){
+                    window.location.href = '../index.html';
+                }
             });
         }
     }
