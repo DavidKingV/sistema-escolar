@@ -153,7 +153,7 @@ if (!$VerifySession['success']) {
                 <!-- Overflow Hidden -->
                 <div class="card mb-4">
                     <div class="card-header py-1">
-                        <h6 class="m-0 font-weight-bold text-primary">Datos</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Registrar nueva materia</h6>
                     </div>
                     <div class="card-body">
                         <form id="addSubjects">
@@ -178,11 +178,46 @@ if (!$VerifySession['success']) {
                             </div>
                         </form>
                     </div>
-                </div>                        
+                </div>   
 
             </div>
 
+            <!--<div class="col-lg-6">
+
+                <div class="card mb-4">
+                    <div class="card-header py-1">
+                        <h6 class="m-0 font-weight-bold text-primary">Registrar profesor en materia</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="addSubjects">
+                            <div class="row g-2">
+                                <div class="col-md py-3">
+                                    <label for="subjectNameTeacher" class="form-label">Nombre de la Materia</label>
+                                    <label id="subjectNameTeacher-error" class="error text-bg-danger" for="subjectNameTeacher" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="subjectNameTeacher" name="subjectNameTeacher">
+                                </div>                                
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md py-3">
+                                    <label for="teacherNameSubject" class="form-label">Nombre del profesor</label>
+                                    <label id="teacherNameSubject-error" class="error text-bg-danger" for="teacherNameSubject" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="teacherNameSubject" name="teacherNameSubject">
+                                </div>                         
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md py-3">
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>              
+
+            </div>-->
+
+
         </div>
+
     </section>
 
 </body>
