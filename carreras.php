@@ -55,71 +55,88 @@ if (!$VerifySession['success']) {
         <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; min-height: calc(100vh);">
             <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item py-1">
-                <a href="dashboard.php" class="nav-link link-dark" aria-current="page">
-                    <i class="bi bi-house-fill px-3"></i>
-                Inicio
-                </a>
+                <a href="dashboard.php" class="btn btn-light d-flex align-items-center justify-content-start"><i class="bi bi-house-fill px-3"></i>Inicio</a>
+            </li>
+            <li class="py-1">                 
+                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
+                <i class="bi bi-person-badge-fill px-3"></i>Alumnos
+                </button>                
+                <div class="collapse" id="collapseStudents">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="alumnos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="alumnos.php" class="list-group-item list-group-item-action">Lista</a>
+                            <a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
+                        </div>                       
+                    </div>
+                </div>                                                    
             </li>
             <li class="py-1">
-                <div class="dropdown">
-                    <a  href="alumnos.html" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
-                        <i class="bi bi-person-badge-fill px-3"></i>
-                    Alumnos
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="alumnos/altas.php">Agregar</a></li>
-                        <li><a class="dropdown-item" href="alumnos.php">Lista</a></li>
-                        <li><a class="dropdown-item" href="alumnos/usuarios.php">Usuarios</a></li>
-                    </ul>
-                </div>
+                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTeachers" aria-expanded="false" aria-controls="collapseTeachers">
+                <i class="bi bi-person-workspace px-3"></i>Profesores
+                </button>                
+                <div class="collapse" id="collapseTeachers">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="profesores/altas.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="profesores.php" class="list-group-item list-group-item-action">Lista</a>
+                            <a href="profesores/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
+                        </div>                          
+                    </div>
+                </div> 
             </li>
             <li class="py-1">
-                <div class="dropdown">
-                    <a href="profesores.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-workspace px-3"></i>
-                    Profesores
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="profesores/altas.php">Agregar</a></li>
-                        <li><a class="dropdown-item" href="profesores.php">Lista</a></li>
-                    </ul>
-                </div>     
+                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroups" aria-expanded="false" aria-controls="collapseGroups">
+                <i class="bi bi-person-badge-fill px-3"></i>Grupos
+                </button>                
+                <div class="collapse" id="collapseGroups">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="grupos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="grupos.php" class="list-group-item list-group-item-action">Lista</a>
+                        </div>                          
+                    </div>
+                </div>  
+            </li>
+            <li class="py-1">                    
+                <button class="btn btn-primary w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCarreers" aria-expanded="false" aria-controls="collapseCarreers">
+                <i class="bi bi-mortarboard-fill px-3"></i>Carreras
+                </button>                
+                <div class="collapse" id="collapseCarreers">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="carreras/altas.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="carreras.php" class="list-group-item list-group-item-action">Lista</a>
+                        </div>                          
+                    </div>
+                </div>  
             </li>
             <li class="py-1">
-                <div class="dropdown">
-                    <a  href="grupos.php" class="nav-link dropdown-toggle link-dark" data-bs-toggle="dropdown" >
-                        <i class="bi bi-person-badge-fill px-3"></i>
-                    Grupos
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="grupos/altas.php">Agregar</a></li>
-                        <li><a class="dropdown-item" href="grupos.php">Lista</a></li>
-                    </ul>
-                </div>
+                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSubjects" aria-expanded="false" aria-controls="collapseSubjects">
+                <i class="bi bi-book-half px-3"></i>Materias
+                </button>                
+                <div class="collapse" id="collapseSubjects">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="materias/altas.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="materias.php" class="list-group-item list-group-item-action">Lista</a>
+                        </div>                          
+                    </div>
+                </div>  
             </li>
             <li class="py-1">
-            <div class="dropdown">
-                    <a href="carreras.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown"> 
-                        <i class="bi bi-mortarboard-fill px-3"></i>
-                    Carreras
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="carreras/altas.php">Agregar</a></li>
-                        <li><a class="dropdown-item" href="carreras.php">Lista</a></li>
-                    </ul>
-                </div>
-            </li>
-            <li class="py-1">
-                <a href="#" class="nav-link link-dark">
-                    <i class="bi bi-book-fill px-3"></i>
-                Materias
-                </a>
-            </li>
-            <li class="py-1">
-                <a href="#" class="nav-link link-dark">
-                    <i class="bi bi-person-lines-fill px-3"></i>
-                Usuarios
-                </a>
+                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUsers" aria-expanded="false" aria-controls="collapseUsers">
+                <i class="bi bi-person-lines-fill px-3"></i>Usuarios
+                </button>                
+                <div class="collapse" id="collapseUsers">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="#" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="#" class="list-group-item list-group-item-action">Lista</a>
+                        </div>                          
+                    </div>
+                </div>  
+
             </li>
             </ul>
             <hr>
