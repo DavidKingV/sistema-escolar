@@ -21,6 +21,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+        case 'getGroupsStudents':   
+            
+            $groupId = $_POST['groupId'];
+
+            $getGroupsStudents = new GroupsControl($con, $sesion);
+            $groupsStudents = $getGroupsStudents->GetGroupsStudents($groupId);
+
+            header('Content-Type: application/json');
+            echo json_encode($groupsStudents);
+
+            break;        
+
         case 'addGroup':
 
             $groupData = $_POST['groupData'];
@@ -58,6 +70,31 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             echo json_encode($delete);
     
             break;
+
+        case 'addStudentGroup':
+
+            $groupId = $_POST['groupId'];
+            $studentId = $_POST['studentId'];
+
+            $addStudentGroup = new GroupsControl($con, $sesion);
+            $add = $addStudentGroup->AddStudentGroup($groupId, $studentId);
+
+            header('Content-Type: application/json');
+            echo json_encode($add);
+
+            break;
+
+        case 'deleteStudentGroup': 
+
+            $studentId = $_POST['studentId'];
+
+            $deleteStudentGroup = new GroupsControl($con, $sesion);
+            $delete = $deleteStudentGroup->DeleteStudentGroup($studentId);
+
+            header('Content-Type: application/json');
+            echo json_encode($delete);
+
+            break;
     }
 
 }
@@ -84,6 +121,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             header('Content-Type: application/json');
             echo json_encode($groups);
 
+            break;
+
+        case 'getStudentsNames':
+
+            $getStudentsNames = new GroupsControl($con, $sesion);
+            $studentsNames = $getStudentsNames->GetStudentsNames();
+    
+            header('Content-Type: application/json');
+            echo json_encode($studentsNames);
+    
             break;
     }
 }

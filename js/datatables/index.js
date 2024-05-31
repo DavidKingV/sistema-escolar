@@ -230,50 +230,91 @@ function initializeCarreersDataTable() {
 
 function initializeGroupsDataTable() {
             
-        $("#groupsTable").DataTable({
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
-            },
-            ordering: false,
-            paging: true,
-            processing: true,
-            ajax: {
-                url: "php/groups/routes.php", 
-                type: "POST",
-                data: { action: "getGroups" },
-                dataSrc: function(data){
-                    console.log(data);
-                    if(!data[0].success) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data[0].message,
-                        });
-
-                        return [];
-                    }
-                    return data;
-                }
-            },
-            "columns": [
-                // Define las columnas
-                { "data": "id", "className": "text-center" },
-                { "data": "id_carreer", "className": "text-center" },
-                { "data": "key", "className": "text-center" },
-                { "data": "name", "className": "text-center" },
-                { "data": "startDate", "className": "text-center" },
-                { "data": "endDate", "className": "text-center" },
-                {
-                    "data": null,
-                    "render": function(data, type, row) {
-                        return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
+     $("#groupsTable").DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+        },
+        ordering: false,
+        paging: true,
+        processing: true,
+        ajax: {
+            url: "php/groups/routes.php", 
+            type: "POST",
+            data: { action: "getGroups" },
+            dataSrc: function(data){
+                console.log(data);
+                if(!data[0].success) {
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data[0].message,
+                });
+                return [];
+            }
+            return data;
+            }
+        },
+        "columns": [
+            // Define las columnas
+            { "data": "id", "className": "text-center" },
+            { "data": "id_carreer", "className": "text-center" },
+            { "data": "key", "className": "text-center" },
+            { "data": "name", "className": "text-center" },
+            { "data": "startDate", "className": "text-center" },
+            { "data": "endDate", "className": "text-center" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle groupDetails"><i class="bi bi-eye-fill"></i></button><button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
                         
-                    },
-                    "className": "text-center"
-                }
-            ]
-        });  
-    }
+                },
+                "className": "text-center"
+            }
+        ]
+    });  
+}
+
+function initializeGroupsStudentsDataTable(groupId) {
+                
+    $("#groupStudentsTable").DataTable({
+    language: {
+        url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+    },
+    ordering: false,
+    paging: true,
+    processing: true,
+    ajax: {
+        url: "../php/groups/routes.php", 
+        type: "POST",
+        data: {groupId: groupId, action: "getGroupsStudents" },
+        dataSrc: function(data){
+            console.log(data);
+            if(!data[0].success) {
+                Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data[0].message,
+            });
+            return [];
+        }
+        return data;
+        }
+    },
+    "columns": [
+         // Define las columnas
+         { "data": "student_id", "className": "text-center" },
+        { "data": "student_name", "className": "text-center" },
+        {
+            "data": null,
+            "render": function(data, type, row) {
+                return '</button><button data-id="'+row.student_id+'" class="btn btn-danger btn-circle deleteGroupStudent"><i class="bi bi-trash-fill"></i></button>';
+                        
+            },
+            "className": "text-center"
+        }
+    ]
+    });  
+}
 
 function initializeSubjectsDataTable(){
     $("#subjectsTable").DataTable({
@@ -318,4 +359,4 @@ function initializeSubjectsDataTable(){
 
 }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeSubjectsDataTable };
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeGroupsStudentsDataTable, initializeSubjectsDataTable };

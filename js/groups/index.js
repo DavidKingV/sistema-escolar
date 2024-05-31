@@ -1,5 +1,5 @@
-import { initializeGroupsDataTable } from '../datatables/index.js';
-import { FillTable, CleanInputsGroupsEdit } from './forms.js';
+import { initializeGroupsDataTable, initializeGroupsStudentsDataTable } from '../datatables/index.js';
+import { FillTable, CleanInputsGroupsEdit, FillDivsGroups } from './forms.js';
 
 initializeGroupsDataTable();
 
@@ -62,6 +62,63 @@ $("#groupsTable").on("click", ".deleteGroup", function(){
     }
 });
 
+$("#groupsTable").on("click", ".groupDetails", function(){
+    let groupId = $(this).data("id");
+    if (groupId) {
+        window.location.href = 'grupos/detalles.php?id=' + groupId;
+    }else{
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'No se ha podido obtener el ID del grupo',
+        });
+    }
+});
+
+$(function () {
+    let currentPath = window.location.pathname;
+    let specificPath = "/CONTROL%20ESCOLAR%20NUEVO/grupos/detalles.php";
+
+    if (currentPath === specificPath) {
+        GetStudentsNames();
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('id');
+
+        if (groupId) {
+            GetDataGroupDetails(groupId);
+            initializeGroupsStudentsDataTable(groupId);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'No se ha podido obtener el ID del grupo',
+            });
+        }
+    }
+});
+
+const GetDataGroupDetails = async (groupId) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/groups/routes.php',
+            type: 'GET',
+            data: {groupId: groupId, action: 'getGroupData'},
+        });
+        if (!response.success) {
+            throw new Error(response.message);
+        } else {
+            FillDivsGroups(response);
+        }
+    } catch (error) {
+        console.error('Error: ', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al obtener los datos del grupo',
+            text: error.message
+        });
+    }
+}
+
 $("#addGroups").on("submit", function(e){
     e.preventDefault();
     let groupData = $(this).serialize();
@@ -80,6 +137,116 @@ $("#addGroups").on("submit", function(e){
         }
     });
 });
+
+$("#addStudentGroup").on("submit", function(e){
+    e.preventDefault();
+    let groupIdUrl = new URLSearchParams(window.location.search);
+    let groupId = groupIdUrl.get('id');
+    let studentId = $('#studentIdGroup').val();
+
+    Swal.fire({
+        title: '¿Estás seguro de agregar al alumno al grupo?', 
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(48, 133, 214)',
+        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonText: 'Sí, agregar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            AddStudentGroup(groupId, studentId);
+        }
+    });
+});
+
+$("#groupStudentsTable").on("click", ".deleteGroupStudent", function(){    
+    let studentId = $(this).data("id");
+
+    Swal.fire({
+        title: '¿Estás seguro de eliminar al alumno del grupo?', 
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(48, 133, 214)',
+        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            DeleteStudentGroup(studentId);
+        }
+    });
+});
+
+const DeleteStudentGroup = async (studentId) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/groups/routes.php',
+            type: 'POST',
+            data: {studentId: studentId, action: 'deleteStudentGroup'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Alumno eliminado',
+                text: response.message
+            });
+            // Reload the table
+            $('#groupStudentsTable').DataTable().ajax.reload();
+            GetStudentsNames();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al eliminar el alumno',
+                text: response.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al eliminar el alumno',
+            text: error.message
+        });
+    }
+}
+
+const AddStudentGroup = async (groupId, studentId) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/groups/routes.php',
+            type: 'POST',
+            data: {groupId: groupId, studentId:studentId, action: 'addStudentGroup'},
+            dataType: 'json'
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Alumno agregado',
+                text: response.message
+            });
+            // Reload the table
+            $('#groupStudentsTable').DataTable().ajax.reload();
+            $('#addStudentGroup').validate().resetForm();
+            $("#studentIdGroup").select2('val', 'All');
+            GetStudentsNames();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al agregar el alumno',
+                text: response.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al agregar el alumno',
+            text: error.message
+        });
+    }
+};
 
 const AddGroup = async (groupData) => {
     try {
@@ -178,6 +345,53 @@ const UpdateGroup = async (groupDataEdit) => {
             text: error.message
         });
     }
+};
+
+const GetStudentsNames = async () => {
+
+    const GetStudentsSelect = async () => {
+        try {
+            const response = await $.ajax({
+                url: '../php/groups/routes.php',
+                type: 'GET',
+                data: {action: 'getStudentsNames'},
+                dataType: 'json'
+            });
+            return response;
+        } catch (error) {
+            console.error('Error al obtener los datos:', error);
+            throw new Error('Error al obtener los datos');
+        }
+    };
+
+    try {
+        const students = await GetStudentsSelect();
+
+        if (!students || students.length === 0) {
+            console.log('No se encontraron grupos');
+            return;
+        }
+
+        let $select = $('#studentIdGroup');
+        $.each(students, function(index, student) {
+            if (student.success !== false) {
+                let $option = $('<option>', {
+                    value: student.id,
+                    text: student.name
+                });
+
+                $select.append($option);
+            }
+        });
+
+        $select.select2({
+            theme: "bootstrap-5",
+            placeholder: 'Selecciona uno o varios alumnos',
+        });
+    } catch (error) {
+        console.error('Error al procesar los datos:', error.message);
+    } 
+   
 };
 
 const GetDataGroupEdit = async (groupId) => {

@@ -566,6 +566,18 @@ $("#addGroups").validate({
     }
 });
 
+$("#groupStudentsTable").validate({
+    rules: {
+        studentGroup: {
+            required: true,
+            valueNotEquals: "0"
+        }
+    }, messages: {
+        studentGroup: {
+            required: "Por favor selecciona un grupo"
+        },
+}});
+
 $("#updateSubject").validate({
     rules: {
         subjectNameEdit: {

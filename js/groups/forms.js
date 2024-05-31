@@ -15,6 +15,15 @@ function FillTable(response) {
     
 }
 
+function FillDivsGroups(response) {
+    $("#groupCarreerNameDetails").text(response.carreer_name);
+    $("#groupKeyDetails").text(response.key);
+    $("#groupNameDetails").text(response.name);
+    $("#groupInitialDateDetails").text(response.startDate);
+    $("#groupFinalDateDetails").text(response.endDate);
+    $("#groupDescriptionDetails").text(response.description);
+}
+
 function CleanInputsGroupsEdit(){
     $("#idGroupDB").val("");
     $("#idCarreerHidden").val("");
@@ -29,4 +38,4 @@ function CleanInputsGroupsEdit(){
     $("#updateGroup").validate().resetForm();
 }
 
-export { FillTable, CleanInputsGroupsEdit };
+export { FillTable, CleanInputsGroupsEdit, FillDivsGroups };
