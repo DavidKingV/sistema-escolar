@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__.'/../../../vendor/autoload.php');
 include __DIR__.'/index.php';
+include __DIR__.'/verify.php';
 
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
@@ -127,6 +128,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
                 break;
 
+            case 'addGradeStudent':
+                $gradeData = $_POST['studentGradeData'];
+                parse_str($gradeData, $gradeDataArray);
+
+                $addGrade = new StudentsControl($con, $sesion);
+                $add = $addGrade->AddGradeStudent($gradeDataArray);
+
+                header('Content-Type: application/json');
+                echo json_encode($add);
+
+                break;
+
         default:
         echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
@@ -150,6 +163,40 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
             echo json_encode($student);
 
         break;
+
+        case 'getSubjectsNames':
+            $careerId = $_GET['careerId'];
+
+            $getSubjects = new StudentsControl($con, $sesion);
+            $subjects = $getSubjects->GetSubjectsNames($careerId);
+
+            header('Content-Type: application/json');
+            echo json_encode($subjects);
+
+            break;
+
+        case 'verifyToken':
+            $studentId = $_GET['studentId'];
+            $studentSecretKey = $_GET['token'];
+
+            $verifyToken = new AdvancedStudentsControl();
+            $verify = $verifyToken->VerifyIdStudentId($studentId, $studentSecretKey);
+
+            header('Content-Type: application/json');
+            echo json_encode($verify);
+
+            break;
+
+        case 'verifyGroupStudent':
+            $studentIdGroup = $_GET['studentIdGroup'];
+
+            $verifyGroup = new StudentsControl($con, $sesion);
+            $verify = $verifyGroup->VerifyGroupStudent($studentIdGroup);
+
+            header('Content-Type: application/json');
+            echo json_encode($verify);
+
+            break;
 
         default:
         echo json_encode(array("success" => false, "message" => "Acción no válida"));

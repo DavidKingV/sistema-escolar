@@ -626,6 +626,49 @@ $("#addSubjects").validate({
     }
 });
 
+$("#addGradeStudent").validate({
+    rules: {
+        subject: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        gradeCont: {
+            required: true,
+            number: true,
+            maxlength: 3,
+        },
+        gradetest: {
+            required: true,
+            number: true,
+            maxlength: 3,
+        },
+        gradefinal: {
+            required: true,
+            number: true,
+            maxlength: 3,
+        },
+    }, messages: {
+        subject: {
+            required: "Por favor selecciona una materia"
+        },
+        gradeCont: {
+            required: "Por favor ingresa una calificación",
+            number: "Por favor ingresa solo números",
+            maxlength: "La calificación debe tener máximo 3 caracteres"
+        },
+        gradetest: {
+            required: "Por favor ingresa una calificación",
+            number: "Por favor ingresa solo números",
+            maxlength: "La calificación debe tener máximo 3 caracteres"
+        },
+        gradefinal: {
+            required: "Por favor ingresa una calificación",
+            number: "Por favor ingresa solo números",
+            maxlength: "La calificación debe tener máximo 3 caracteres"
+        }
+    }
+});
+
 $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);
 }, "Por favor, ingresa solo letras");

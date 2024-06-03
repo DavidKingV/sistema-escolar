@@ -25,12 +25,19 @@ function initializeStudentDataTable() {
         },
         "columns": [
             // Define las columnas
-            { "data": "id", "className": "text-center" },
             { "data": "no_control", "className": "text-center" },
             { "data": "name", "className": "text-center" },
             { "data": "phone", "className": "text-center" },
             { "data": "email", "className": "text-center" },
             { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-token="'+row.token+'" data-id="'+row.id+'" class="btn btn-primary btn-circle GradeStudent"><i class="bi bi-journal-check"></i></button>';
+                
+                },
+                "className": "text-center"
+            },
             {
                 "data": null,
                 "render": function(data, type, row) {

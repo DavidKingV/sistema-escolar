@@ -168,12 +168,12 @@ if (!$VerifySession['success']) {
                             <table class="table" id="studentTable">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">ID</th>
                                         <th class="text-center">No. Control</th>
                                         <th class="text-center">Nombre</th>
                                         <th class="text-center">Teléfono</th>
                                         <th class="text-center">Email</th>
                                         <th class="text-center">Grupo</th>
+                                        <th class="text-center">Calificaciones</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>

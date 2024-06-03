@@ -36,10 +36,17 @@ class StudentsControl {
                 return array("success" => false, "message" => "Error al obtener los alumnos, por favor intente de nuevo más tarde");
             }else{
                 $students = array();
-                if($query->num_rows > 0){
+                $secret_key = 'sk_live_51TS8';
+                if($query->num_rows > 0){                    
                     while($row = $query->fetch_assoc()){
+                        $payload = [
+                            "sId" => $row['id']
+                        ];                    
+                        $token = JWT::encode($payload, $secret_key, 'HS256');
+
                         $students[] = array(
                             'success' => true,
+                            'token' => $token,
                             'id' => $row['id'],
                             'no_control' => $row['no_control'],
                             'name' => $row['nombre'],
@@ -310,4 +317,84 @@ class StudentsControl {
         }
     }
 
+    public function GetSubjectsNames($careerId){
+            
+            if(!$this->sesion['success']){
+                return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+            }else{
+                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, subjects.nombre 
+                FROM carreers_subjects 
+                INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id 
+                WHERE carreers_subjects.id_carreer = ?";
+                $stmt = $this->con->prepare($sql);
+                $stmt->bind_param('i', $careerId);
+                $stmt->execute();
+                $query = $stmt->get_result();
+    
+                if(!$query){
+                    return array("success" => false, "message" => "Error al obtener las materias, por favor intente de nuevo más tarde");
+                }else{
+                    $subjects = array();
+                    if($query->num_rows > 0){
+                        while($row = $query->fetch_assoc()){
+                            $subjects[] = array(
+                                'success' => true,
+                                'id_career' => $row['id_carreer'],
+                                'id_subject' => $row['id_subject'],
+                                'name_subject' => $row['nombre']
+                            );
+                        }
+                    }else{
+                        $subjects[] = array("success" => false, "message" => "No se encontraron materias registradas");
+                    }
+                    $stmt->close();
+                    $this->con->close();
+    
+                    return $subjects;
+                }
+            }
+    }
+
+    public function VerifyGroupStudent($studentIdGroup){
+            
+            if(!$this->sesion['success']){
+                return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+            }else{
+                $sql = "SELECT students.id_group, groups.id_carreer FROM students INNER JOIN groups ON students.id_group = groups.id WHERE students.id = ?";
+                $stmt = $this->con->prepare($sql);
+                $stmt->bind_param('i', $studentIdGroup);
+                $stmt->execute();
+                $query = $stmt->get_result();
+    
+                if($query->num_rows > 0){
+                    return array("success" => true, "group" => true, "id_career" => $query->fetch_assoc()['id_carreer'], "message" => "Alumno con grupo asignado");
+                }else{
+                    return array("success" => true, "group" => false, "message" => "Alumno sin grupo asignado");
+                }
+            }
+    }
+
+    public function AddGradeStudent($gradeDataArray){
+            
+            if(!$this->sesion['success']){
+                return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+            }else{
+                $sql = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?)";
+                $stmt = $this->con->prepare($sql);
+                $stmt->bind_param('iiiii', $gradeDataArray['studentIdDB'], $gradeDataArray['subject'], $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
+                $stmt->execute();
+        
+                if($stmt->affected_rows > 0){
+                    $stmt->close();
+                    $this->con->close();
+                    return array("success" => true, "message" => "Calificación registrada correctamente");
+                }else{
+                    $stmt->close();
+                    $this->con->close();
+                    return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
+                }
+            }
+    }
+
 }
+
