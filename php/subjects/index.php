@@ -33,12 +33,10 @@ class SubjectsControl{
             $result = $this->con->query($query);
             
             if (!$result) {
-                error_log("Error en la consulta SQL: " . mysqli_error($this->con));
-                return array(array("success" => false, "message" => "Error al obtener las materias"));
+                return array("success" => false, "message" => "Error al obtener las materias");
             }else{
                 $subjects = array();
                 if($result->num_rows > 0){
-                    error_log("Se encontraron materias: " . $result->num_rows);
                     while($row = $result->fetch_assoc()){
                         $subjects[] = array(
                             'success' => true,
@@ -51,7 +49,6 @@ class SubjectsControl{
                 }else{
                     $subjects[] = array("success" => false, "message" => "No se encontraron materias");
                 }
-                error_log("Array final de materias: " . $subjects[0]);
                 $this->con->close();
                 return $subjects;
             }
