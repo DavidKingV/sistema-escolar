@@ -1,0 +1,19 @@
+{
+    "name": "vendor/scholarsystem",
+    "description": "school management system",
+    "type": "composer",
+    "license": "free",
+    "autoload": {
+        "psr-4": {
+            "Vendor\\Scholarsystem\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "DavidKingV",
+            "email": "qet135ui@hotmail.com"
+        }
+    ],
+    "minimum-stability": "alpha",
+    "require": {}
+}

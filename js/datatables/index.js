@@ -352,6 +352,7 @@ function initializeSubjectsDataTable(){
             // Define las columnas
             { "data": "id", "className": "text-center" },
             { "data": "name", "className": "text-center" },
+            { "data": "career", "className": "text-center" },
             { "data": "description", "className": "text-center" },
             {
                 "data": null,
