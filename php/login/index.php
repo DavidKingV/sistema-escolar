@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../../vendor/autoload.php');
+require_once(__DIR__.'/../vendor/autoload.php');
 include __DIR__.'/../db.php';
 
 use \Firebase\JWT\JWT;

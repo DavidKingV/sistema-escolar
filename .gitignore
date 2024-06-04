@@ -1,2 +1,4 @@
 .env
 git rm --cached '*/error_log' error_log
+composer.lock
+vendor/
