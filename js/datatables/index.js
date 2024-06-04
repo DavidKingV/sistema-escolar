@@ -336,6 +336,7 @@ function initializeSubjectsDataTable(){
             type: "POST",
             data: { action: "getSubjects" },
             dataSrc: function(data){
+                console.log(data);
                 if(!data[0].success) {
                     Swal.fire({
                         icon: 'error',
