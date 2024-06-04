@@ -1,6 +1,6 @@
 /*import { VerifyUser } from './../students/index.js';*/
 
-$("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nameGroupEdit, #descriptionGroupEdit, #keyGroup, #nameGroup, #descriptionGroup, #descriptionSubjectEdit, #subjectNameEdit, #subjectName, #subjectDes").on("input", function(event) {
+$("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nameGroupEdit, #descriptionGroupEdit, #keyGroup, #nameGroup, #descriptionGroup, #descriptionSubjectEdit, #subjectDes").on("input", function(event) {
     event.preventDefault();
     var cursorPosition = $(this).prop('selectionStart');
         
@@ -12,7 +12,7 @@ $("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nam
     $(this).prop('selectionEnd', cursorPosition);
 });
 
-$("#studentNation, #studentEmail").on("input", function(event) {
+$("#studentNation, #studentEmail, #subjectNameEdit, #subjectName").on("input", function(event) {
     event.preventDefault();
     var cursorPosition = $(this).prop('selectionStart');
 
