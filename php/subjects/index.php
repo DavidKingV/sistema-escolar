@@ -53,7 +53,7 @@ class SubjectsControl{
                 }
                 error_log("Array final de materias: " . json_encode($subjects));
                 $this->con->close();
-                return $subjects;
+                return $subjects[] = array("success" => false, "message" => "No se encontraron materias");
             }
         }
     }
