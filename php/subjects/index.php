@@ -32,8 +32,9 @@ class SubjectsControl{
             $query = "SELECT subjects.nombre, subjects.descripcion, carreers_subjects.id_subject, carreers_subjects.id_carreer as id_carrera, carreers.nombre AS nombre_carrera FROM subjects INNER JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject INNER JOIN carreers ON carreers_subjects.id_carreer = carreers.id;";
             $result = mysqli_query($this->con, $query);
             
-            if(!$result){
-                return array("success" => false, "message" => "Error al obtener las materias");
+            if (!$result) {
+                error_log("Error en la consulta SQL: " . mysqli_error($this->con));
+                return array(array("success" => false, "message" => "Error al obtener las materias"));
             }else{
                 $subjects = array();
                 if($result->num_rows > 0){
