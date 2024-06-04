@@ -14,6 +14,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'getSubjects':
             $SubjectsControl = new SubjectsControl($con, $sesion);
             $subjects = $SubjectsControl->GetSubjects();
+
+            header('Content-Type: application/json');
             echo json_encode($subjects);
             break;
 
