@@ -40,12 +40,14 @@ class SubjectsControl{
                 if($result->num_rows > 0){
                     error_log("Se encontraron materias: " . $result->num_rows);
                     while($row = $result->fetch_assoc()){
-                        error_log("Materia encontrada: " . json_encode($row['id_subject']));
+                        error_log("Materia encontrada: " . json_encode($row['nombre']));
+                        error_log("Materia encontrada: " . json_encode($row['nombre_carrera']));
+                        error_log("Materia encontrada: " . json_encode($row['descripcion']));
                         $subjects[] = array(
                             "success" => true,
                             "id" => $row['id_subject'],
                             "name" => $row['nombre'],
-                            "career" => $row['nombre_carrera'], // "career" => "nombre_carrera
+                            "career" => $row['nombre_carrera'], 
                             "description" => $row['descripcion'],
                         );
                     }
