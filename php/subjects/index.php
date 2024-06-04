@@ -40,9 +40,6 @@ class SubjectsControl{
                 if($result->num_rows > 0){
                     error_log("Se encontraron materias: " . $result->num_rows);
                     while($row = $result->fetch_assoc()){
-                        error_log("Materia encontrada: " . json_encode($row['nombre']));
-                        error_log("Materia encontrada: " . json_encode($row['nombre_carrera']));
-                        error_log("Materia encontrada: " . json_encode($row['descripcion']));
                         $subjects[] = array(
                             "success" => true,
                             "id" => $row['id_subject'],
@@ -54,7 +51,7 @@ class SubjectsControl{
                 }else{
                     $subjects[] = array("success" => false, "message" => "No se encontraron materias");
                 }
-                error_log("Materias encontradas: " . json_encode($subjects));
+                error_log("Array final de materias: " . json_encode($subjects));
                 $this->con->close();
                 return $subjects;
             }
