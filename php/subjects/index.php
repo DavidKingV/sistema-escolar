@@ -51,6 +51,7 @@ class SubjectsControl{
                 }else{
                     $subjects[] = array("success" => false, "message" => "No se encontraron materias");
                 }
+                error_log("Materias encontradas: " . json_encode($subjects));
                 $this->con->close();
                 return $subjects;
             }
