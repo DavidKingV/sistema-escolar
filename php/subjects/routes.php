@@ -12,14 +12,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
     switch ($action){
     
         case 'getSubjects':
-            error_log("Entrando a getSubjects");
             $SubjectsControl = new SubjectsControl($con, $sesion);
             $subjects = $SubjectsControl->GetSubjects();
 
             header('Content-Type: application/json');
             echo json_encode($subjects);
 
-            error_log("Saliendo de getSubjects" . json_encode($subjects));
 
             break;
 

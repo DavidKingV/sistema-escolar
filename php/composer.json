@@ -15,5 +15,9 @@
         }
     ],
     "minimum-stability": "alpha",
-    "require": {}
+    "require": {
+        "php": ">=8.1.0",
+        "firebase/php-jwt": "latest",
+        "vlucas/phpdotenv": "latest"
+    }
 }

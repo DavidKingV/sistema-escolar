@@ -335,9 +335,7 @@ function initializeSubjectsDataTable(){
             url: "php/subjects/routes.php", 
             type: "POST",
             data: { action: "getSubjects" },
-            dataType: "json",
             dataSrc: function(data){
-                console.log("Response from server:", data); // Log the full response
                 if(!data[0].success) {
                     Swal.fire({
                         icon: 'error',
