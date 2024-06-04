@@ -336,7 +336,6 @@ function initializeSubjectsDataTable(){
             type: "POST",
             data: { action: "getSubjects" },
             dataSrc: function(data){
-                console.log(data);
                 if(!data[0].success) {
                     Swal.fire({
                         icon: 'error',
@@ -353,7 +352,7 @@ function initializeSubjectsDataTable(){
             // Define las columnas
             { "data": "id", "className": "text-center" },
             { "data": "name", "className": "text-center" },
-            //{ "data": "career", "className": "text-center" },
+            { "data": "career", "className": "text-center" },
             { "data": "description", "className": "text-center" },
             {
                 "data": null,
