@@ -1,5 +1,5 @@
-import { initializeSubjectsDataTable } from './datatables/index.js';
 import { FillTable } from '../subjects/forms.js';
+import { initializeSubjectsDataTable } from '../datatables/index.js';
 
 initializeSubjectsDataTable();
 
