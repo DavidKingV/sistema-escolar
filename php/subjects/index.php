@@ -41,11 +41,11 @@ class SubjectsControl{
                     error_log("Se encontraron materias: " . $result->num_rows);
                     while($row = $result->fetch_assoc()){
                         $subjects[] = array(
-                            "success" => true,
-                            "id" => $row['id_subject'],
-                            "name" => $row['nombre'],
-                            "career" => $row['nombre_carrera'], 
-                            "description" => $row['descripcion']
+                            'success' => true,
+                            'id' => $row['id_subject'],
+                            'name' => $row['nombre'],
+                            'career' => $row['nombre_carrera'], 
+                            'description' => $row['descripcion']
                         );
                     }
                 }else{
