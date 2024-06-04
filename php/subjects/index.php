@@ -38,6 +38,7 @@ class SubjectsControl{
             }else{
                 $subjects = array();
                 if($result->num_rows > 0){
+                    error_log("Se encontraron materias: " . $result->num_rows);
                     while($row = $result->fetch_assoc()){
                         $subjects[] = array(
                             "success" => true,

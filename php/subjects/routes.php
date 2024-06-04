@@ -12,6 +12,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
     switch ($action){
     
         case 'getSubjects':
+            error_log("Entrando a getSubjects");
             $SubjectsControl = new SubjectsControl($con, $sesion);
             $subjects = $SubjectsControl->GetSubjects();
 
@@ -51,6 +52,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             header('Content-Type: application/json');
             echo json_encode($deleteSubject);
             break;
+
+        default:
+        error_log("Acción no reconocida: " . $action);
+        echo json_encode(array("success" => false, "message" => "Acción no reconocida"));
         
     }
 
