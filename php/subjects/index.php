@@ -30,7 +30,7 @@ class SubjectsControl{
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
             $query = "SELECT subjects.nombre, subjects.descripcion, carreers_subjects.id_subject, carreers_subjects.id_carreer as id_carrera, carreers.nombre AS nombre_carrera FROM subjects INNER JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject INNER JOIN carreers ON carreers_subjects.id_carreer = carreers.id;";
-            $result = mysqli_query($this->con, $query);
+            $result = $this->con->query($query);
             
             if (!$result) {
                 error_log("Error en la consulta SQL: " . mysqli_error($this->con));
@@ -45,7 +45,7 @@ class SubjectsControl{
                             "id" => $row['id_subject'],
                             "name" => $row['nombre'],
                             "career" => $row['nombre_carrera'], 
-                            "description" => $row['descripcion'],
+                            "description" => $row['descripcion']
                         );
                     }
                 }else{
