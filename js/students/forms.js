@@ -44,4 +44,14 @@ function ClearStudensEditUser(){
     $(".userError", ".userSuccess").html("");
 }
 
-export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser};
+
+function AverageGrade(){
+    let continuos_grade = parseFloat($("#gradeCont").val());
+    let exam_grade = parseFloat($("#gradetest").val());
+
+    let average = (continuos_grade + exam_grade) / 2;
+
+    $("#gradefinal").val(average);
+}
+
+export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade};

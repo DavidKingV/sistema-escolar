@@ -1,4 +1,4 @@
-import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser } from './forms.js';
+import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade } from './forms.js';
 import { initializeStudentDataTable, initializeStudentsUsersTable } from '../datatables/index.js';
 
 initializeStudentDataTable();
@@ -308,6 +308,10 @@ $("#addGradeStudent").on("submit", function(event){
             }
         }
     });
+});
+
+$("#gradeCont, #gradetest").on("input", function(){
+    AverageGrade();
 });
 
 $(function () {

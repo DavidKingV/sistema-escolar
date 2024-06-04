@@ -35,8 +35,9 @@ class StudentsControl {
             if(!$query){
                 return array("success" => false, "message" => "Error al obtener los alumnos, por favor intente de nuevo más tarde");
             }else{
+                cargarEnv();
                 $students = array();
-                $secret_key = 'sk_live_51TS8';
+                $secret_key = $_ENV['SECRET_KEY'];
                 if($query->num_rows > 0){                    
                     while($row = $query->fetch_assoc()){
                         $payload = [

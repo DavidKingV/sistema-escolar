@@ -4,11 +4,17 @@ require_once(__DIR__.'/../../../vendor/autoload.php');
 use \Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
+function cargarEnv() {
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+}
+
 class AdvancedStudentsControl{
 
     public function VerifyIdStudentId($studentId, $studentSecretKey){
-        
-        $secret_key = 'sk_live_51TS8';
+        cargarEnv();
+    
+        $secret_key = $_ENV['SECRET_KEY'];
         //comparar el id del estudiante con el id del token
          $decoded = JWT::decode($studentSecretKey, new Key($secret_key, 'HS256'));
 

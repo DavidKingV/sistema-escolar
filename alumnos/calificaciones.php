@@ -200,15 +200,14 @@ if (!$VerifySession['success']) {
                                     <tbody>
                                         <tr>
                                         <th scope="row">
-                                            <select class="form-select subjectName" name="subject" id="subject">
+                                            <select class="form-select subjectName" name="subject" id="subject" style="">
                                                 <option value="0">Selecciona una materia</option>
                                             </select>
                                         </th>
                                         <td><input type="text" name="gradeCont" id="gradeCont" class="form-control"></td>
                                         <td><input type="text" name="gradetest" id="gradetest" class="form-control"></td>
                                         <td><input type="text" name="gradefinal" id="gradefinal" class="form-control"></td>
-                                        </tr>  
-                                        <tr id="addtr1"></tr>                                  
+                                        </tr>                                 
                                     </tbody>
                                 </table>
                                 
