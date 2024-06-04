@@ -336,11 +336,11 @@ function initializeSubjectsDataTable(){
             type: "POST",
             data: { action: "getSubjects" },
             dataSrc: function(data){
-                if(!data[0].success) {
+                if(!data.success) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data[0].message,
+                        text: data.message,
                     });
 
                     return [];

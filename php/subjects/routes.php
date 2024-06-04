@@ -17,6 +17,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             header('Content-Type: application/json');
             echo json_encode($subjects);
+
             break;
 
         case 'addSubject':
