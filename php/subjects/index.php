@@ -29,7 +29,7 @@ class SubjectsControl{
         if(!$this->sesion['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $query = "SELECT * FROM subjects";
+            $query = "SELECT subjects.nombre, subjects.descripcion, carreers_subjects.id_subject, carreers_subjects.id_carreer as id_carrera, carreers.nombre AS nombre_carrera FROM subjects INNER JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject INNER JOIN carreers ON carreers_subjects.id_carreer = carreers.id;";
             $result = mysqli_query($this->con, $query);
             
             if(!$result){
@@ -40,8 +40,9 @@ class SubjectsControl{
                     while($row = $result->fetch_assoc()){
                         $subjects[] = array(
                             "success" => true,
-                            "id" => $row['id'],
+                            "id" => $row['id_subject'],
                             "name" => $row['nombre'],
+                            "career" => $row['nombre_carrera'], // "career" => "nombre_carrera
                             "description" => $row['descripcion'],
                         );
                     }
