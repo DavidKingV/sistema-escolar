@@ -435,17 +435,15 @@ const GetDataGroupEdit = async (groupId) => {
         let $selectEdit = $('#carreerNameGroupEdit');
         $.each(careers, function(area, subareas) {
             let $mainOptgroup = $('<optgroup>', { label: area.replace(/_/g, ' ') });
-
             $.each(subareas, function(subarea, programs) {
                 let $subOptgroup = $('<optgroup>', { label: '  ' + subarea.replace(/_/g, ' ') }); // Agrega espacios para simular jerarquía
                 $.each(programs, function(index, program) {
                     let $option = $('<option>', {
-                        value: program,
-                        text: '    ' + program                       
+                        value: program.id,
+                        text: '    ' + program.nombre                       
                     });
-
                     // Verificar si esta opción coincide con el valor predeterminado
-                    if (program === defaultCareer) {
+                    if (program.nombre === defaultCareer) {
                         $option.prop('selected', true); // Establecer la opción como seleccionada
                     }
 
