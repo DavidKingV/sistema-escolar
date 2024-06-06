@@ -77,7 +77,7 @@ $("#groupsTable").on("click", ".groupDetails", function(){
 
 $(function () {
     let currentPath = window.location.pathname;
-    let specificPath = "/CONTROL%20ESCOLAR%20NUEVO/grupos/detalles.php";
+    let specificPath = "/grupos/detalles.php";
 
     if (currentPath === specificPath) {
         GetStudentsNames();

@@ -8,7 +8,7 @@ $(function() {
     let currentPath = window.location.pathname;
 
     // Define la ruta en la que deseas cargar el JSON
-    let specificPath = "/CONTROL%20ESCOLAR%20NUEVO/carreras/altas.php";
+    let specificPath = "/carreras/altas.php";
 
     if (currentPath === specificPath) {
 
