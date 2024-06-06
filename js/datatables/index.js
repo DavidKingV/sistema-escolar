@@ -69,8 +69,9 @@ function initializeStudentsUsersTable() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message,
+                        text: data[0].message,
                     });
+                    return [];
                 }
                 return data;
             }
@@ -120,8 +121,9 @@ function initializeTeachersDataTable() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message,
+                        text: data[0].message,
                     });
+                    return [];
                 }
                 return data;
             }
@@ -162,8 +164,9 @@ function initializeTeachersUsersTable(){
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message,
+                        text: data[0].message,
                     });
+                    return [];
                 }
                 return data;
             }
@@ -211,8 +214,9 @@ function initializeCarreersDataTable() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message,
+                        text: data[0].message,
                     });
+                    return [];
                 }
                 return data;
             }
