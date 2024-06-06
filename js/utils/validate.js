@@ -70,12 +70,7 @@ $("#subjectChildName, #subjectNameEdit, #subjectName").on("input", function(even
     // Función para convertir solo la primera letra a mayúscula
     function capitalizeWords(string) {
         if (!string) return string; // Maneja cadenas vacías o nulas
-        return string.split(' ').map(function(word) {
-            if (word.length > 0) {
-                return word.charAt(0).toUpperCase() + word.slice(1);
-            }
-            return word;
-        }).join(' ');
+            return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     // Convertir el valor del input con la primera letra en mayúscula
