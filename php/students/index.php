@@ -198,7 +198,7 @@ class StudentsControl {
                         );
                     }
                 }else{
-                    return array("success" => false, "message" => "No se encontraron alumnos registrados");
+                    $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
                 }
                 $this->con->close();
 

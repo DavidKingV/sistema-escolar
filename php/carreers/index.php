@@ -35,15 +35,19 @@ class CareersControl{
                 return array("success" => false, "message" => "Error al obtener las carreras");
             }else{
                 $careers = array();
-                while($row = $query->fetch_assoc()){
-                    $careers[] = array(
-                        "success" => true,  
-                        "id" => $row['id'],
-                        "name" => $row['nombre'],
-                        "area" => $row['area'],
-                        "subarea" => $row['subarea'],
-                        "description" => $row['descripcion']
-                    );
+                if($query->num_rows > 0){
+                    while($row = $query->fetch_assoc()){
+                        $careers[] = array(
+                            "success" => true,  
+                            "id" => $row['id'],
+                            "name" => $row['nombre'],
+                            "area" => $row['area'],
+                            "subarea" => $row['subarea'],
+                            "description" => $row['descripcion']
+                        );
+                    }
+                }else{
+                    $careers[] = array("success" => false, "message" => "No hay carreras registradas");
                 }
                 $this->con->close();
                 return $careers;

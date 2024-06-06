@@ -365,6 +365,14 @@ function initializeSubjectsDataTable(){
                     
                 },
                 "className": "text-center"
+            },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editSubject" data-bs-toggle="modal" data-bs-target="#SubjectsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteSubject"><i class="bi bi-trash-fill"></i></button>';
+                    
+                },
+                "className": "text-center"
             }
         ]
     });  

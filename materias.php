@@ -174,6 +174,7 @@ if (!$VerifySession['success']) {
                                         <th class="text-center">Nombre</th>
                                         <th class="text-center">Carrera</th>
                                         <th class="text-center">Descipción</th>
+                                        <th class="text-center">Materias Hijas</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>

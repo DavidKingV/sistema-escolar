@@ -47,7 +47,7 @@ class TeachersControl{
                             );
                         }
                     }else{
-                        return array("success" => false, "message" => "No se encontraron alumnos registrados");
+                        $teachers[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
                     }
                     $this->con->close();
                     return $teachers;
