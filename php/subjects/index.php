@@ -39,7 +39,7 @@ class SubjectsControl{
                 if($result->num_rows > 0){
                     while($row = $result->fetch_assoc()){
                         $subjects[] = array(
-                            'success' => true,
+                            'success' => true, 
                             'id' => $row['id_subject'],
                             'name' => $row['nombre'],
                             'career' => $row['nombre_carrera'], 
