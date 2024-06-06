@@ -1,8 +1,8 @@
 /*import { VerifyUser } from './../students/index.js';*/
 
-$("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nameGroupEdit, #descriptionGroupEdit, #keyGroup, #nameGroup, #descriptionGroup, #descriptionSubjectEdit, #subjectDes").on("input", function(event) {
+$("#controlNumber, #studentCurp, #keyGroupEdit, #nameGroupEdit, #keyGroup, #nameGroup, #descriptionSubjectEdit, #subjectDes").on("input", function(event) {
     event.preventDefault();
-    var cursorPosition = $(this).prop('selectionStart');
+    let cursorPosition = $(this).prop('selectionStart');
         
     // Convertir el valor del input a mayúsculas
     $(this).val($(this).val().toUpperCase());
@@ -12,12 +12,12 @@ $("#controlNumber, #studentName, #studentCurp, #teacherName, #keyGroupEdit, #nam
     $(this).prop('selectionEnd', cursorPosition);
 });
 
-$("#studentNation, #studentEmail, #subjectNameEdit, #subjectName").on("input", function(event) {
+$("#studentNation, #studentEmail, #descriptionGroup, #descriptionGroupEdit, #teacherEmail, #teacherEmailEdit").on("input", function(event) {
     event.preventDefault();
-    var cursorPosition = $(this).prop('selectionStart');
+    let cursorPosition = $(this).prop('selectionStart');
 
     // Obtener el valor actual del input
-    var inputValue = $(this).val();
+    let inputValue = $(this).val();
 
     // Función para convertir solo la primera letra a mayúscula
     function capitalizeFirstLetter(string) {
@@ -26,7 +26,60 @@ $("#studentNation, #studentEmail, #subjectNameEdit, #subjectName").on("input", f
     }
 
     // Convertir el valor del input con la primera letra en mayúscula
-    var capitalizedValue = capitalizeFirstLetter(inputValue);
+    let capitalizedValue = capitalizeFirstLetter(inputValue);
+
+    // Establecer el valor modificado en el input
+    $(this).val(capitalizedValue);
+    
+    // Restaurar la posición del cursor después de la modificación
+    $(this).prop('selectionStart', cursorPosition);
+    $(this).prop('selectionEnd', cursorPosition);
+});
+
+$("#studentName, #teacherName, #teacherNameEdit").on("input", function(event) {
+    event.preventDefault();
+    let cursorPosition = $(this).prop('selectionStart');
+
+    // Obtener el valor actual del input
+    let inputValue = $(this).val();
+
+    // Función para convertir solo la primera letra a mayúscula
+    function capitalizeWords(string) {
+        if (!string) return string; // Maneja cadenas vacías o nulas
+        return string.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    }
+
+    // Convertir el valor del input con la primera letra en mayúscula
+    let capitalizedValue = capitalizeWords(inputValue);
+
+    // Establecer el valor modificado en el input
+    $(this).val(capitalizedValue);
+    
+    // Restaurar la posición del cursor después de la modificación
+    $(this).prop('selectionStart', cursorPosition);
+    $(this).prop('selectionEnd', cursorPosition);
+});
+
+$("#subjectChildName, #subjectNameEdit, #subjectName").on("input", function(event) {
+    event.preventDefault();
+    let cursorPosition = $(this).prop('selectionStart');
+
+    // Obtener el valor actual del input
+    let inputValue = $(this).val();
+
+    // Función para convertir solo la primera letra a mayúscula
+    function capitalizeWords(string) {
+        if (!string) return string; // Maneja cadenas vacías o nulas
+        return string.split(' ').map(function(word) {
+            if (word.length > 0) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }
+            return word;
+        }).join(' ');
+    }
+
+    // Convertir el valor del input con la primera letra en mayúscula
+    let capitalizedValue = capitalizeWords(inputValue);
 
     // Establecer el valor modificado en el input
     $(this).val(capitalizedValue);
@@ -626,6 +679,30 @@ $("#addSubjects").validate({
     }
 });
 
+$("#addSubjectChild").validate({
+    rules: {
+        subjectChildName: {
+            required: true,
+            specialChars: true
+        },
+        descriptionChildSubject: {
+            lettersonly: true
+        }
+    }, messages: {
+        subjectChildName: {
+            required: "Por favor, ingresa un nombre",
+            specialChars: "Por favor, ingresa solo letras y números"
+        },
+        descriptionChildSubject: {
+            lettersonly: "Por favor, ingresa solo letras"
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
 $("#addGradeStudent").validate({
     rules: {
         subject: {
@@ -674,7 +751,7 @@ $.validator.addMethod("lettersonly", function(value) {
 }, "Por favor, ingresa solo letras");
 
 $.validator.addMethod("specialChars", function(value) {
-    return /^[a-zA-Z0-9\s]*$/.test(value);
+    return /^[a-zA-Z0-9\sáéíóúÁÉÍÓÚüÜñÑ]*$/.test(value);
 }, "Por favor, ingresa solo letras y números");
 
 //metodo para validar un select no tenga un valor vacio
