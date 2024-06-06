@@ -13,5 +13,7 @@ $con = new mysqli($host,$user,$password,$db);
 if ($con->connect_error) {
     die("Connection failed: " . $con->connect_error);
 }
-
+if (!$con->set_charset("utf8")) {
+    die("Error al cargar el conjunto de caracteres utf8: " . $con->error);
+}
 ?>
