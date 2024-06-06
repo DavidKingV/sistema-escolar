@@ -316,7 +316,7 @@ $("#gradeCont, #gradetest").on("input", function(){
 
 $(function () {
     let currentPath = window.location.pathname;
-    let specificPath = "/CONTROL%20ESCOLAR%20NUEVO/alumnos/calificaciones.php";
+    let specificPath = "/alumnos/calificaciones.php";
 
     if (currentPath === specificPath) {
         let urlParams = new URLSearchParams(window.location.search);
