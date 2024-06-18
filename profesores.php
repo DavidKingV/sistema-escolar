@@ -211,7 +211,7 @@ if (!$VerifySession['success']) {
                     </div>
                     <div class="col-md">
                         <div class="form-floating">
-                        <input type="text" class="form-control" id="teacherNameEdit" name="teacherNameEdit" value="" readonly>
+                        <input type="text" class="form-control" id="teacherNameEdit" name="teacherNameEdit" value="">
                         <label for="teacherNameEdit">Nombre del Profesor</label>
                         </div>
                     </div>
