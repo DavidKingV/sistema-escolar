@@ -5,7 +5,7 @@
     "license": "free",
     "autoload": {
         "psr-4": {
-            "Vendor\\Scholarsystem\\": "src/"
+            "Vendor\\Schoolarsystem\\": "src/"
         }
     },
     "authors": [
