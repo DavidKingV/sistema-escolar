@@ -2,8 +2,9 @@
 require_once(__DIR__.'/../vendor/autoload.php');
 include __DIR__.'/index.php';
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+use Vendor\Schoolarsystem\DBConnection;
+
+$connection = new DBConnection();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
@@ -13,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         
         case 'getTeachers':
 
-            $getTeachers = new TeachersControl($con, $sesion);
+            $getTeachers = new TeachersControl($connection);
             $teachers = $getTeachers->GetTeachers();
 
             header('Content-Type: application/json');
@@ -26,7 +27,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $teacherData = $_POST['teacherData'];
             parse_str($teacherData, $teacher);
 
-            $addTeacher = new TeachersControl($con, $sesion);
+            $addTeacher = new TeachersControl($connection);
             $add = $addTeacher->AddTeacher($teacher);
 
             header('Content-Type: application/json');
@@ -39,7 +40,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $teacherEditData = $_POST['teacherEditData'];
             parse_str($teacherEditData, $teacherData);
 
-            $updateTeacherData = new TeachersControl($con, $sesion);
+            $updateTeacherData = new TeachersControl($connection);
             $update = $updateTeacherData->UpdateTeacherData($teacherData);
 
             header('Content-Type: application/json');
@@ -51,7 +52,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 
             $teacherId = $_POST['teacherId'];
     
-            $deleteTeacher = new TeachersControl($con, $sesion);
+            $deleteTeacher = new TeachersControl($connection);
             $delete = $deleteTeacher->DeleteTeacher($teacherId);
     
             header('Content-Type: application/json');
@@ -61,7 +62,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
         case 'getTeachersUsers':
 
-            $getTeachersUsers = new TeachersControl($con, $sesion);
+            $getTeachersUsers = new TeachersControl($connection);
             $teachers = $getTeachersUsers->GetTeachersUsers();
 
             header('Content-Type: application/json');
@@ -73,7 +74,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             $teacherUserAdd = $_POST['teacherUserAdd'];
 
-            $verifyTeacherUser = new TeachersControl($con, $sesion);
+            $verifyTeacherUser = new TeachersControl($connection);
             $verify = $verifyTeacherUser->VerifyTeacherUser($teacherUserAdd);
 
             header('Content-Type: application/json');
@@ -86,7 +87,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $teacherUserAdd = $_POST['teacherUserData'];
             parse_str($teacherUserAdd, $teacherUserAddArray);
 
-            $addTeacherUser = new TeachersControl($con, $sesion);
+            $addTeacherUser = new TeachersControl($connection);
             $add = $addTeacherUser->AddTeacherUser($teacherUserAddArray);
     
             header('Content-Type: application/json');
@@ -98,7 +99,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 
             $teacherUserId = $_POST['teacherUserId'];
 
-            $desactivateTeacherUser = new TeachersControl($con, $sesion);
+            $desactivateTeacherUser = new TeachersControl($connection);
             $desactivate = $desactivateTeacherUser->DesactivateTeacherUser($teacherUserId);
 
             header('Content-Type: application/json');
@@ -110,7 +111,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 
             $teacherUserId = $_POST['teacherUserId'];
 
-            $reactivateTeacherUser = new TeachersControl($con, $sesion);
+            $reactivateTeacherUser = new TeachersControl($connection);
             $reactivate = $reactivateTeacherUser->ReactivateTeacherUser($teacherUserId);
 
             header('Content-Type: application/json');
@@ -123,7 +124,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $teacherUserEditData = $_POST['teacherUserEditData'];
             parse_str($teacherUserEditData, $teacherUserDataArray);
 
-            $updateTeacherUserData = new TeachersControl($con, $sesion);
+            $updateTeacherUserData = new TeachersControl($connection);
             $update = $updateTeacherUserData->UpdateTeacherUserData($teacherUserDataArray);
 
             header('Content-Type: application/json');
@@ -146,7 +147,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
 
             $idTeacher = $_GET['teacherId'];
 
-            $getTeacher = new TeachersControl($con, $sesion);
+            $getTeacher = new TeachersControl($connection);
             $teacher = $getTeacher->GetTeacher($idTeacher);
 
             header('Content-Type: application/json');
