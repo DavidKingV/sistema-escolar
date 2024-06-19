@@ -3,8 +3,9 @@ require_once(__DIR__.'/../vendor/autoload.php');
 include __DIR__.'/index.php';
 include __DIR__.'/verify.php';
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+use Vendor\Schoolarsystem\DBConnection;
+
+$connection = new DBConnection();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
@@ -13,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
     switch ($action){
        case 'getStudents':
 
-            $getStudents = new StudentsControl($con, $sesion);
+            $getStudents = new StudentsControl($connection);
             $students = $getStudents->GetStudents();
 
             header('Content-Type: application/json');
@@ -26,7 +27,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             
             parse_str($studentData, $studentDataArray);
 
-            $addStudent = new StudentsControl($con, $sesion);
+            $addStudent = new StudentsControl($connection);
             $add = $addStudent->addStudent($studentDataArray);
 
             header('Content-Type: application/json');
@@ -38,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             $studentId = $_POST['studentId'];
 
-            $deleteStudent = new StudentsControl($con, $sesion);
+            $deleteStudent = new StudentsControl($connection);
             $delete = $deleteStudent->DeleteStudent($studentId);
 
             header('Content-Type: application/json');
@@ -51,7 +52,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 
                 parse_str($studentData, $studentDataArray);
     
-                $updateStudent = new StudentsControl($con, $sesion);
+                $updateStudent = new StudentsControl($connection);
                 $update = $updateStudent->UpdateStudent($studentDataArray);
     
                 header('Content-Type: application/json');
@@ -61,7 +62,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
         case 'getStudentsUsers':
 
-            $getStudentsUsers = new StudentsControl($con, $sesion);
+            $getStudentsUsers = new StudentsControl($connection);
             $students = $getStudentsUsers->GetStudentsUsers();
 
             header('Content-Type: application/json');
@@ -73,7 +74,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             $studentUser = $_POST['studentUserAdd'];
 
-            $verifyStudent = new StudentsControl($con, $sesion);
+            $verifyStudent = new StudentsControl($connection);
             $verify = $verifyStudent->VerifyStudentUser($studentUser);
 
             header('Content-Type: application/json');
@@ -86,7 +87,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                     $studentUserData = $_POST['studentUserData'];
                     parse_str($studentUserData, $studentDataArray);
         
-                    $addStudentUser = new StudentsControl($con, $sesion);
+                    $addStudentUser = new StudentsControl($connection);
                     $add = $addStudentUser->AddStudentUser($studentDataArray);
         
                     header('Content-Type: application/json');
@@ -98,7 +99,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 $studentEditUserData = $_POST['studentUserData'];
                 parse_str($studentEditUserData, $studentEditDataArray);
 
-                $updateStudentUser = new StudentsControl($con, $sesion);
+                $updateStudentUser = new StudentsControl($connection);
                 $update = $updateStudentUser->UpdateStudentUser($studentEditDataArray);
 
                 header('Content-Type: application/json');
@@ -109,7 +110,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             case 'desactivateStudentUser':
                 $studentId = $_POST['studentId'];
 
-                $desactivateStudent = new StudentsControl($con, $sesion);
+                $desactivateStudent = new StudentsControl($connection);
                 $desactivate = $desactivateStudent->DesactivateStudentUser($studentId);
 
                 header('Content-Type: application/json');
@@ -120,7 +121,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             case 'reactivateStudentUser':
                 $studentId = $_POST['studentId'];
 
-                $reactivateStudent = new StudentsControl($con, $sesion);
+                $reactivateStudent = new StudentsControl($connection);
                 $reactivate = $reactivateStudent->ReactivateStudentUser($studentId);
 
                 header('Content-Type: application/json');
@@ -132,7 +133,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 $gradeData = $_POST['studentGradeData'];
                 parse_str($gradeData, $gradeDataArray);
 
-                $addGrade = new StudentsControl($con, $sesion);
+                $addGrade = new StudentsControl($connection);
                 $add = $addGrade->AddGradeStudent($gradeDataArray);
 
                 header('Content-Type: application/json');
@@ -156,7 +157,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
                 
             $studentId = $_GET['studentId'];
 
-            $getStudent = new StudentsControl($con, $sesion);
+            $getStudent = new StudentsControl($connection);
             $student = $getStudent->GetStudent($studentId);
 
             header('Content-Type: application/json');
@@ -167,7 +168,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
         case 'getSubjectsNames':
             $careerId = $_GET['careerId'];
 
-            $getSubjects = new StudentsControl($con, $sesion);
+            $getSubjects = new StudentsControl($connection);
             $subjects = $getSubjects->GetSubjectsNames($careerId);
 
             header('Content-Type: application/json');
@@ -190,7 +191,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
         case 'verifyGroupStudent':
             $studentIdGroup = $_GET['studentIdGroup'];
 
-            $verifyGroup = new StudentsControl($con, $sesion);
+            $verifyGroup = new StudentsControl($connection);
             $verify = $verifyGroup->VerifyGroupStudent($studentIdGroup);
 
             header('Content-Type: application/json');
