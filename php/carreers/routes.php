@@ -2,8 +2,9 @@
 require_once(__DIR__.'/../vendor/autoload.php');
 include __DIR__.'/index.php';
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+use Vendor\Schoolarsystem\DBConnection;
+
+$connection = new DBConnection();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
@@ -12,7 +13,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
     switch ($action){
 
         case 'getCareers':
-            $getCareers = new CareersControl($con, $sesion);
+            $getCareers = new CareersControl($connection);
             $careers = $getCareers->getCareers();
 
             header('Content-Type: application/json');
@@ -24,7 +25,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $carreerData = $_POST['carreerData'];
             parse_str($carreerData, $carreerDataArray);
 
-            $addCarreer = new CareersControl($con, $sesion);
+            $addCarreer = new CareersControl($connection);
             $add = $addCarreer->addCarreer($carreerDataArray);
 
             header('Content-Type: application/json');
@@ -36,7 +37,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $carreerDataEdit = $_POST['carreerDataEdit'];
             parse_str($carreerDataEdit, $carreerDataEditArray);
 
-            $updateCarreer = new CareersControl($con, $sesion);
+            $updateCarreer = new CareersControl($connection);
             $update = $updateCarreer->updateCarreer($carreerDataEditArray);
 
             header('Content-Type: application/json');
@@ -47,7 +48,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'deleteCarreer':
             $idCarreer = $_POST['idCarreer'];
 
-            $deleteCarreer = new CareersControl($con, $sesion);
+            $deleteCarreer = new CareersControl($connection);
             $delete = $deleteCarreer->deleteCarreer($idCarreer);
 
             header('Content-Type: application/json');
@@ -69,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
         case 'getCareerData':
             $idCarreer = $_GET['idCarreer'];
 
-            $getCareer = new CareersControl($con, $sesion);
+            $getCareer = new CareersControl($connection);
             $career = $getCareer->getCareer($idCarreer);
 
             header('Content-Type: application/json');

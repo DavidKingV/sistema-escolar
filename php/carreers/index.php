@@ -1,35 +1,25 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-include __DIR__.'/../db.php';
-include __DIR__.'/../login/index.php';
-
 session_start();
 
-use \Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-
-$sesionControl = new LoginControl($con);
-if(isset($_COOKIE['auth'])){
-    $sesion = $sesionControl->VerifySession($_COOKIE['auth']);
-}else{
-    $sesion = array("success" => false);
-}
+use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\loadEnv;
+use Vendor\Schoolarsystem\DBConnection;
 
 class CareersControl{
-    private $con;
-    private $sesion;
+    private $connection;
 
-    public function __construct($con, $sesion){
-        $this->con = $con;
-        $this->sesion = $sesion;
+    public function __construct(DBConnection $dbConnection) {
+        $this->connection = $dbConnection->getConnection();
     }
 
     public function getCareers(){
-       if(!$this->sesion['success']){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+       if(!$VerifySession['success']){
            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-         }else{
+        }else{
             $sql = "SELECT * FROM carreers";
-            $query = $this->con->query($sql);
+            $query = $this->connection->query($sql);
 
             if(!$query){
                 return array("success" => false, "message" => "Error al obtener las carreras");
@@ -49,18 +39,19 @@ class CareersControl{
                 }else{
                     $careers[] = array("success" => false, "message" => "No hay carreras registradas");
                 }
-                $this->con->close();
+                $this->connection->close();
                 return $careers;
             }
         }
     }
 
     public function getCareer($idCarreer){
-        if(!$this->sesion['success']){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+       if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
             $sql = "SELECT * FROM carreers WHERE id = ?";
-            $stmt = $this->con->prepare($sql);
+            $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $idCarreer);
             $stmt->execute();
 
@@ -79,70 +70,73 @@ class CareersControl{
                 "description" => $row['descripcion']
             );
             $stmt->close();
-            $this->con->close();
+            $this->connection->close();
     
             return $carreer;
         }
     }
 
     public function addCarreer($carreerData){
-        if(!$this->sesion['success']){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+       if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
             $sql = "INSERT INTO carreers (nombre, area, subarea, descripcion) VALUES (?, ?, ?, ?)";
-            $stmt = $this->con->prepare($sql);
+            $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('ssss', $carreerData['careerName'], $carreerData['careerArea'], $carreerData['careerSubarea'], $carreerData['careerDes']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
                 $stmt->close();
-                $this->con->close();
+                $this->connection->close();
                 return array("success" => true, "message" => "Carrera agregada correctamente");
             }else{
                 $stmt->close();
-                $this->con->close();
+                $this->connection->close();
                 return array("success" => false, "message" => "Error al agregar la carrera");
             }
         }
     }
 
     public function updateCarreer($carreerDataEditArray){
-        if(!$this->sesion['success']){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+       if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
             $sql = "UPDATE carreers SET nombre = ?, area = ?, subarea = ?, descripcion = ? WHERE id = ?";
-            $stmt = $this->con->prepare($sql);
+            $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('ssssi', $carreerDataEditArray['careerNameEdit'], $carreerDataEditArray['carreerAreaEdit'], $carreerDataEditArray['careerSubareaEdit'], $carreerDataEditArray['careerComentsEdit'], $carreerDataEditArray['idCarreerDB']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
                 $stmt->close();
-                $this->con->close();
+                $this->connection->close();
                 return array("success" => true, "message" => "Carrera actualizada correctamente");
             }else{
                 $stmt->close();
-                $this->con->close();
+                $this->connection->close();
                 return array("success" => false, "message" => "Error al actualizar la carrera");
             }
         }
     }
 
     public function deleteCarreer($idCarreer){
-        if(!$this->sesion['success']){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+       if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
             $sql = "DELETE FROM carreers WHERE id = ?";
-            $stmt = $this->con->prepare($sql);
+            $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $idCarreer);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
                 $stmt->close();
-                $this->con->close();
+                $this->connection->close();
                 return array("success" => true, "message" => "Carrera eliminada correctamente");
             }else{
                 $stmt->close();
-                $this->con->close();
+                $this->connection->close();
                 return array("success" => false, "message" => "Error al eliminar la carrera");
             }
         }
