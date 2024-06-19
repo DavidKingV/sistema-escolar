@@ -1,10 +1,13 @@
 <?php
 require_once __DIR__ . '/php/login/index.php';
 
+use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\userData;
+
 session_start();
 
-$LoginControl = new LoginControl($con);
-$VerifySession = $LoginControl->VerifySession($_COOKIE['auth']);
+$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
 
 if (!$VerifySession['success']) {
     header('Location: index.html?sesion=expired');
@@ -12,8 +15,12 @@ if (!$VerifySession['success']) {
 }else{
     $userId = $VerifySession['userId'];
 
-    $UsersControl = new UsersControl($con);
-    $GetCurrentUserData = $UsersControl->GetCurrentUserData($userId);
+    $dbConnection = new DBConnection();
+    $connection = $dbConnection->getConnection();
+
+    $userDataInstance = new userData($connection);
+    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
 
     if (!$GetCurrentUserData['success']) {
         echo 'Error al obtener los datos del usuario';
