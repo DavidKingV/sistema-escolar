@@ -2,8 +2,9 @@
 require_once(__DIR__.'/../vendor/autoload.php');
 include __DIR__.'/index.php';
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+use Vendor\Schoolarsystem\DBConnection;
+
+$connection = new DBConnection();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
@@ -13,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         
         case 'getGroups':
 
-            $getGroups = new GroupsControl($con, $sesion);
+            $getGroups = new GroupsControl($connection);
             $groups = $getGroups->GetGroups();
 
             header('Content-Type: application/json');
@@ -25,7 +26,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             
             $groupId = $_POST['groupId'];
 
-            $getGroupsStudents = new GroupsControl($con, $sesion);
+            $getGroupsStudents = new GroupsControl($connection);
             $groupsStudents = $getGroupsStudents->GetGroupsStudents($groupId);
 
             header('Content-Type: application/json');
@@ -38,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $groupData = $_POST['groupData'];
             parse_str($groupData, $groupDataArray);
 
-            $addGroup = new GroupsControl($con, $sesion);
+            $addGroup = new GroupsControl($connection);
             $add = $addGroup->AddGroup($groupDataArray);
 
             header('Content-Type: application/json');
@@ -51,7 +52,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $groupDataEdit = $_POST['groupDataEdit'];
             parse_str($groupDataEdit, $groupDataEditArray);
 
-            $updateGroupData = new GroupsControl($con, $sesion);
+            $updateGroupData = new GroupsControl($connection);
             $update = $updateGroupData->UpdateGroup($groupDataEditArray);
 
             header('Content-Type: application/json');
@@ -63,7 +64,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 
             $groupId = $_POST['groupId'];
     
-            $deleteGroup = new GroupsControl($con, $sesion);
+            $deleteGroup = new GroupsControl($connection);
             $delete = $deleteGroup->DeleteGroup($groupId);
     
             header('Content-Type: application/json');
@@ -76,7 +77,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $groupId = $_POST['groupId'];
             $studentId = $_POST['studentId'];
 
-            $addStudentGroup = new GroupsControl($con, $sesion);
+            $addStudentGroup = new GroupsControl($connection);
             $add = $addStudentGroup->AddStudentGroup($groupId, $studentId);
 
             header('Content-Type: application/json');
@@ -88,7 +89,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             $studentId = $_POST['studentId'];
 
-            $deleteStudentGroup = new GroupsControl($con, $sesion);
+            $deleteStudentGroup = new GroupsControl($connection);
             $delete = $deleteStudentGroup->DeleteStudentGroup($studentId);
 
             header('Content-Type: application/json');
@@ -105,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
         case 'getGroupData':
             $groupId = $_GET['groupId'];
 
-            $getGroupData = new GroupsControl($con, $sesion);
+            $getGroupData = new GroupsControl($connection);
             $groupData = $getGroupData->GetGroupData($groupId);
 
             header('Content-Type: application/json');
@@ -115,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
 
         case 'getGroupsJson':
 
-            $getGroups = new GroupsControl($con, $sesion);
+            $getGroups = new GroupsControl($connection);
             $groups = $getGroups->GetGroupsJson();
 
             header('Content-Type: application/json');
@@ -125,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
 
         case 'getStudentsNames':
 
-            $getStudentsNames = new GroupsControl($con, $sesion);
+            $getStudentsNames = new GroupsControl($connection);
             $studentsNames = $getStudentsNames->GetStudentsNames();
     
             header('Content-Type: application/json');
