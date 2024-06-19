@@ -2,12 +2,16 @@
 require_once(__DIR__.'/../vendor/autoload.php');
 include __DIR__.'/index.php';
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Vendor\Schoolarsystem\loadEnv;
+use Vendor\Schoolarsystem\DBConnection;
 
-cargarVariablesEnv();
-$secret_key = $_ENV['KEY'];
-$tiempo_vida = $_ENV['LIFE_TIME'];
+loadEnv::cargar();
+
+$connection = new DBConnection();
+$secreyKey = $_ENV['KEY'] ?? NULL;
+$lifeTime = $_ENV['LIFE_TIME'] ?? NULL;
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
@@ -20,12 +24,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $user = $data['user'] ?? '';
             $pass = $data['password'] ?? '';
 
-            $control = new LoginControl($con);
+            $control = new LoginControl($connection);
             $login = $control -> indexLogin($user, $pass);
 
             if($login['success']){
                 //se crea una sesion
-                session_set_cookie_params($tiempo_vida);
+                session_set_cookie_params($lifeTime);
                 session_start();
                 
                 $_SESSION['userId'] = $login['userId'];
@@ -36,10 +40,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                     "userName" => $user
                 ];
 
-                $jwt = JWT::encode($payload, $secret_key, 'HS256');
+                $jwt = JWT::encode($payload, $secreyKey, 'HS256');
 
                 //se genera un cookie con el token
-                setcookie("auth", $jwt, time() + ($tiempo_vida), "/", "", 1, 1);
+                setcookie("auth", $jwt, time() + ($lifeTime), "/", "", 1, 1);
 
                 header('Content-Type: application/json');
                 echo json_encode($login);

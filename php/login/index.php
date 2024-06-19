@@ -1,26 +1,20 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-include __DIR__.'/../db.php';
 
-use \Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-
-function cargarVariablesEnv() {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-    $dotenv->load();
-}
+use Vendor\Schoolarsystem\loadEnv;
+use Vendor\Schoolarsystem\DBConnection;
 
 class LoginControl{
-    private $con;
+    private $connection;
 
-    public function __construct($con){
-        $this->con = $con;
+    public function __construct(DBConnection $dbConnection) {
+        $this->connection = $dbConnection->getConnection();
     }
 
     public function indexLogin($user, $pass) {
         // Verificar si el usuario existe en la base de datos
         $sql = "SELECT id, password, hashed_password FROM login_users WHERE user = ?";
-        $stmt = $this->con->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $stmt->bind_param("s", $user);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -36,7 +30,7 @@ class LoginControl{
                 // Actualizar la contraseña con su versión hashada
                 $new_hashed_password = password_hash($pass, PASSWORD_DEFAULT);
                 $sql_update = "UPDATE login_users SET hashed_password = ? WHERE id = ?";
-                $stmt_update = $this->con->prepare($sql_update);
+                $stmt_update = $this->connection->prepare($sql_update);
                 $stmt_update->bind_param("si", $new_hashed_password, $row['id']);
                 $stmt_update->execute();
                 $stmt_update->close();
