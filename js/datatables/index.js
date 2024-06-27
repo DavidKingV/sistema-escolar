@@ -355,13 +355,19 @@ function initializeSubjectsDataTable(){
         "columns": [
             // Define las columnas
             { "data": "id", "className": "text-center" },
-            { "data": "name", "className": "text-center" },
+            { "data": null, "className": "text-center",
+                "render": function(data, type, row) {
+                    if (row.child == "No asignado") return `<h6>${row.name}</h6>`;
+                    else return `<h6>${row.name}</h6>
+                            <p><a data-idFather="${row.id}" data-idChild="${row.id_child}" class="link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover subjectChildInfo" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#childSubjectsModal">${row.child}</a></p>`
+                }
+            },
             { "data": "career", "className": "text-center" },
             { "data": "description", "className": "text-center" },
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editSubject" data-bs-toggle="modal" data-bs-target="#SubjectsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteSubject"><i class="bi bi-trash-fill"></i></button>';
+                    return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle addChildSubject" data-bs-toggle="modal" data-bs-target="#SubjectsChildAddModal"><i class="bi bi-capslock-fill"></i></button><button data-id="'+row.id+'" class="btn btn-warning btn-circle editChildSubject"><i class="bi bi-pencil-fill"></i></button>';
                     
                 },
                 "className": "text-center"

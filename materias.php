@@ -1,10 +1,13 @@
 <?php
-require_once __DIR__ . '/php/login/index.php';
+require_once(__DIR__.'/php/vendor/autoload.php');
+
+use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\userData;
 
 session_start();
 
-$LoginControl = new LoginControl($con);
-$VerifySession = $LoginControl->VerifySession($_COOKIE['auth']);
+$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
 
 if (!$VerifySession['success']) {
     header('Location: index.html?sesion=expired');
@@ -12,8 +15,12 @@ if (!$VerifySession['success']) {
 }else{
     $userId = $VerifySession['userId'];
 
-    $UsersControl = new UsersControl($con);
-    $GetCurrentUserData = $UsersControl->GetCurrentUserData($userId);
+    $dbConnection = new DBConnection();
+    $connection = $dbConnection->getConnection();
+
+    $userDataInstance = new userData($connection);
+    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
 
     if (!$GetCurrentUserData['success']) {
         echo 'Error al obtener los datos del usuario';
@@ -232,6 +239,123 @@ if (!$VerifySession['success']) {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+            </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ADD CHILD -->
+<div class="modal fade modal-lg" id="SubjectsChildAddModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="SubjectsChildAddModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="SubjectsChildAddModalLabel">Agregar Submateria</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addSubjectChild">
+            <div class="row g-2">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="idMainSubject" name="idMainSubject" readonly>
+                    <label for="idMainSubject">ID</label>
+                    </div>                    
+                </div>                
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="subjectManinName" name="subjectManinName" value="" readonly>
+                    <label for="subjectManinName">Nombre de la Materia Padre</label>
+                    </div>                    
+                </div>                
+            </div>            
+            <div class="row g-2 py-4">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="subjectChildName" name="subjectChildName" value="">
+                    <label for="subjectChildName">Nombre de la Submateria</label>
+                    </div>
+                    <div>
+                        <p class="py-1">                        
+                        <label id="subjectChildName-error" class="error text-bg-danger" for="subjectChildName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                        </p>
+                    </div>    
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="descriptionChildSubject" name="descriptionChildSubject" value="">
+                    <label for="descriptionChildSubject">Descripción</label>
+                    </div>
+                    <div>
+                        <p class="py-1">                            
+                            <label id="descriptionChildSubject-error" class="error text-bg-danger" for="descriptionChildSubject" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                        </p>
+                    </div>    
+                </div>                
+            </div>
+            </div>        
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+            </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal CHILD INFO-->
+<div class="modal fade modal-lg" id="childSubjectsModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="childSubjectsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="childSubjectsModalLabel">Materia Hija</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="subjectChildInfo">
+            <div class="row g-2">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="idMainSubjectInfo" name="idMainSubjectInfo" readonly>
+                    <label for="idMainSubjectInfo">ID</label>
+                    </div>                    
+                </div>     
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="idChildSubjectInfo" name="idChildSubjectInfo" readonly>
+                    <label for="idChildSubjectInfo">ID Submateria</label>
+                    </div>                    
+                </div>                                    
+            </div>            
+            <div class="row g-2 py-4">
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="subjectChildNameInfo" name="subjectChildNameInfo" value="">
+                    <label for="subjectChildNameInfo">Nombre de la Submateria</label>
+                    </div>
+                    <div>
+                        <p class="py-1">                        
+                        <label id="subjectChildNameInfo-error" class="error text-bg-danger" for="subjectChildNameInfo" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                        </p>
+                    </div>    
+                </div>
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="descriptionChildSubjectInfo" name="descriptionChildSubjectInfo" value="">
+                    <label for="descriptionChildSubjectInfo">Descripción</label>
+                    </div>
+                    <div>
+                        <p class="py-1">                            
+                            <label id="descriptionChildSubjectInfo-error" class="error text-bg-danger" for="descriptionChildSubjectInfo" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                        </p>
+                    </div>    
+                </div>                
+            </div>
+            </div>        
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="updateSubjectChild" class="btn btn-primary">Actualizar</button>
+                <button type="button" id="deleteSubjectChild" class="btn btn-danger">Eliminar</button>
         </form>
             </div>
     </div>
