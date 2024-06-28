@@ -367,7 +367,7 @@ function initializeSubjectsDataTable(){
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle addChildSubject" data-bs-toggle="modal" data-bs-target="#SubjectsChildAddModal"><i class="bi bi-capslock-fill"></i></button><button data-id="'+row.id+'" class="btn btn-warning btn-circle editChildSubject"><i class="bi bi-pencil-fill"></i></button>';
+                    return '<button data-id="'+row.id+'" data-name="'+row.name+'" data-carrerid="'+row.id_carrer+'" class="btn btn-primary btn-circle addChildSubject" data-bs-toggle="modal" data-bs-target="#SubjectsChildAddModal"><i class="bi bi-capslock-fill"></i></button><button data-id="'+row.id+'" class="btn btn-warning btn-circle editChildSubject"><i class="bi bi-pencil-fill"></i></button>';
                     
                 },
                 "className": "text-center"
