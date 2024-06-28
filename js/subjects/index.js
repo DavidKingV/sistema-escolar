@@ -88,12 +88,19 @@ $("#subjectsTable").on('click', '.subjectChildInfo', async function() {
 
 
 $("#subjectsTable").on('click', '.addChildSubject', function() {
+
+    observeDOMChanges('idMainSubject', 'readonly');
+    observeDOMChanges('subjectManinName', 'readonly');
+    observeDOMChanges('carrerId', 'readonly');
+
     let subjectId = $(this).data('id');
     let subjectName = $(this).data('name');
+    let carrerId = $(this).data('carrerid');
 
     if (subjectId) {
         $("#idMainSubject").val(subjectId); 
-        $("#subjectManinName").val(subjectName);    
+        $("#subjectManinName").val(subjectName);  
+        $("#carrerId").val(carrerId); 
     }else{
         Swal.fire({
             icon: 'error',

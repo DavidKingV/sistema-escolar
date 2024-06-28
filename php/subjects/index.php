@@ -34,6 +34,7 @@ class SubjectsControl{
                             'success' => true, 
                             'id' => $row['id_subject'],
                             'name' => $row['nombre'],
+                            'id_carrer' => $row['id_carrera'], //Se mostrará el id de la carrera en la tabla de materias, para que el usuario pueda identificar a qué carrera pertenece la materia
                             'id_child' => $row['id_subjet_child'] ?? 'No asignado', //Si no hay un child asignado, se mostrará 'No asignado
                             'child' => $row['nombre_subject_child'] ?? 'No asignado',
                             'career' => $row['nombre_carrera'], 
@@ -155,9 +156,21 @@ class SubjectsControlChild extends SubjectsControl{
             $stmt->bind_param("iss", $subjectChildDataArray['idMainSubject'], $subjectChildDataArray['subjectChildName'], $subjectChildDataArray['descriptionChildSubject']);
             $stmt->execute();
 
+            $newlyCreatedId = $this->connection->insert_id;
+
             if($stmt->affected_rows > 0){
-                $this->connection->close();
-                return array("success" => true, "message" => "Materia agregada a la carrera correctamente");
+                $secondQuery = "INSERT INTO carreers_subjects (id_subject, id_child_subject, id_carreer) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE id_child_subject = VALUES (id_child_subject)";
+                $secondStmt = $this->connection->prepare($secondQuery);
+                $secondStmt->bind_param("iii", $subjectChildDataArray['idMainSubject'], $newlyCreatedId, $subjectChildDataArray['carrerId']);
+
+                $secondStmt->execute();
+
+                if($secondStmt->affected_rows > 0){
+                    $this->connection->close();
+                    return array("success" => true, "message" => "Materia y submateria agregadas correctamente");
+                }else{
+                    return array("success" => false, "message" => "Error al agregar la submateria a la carrera");
+                }
             }else{
                 return array("success" => false, "message" => "Error al agregar la materia a la carrera");
             }
