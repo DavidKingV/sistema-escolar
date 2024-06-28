@@ -261,7 +261,13 @@ if (!$VerifySession['success']) {
                     <input type="text" class="form-control" id="idMainSubject" name="idMainSubject" readonly>
                     <label for="idMainSubject">ID</label>
                     </div>                    
-                </div>                
+                </div>  
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="carrerId" name="carrerId" value="" readonly>
+                    <label for="carrerId">ID Carrera</label>
+                    </div>
+                </div>              
                 <div class="col-md">
                     <div class="form-floating">
                     <input type="text" class="form-control" id="subjectManinName" name="subjectManinName" value="" readonly>
@@ -319,7 +325,8 @@ if (!$VerifySession['success']) {
                     <input type="text" class="form-control" id="idMainSubjectInfo" name="idMainSubjectInfo" readonly>
                     <label for="idMainSubjectInfo">ID</label>
                     </div>                    
-                </div>     
+                </div>  
+                </div>   
                 <div class="col-md">
                     <div class="form-floating">
                     <input type="text" class="form-control" id="idChildSubjectInfo" name="idChildSubjectInfo" readonly>
