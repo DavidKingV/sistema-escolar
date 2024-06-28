@@ -327,10 +327,7 @@ class StudentsControl {
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
-                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, subjects.nombre 
-                FROM carreers_subjects 
-                INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id 
-                WHERE carreers_subjects.id_carreer = ?";
+                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre, subjects_child.nombre AS nombre_hijo FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id LEFT JOIN subjects_child ON carreers_subjects.id_child_subject = subjects_child.id WHERE carreers_subjects.id_carreer = ?";
                 $stmt = $this->connection->prepare($sql);
                 $stmt->bind_param('i', $careerId);
                 $stmt->execute();
