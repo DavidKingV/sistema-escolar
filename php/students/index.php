@@ -327,7 +327,7 @@ class StudentsControl {
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
-                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre, subjects_child.nombre AS nombre_hijo FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id LEFT JOIN subjects_child ON carreers_subjects.id_child_subject = subjects_child.id WHERE carreers_subjects.id_carreer = ?";
+                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre, subject_child.nombre AS nombre_hijo FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id LEFT JOIN subject_child ON carreers_subjects.id_child_subject = subject_child.id WHERE carreers_subjects.id_carreer = ?";
                 $stmt = $this->connection->prepare($sql);
                 $stmt->bind_param('i', $careerId);
                 $stmt->execute();
@@ -343,7 +343,9 @@ class StudentsControl {
                                 'success' => true,
                                 'id_career' => $row['id_carreer'],
                                 'id_subject' => $row['id_subject'],
-                                'name_subject' => $row['nombre']
+                                'name_subject' => $row['nombre'],
+                                'id_child_subject' => $row['id_child_subject'],
+                                'name_child_subject' => $row['nombre_hijo']
                             );
                         }
                     }else{
