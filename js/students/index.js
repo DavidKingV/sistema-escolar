@@ -515,6 +515,14 @@ const GetSubjectsNames = async (careerId) => {
                 });
 
                 $select.append($option);
+                
+                if(subject.id_child_subject && subject.name_child_subject){
+                    let $optionChild = $('<option>', {
+                        value: subject.id_child_subject,
+                        text: subject.name_child_subject
+                    });
+                    $select.append($optionChild);
+                }
             }
         });
 
