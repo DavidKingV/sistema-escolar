@@ -319,55 +319,55 @@ if (!$VerifySession['success']) {
       </div>
       <div class="modal-body">
         <form id="subjectChildInfo">
-            <div class="row g-2">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="idMainSubjectInfo" name="idMainSubjectInfo" readonly>
-                    <label for="idMainSubjectInfo">ID</label>
-                    </div>                    
-                </div>  
-                </div>   
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="idChildSubjectInfo" name="idChildSubjectInfo" readonly>
-                    <label for="idChildSubjectInfo">ID Submateria</label>
-                    </div>                    
-                </div>                                    
-            </div>            
-            <div class="row g-2 py-4">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="subjectChildNameInfo" name="subjectChildNameInfo" value="">
-                    <label for="subjectChildNameInfo">Nombre de la Submateria</label>
-                    </div>
-                    <div>
-                        <p class="py-1">                        
-                        <label id="subjectChildNameInfo-error" class="error text-bg-danger" for="subjectChildNameInfo" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
-                        </p>
-                    </div>    
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="descriptionChildSubjectInfo" name="descriptionChildSubjectInfo" value="">
-                    <label for="descriptionChildSubjectInfo">Descripción</label>
-                    </div>
-                    <div>
-                        <p class="py-1">                            
-                            <label id="descriptionChildSubjectInfo-error" class="error text-bg-danger" for="descriptionChildSubjectInfo" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
-                        </p>
-                    </div>    
-                </div>                
+          <div class="row g-2">
+            <div class="col-md">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="idMainSubjectInfo" name="idMainSubjectInfo" readonly>
+                <label for="idMainSubjectInfo">ID</label>
+              </div>                    
             </div>
-            </div>        
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" id="updateSubjectChild" class="btn btn-primary">Actualizar</button>
-                <button type="button" id="deleteSubjectChild" class="btn btn-danger">Eliminar</button>
+            <div class="col-md">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="idChildSubjectInfo" name="idChildSubjectInfo" readonly>
+                <label for="idChildSubjectInfo">ID Submateria</label>
+              </div>                    
+            </div>                                    
+          </div>            
+          <div class="row g-2 py-4">
+            <div class="col-md">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="subjectChildNameInfo" name="subjectChildNameInfo" value="">
+                <label for="subjectChildNameInfo">Nombre de la Submateria</label>
+              </div>
+              <div>
+                <p class="py-1">                        
+                  <label id="subjectChildNameInfo-error" class="error text-bg-danger" for="subjectChildNameInfo" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                </p>
+              </div>    
+            </div>
+            <div class="col-md">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="descriptionChildSubjectInfo" name="descriptionChildSubjectInfo" value="">
+                <label for="descriptionChildSubjectInfo">Descripción</label>
+              </div>
+              <div>
+                <p class="py-1">                            
+                  <label id="descriptionChildSubjectInfo-error" class="error text-bg-danger" for="descriptionChildSubjectInfo" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                </p>
+              </div>    
+            </div>                
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" id="updateSubjectChild" class="btn btn-primary">Actualizar</button>
+            <button type="button" id="deleteSubjectChild" class="btn btn-danger">Eliminar</button>
+          </div>
         </form>
-            </div>
+      </div>
     </div>
   </div>
 </div>
+
 
 <!-- Boostrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
