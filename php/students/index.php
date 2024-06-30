@@ -385,9 +385,17 @@ class StudentsControl {
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
-                $sql = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?)";
+                if($gradeDataArray['subjectChild'] != ""){
+                    $id_subject_child= $gradeDataArray['subjectChild'];
+                    $id_subject = NULL;
+                }else{
+                    $id_subject= $gradeDataArray['subject'];
+                    $id_subject_child= NULL;
+                }
+
+                $sql = "INSERT INTO student_grades (id_student, id_subject, id_subject_child, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?, ?)";
                 $stmt = $this->connection->prepare($sql);
-                $stmt->bind_param('iiiii', $gradeDataArray['studentIdDB'], $gradeDataArray['subject'], $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
+                $stmt->bind_param('iiiiii', $gradeDataArray['studentIdDB'], $id_subject, $id_subject_child, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
                 $stmt->execute();
         
                 if($stmt->affected_rows > 0){

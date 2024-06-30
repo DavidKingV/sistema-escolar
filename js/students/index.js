@@ -518,7 +518,7 @@ const GetSubjectsNames = async (careerId) => {
                 
                 if(subject.id_child_subject && subject.name_child_subject){
                     let $optionChild = $('<option>', {
-                        value: subject.id_child_subject,
+                        value: 'sub'+subject.id_child_subject,
                         text: subject.name_child_subject
                     });
                     $select.append($optionChild);
@@ -530,6 +530,19 @@ const GetSubjectsNames = async (careerId) => {
             theme: "bootstrap-5",
             placeholder: 'Selecciona la materia',
         });
+
+        $select.on('change', function () {
+            let selectedValue = $(this).val(); // Obtener el valor seleccionado
+            //si selectedValue empieza con sub 
+            if(selectedValue.startsWith('sub')){
+                selectedValue = selectedValue.substring(3);
+                $("#subjectChild").val(selectedValue);
+            }else{
+                $("#subjectChild").val('');
+            }
+
+        });
+
     } catch (error) {
         console.error('Error al procesar los datos:', error.message);
     } 

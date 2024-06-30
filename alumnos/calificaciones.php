@@ -213,6 +213,7 @@ if (!$VerifySession['success']) {
                                             <select class="form-select subjectName" name="subject" id="subject" style="">
                                                 <option value="0">Selecciona una materia</option>
                                             </select>
+                                            <input name="subjectChild" id="subjectChild" class="" hidden>
                                         </th>
                                         <td><input type="text" name="gradeCont" id="gradeCont" class="form-control"></td>
                                         <td><input type="text" name="gradetest" id="gradetest" class="form-control"></td>
