@@ -138,7 +138,7 @@ $("#addGroups").on("submit", function(e){
     });
 });
 
-$("#addStudentGroup").on("submit", function(e){
+$("#addStudentGroupForm").on("submit", function(e){
     e.preventDefault();
     let groupIdUrl = new URLSearchParams(window.location.search);
     let groupId = groupIdUrl.get('id');

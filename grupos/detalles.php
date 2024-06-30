@@ -238,7 +238,7 @@ if (!$VerifySession['success']) {
 
                             <div class="tab-pane fade show" id="addStudentGroup" role="tabpanel" aria-labelledby="addStudentGroup" tabindex="0">
                                 <h4 class="card-title py-3">Agregar alumno al grupo</h4>
-                                <form id="addStudentGroup">
+                                <form id="addStudentGroupForm">
                                     <div class="row g-2">                                
                                         <div class="col-md">                                            
                                             <select class="form-select" id="studentIdGroup" name="studentIdGroup[]" multiple="multiple">                                                 
