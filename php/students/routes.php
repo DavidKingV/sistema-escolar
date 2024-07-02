@@ -176,6 +176,17 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
 
             break;
 
+        case 'getChildSubjectsNames':
+            $idSubject = $_GET['idSubject'];
+
+            $getChildSubjects = new StudentsControl($connection);
+            $childSubjects = $getChildSubjects->GetChildSubjectsNames($idSubject);
+
+            header('Content-Type: application/json');
+            echo json_encode($childSubjects);
+
+            break;
+
         case 'verifyToken':
             $studentId = $_GET['studentId'];
             $studentSecretKey = $_GET['token'];

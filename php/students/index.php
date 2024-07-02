@@ -327,7 +327,7 @@ class StudentsControl {
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
-                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre, subject_child.nombre AS nombre_hijo FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id LEFT JOIN subject_child ON carreers_subjects.id_child_subject = subject_child.id WHERE carreers_subjects.id_carreer = ?";
+                $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id WHERE carreers_subjects.id_carreer = ?";
                 $stmt = $this->connection->prepare($sql);
                 $stmt->bind_param('i', $careerId);
                 $stmt->execute();
@@ -344,8 +344,43 @@ class StudentsControl {
                                 'id_career' => $row['id_carreer'],
                                 'id_subject' => $row['id_subject'],
                                 'name_subject' => $row['nombre'],
-                                'id_child_subject' => $row['id_child_subject'],
-                                'name_child_subject' => $row['nombre_hijo']
+                                'id_child_subject' => $row['id_child_subject']
+                            );
+                        }
+                    }else{
+                        $subjects[] = array("success" => false, "message" => "No se encontraron materias registradas");
+                    }
+                    $stmt->close();
+                    $this->connection->close();
+    
+                    return $subjects;
+                }
+            }
+    }
+
+    public function GetChildSubjectsNames($idSubject){
+            
+            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            if(!$VerifySession['success']){
+                return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+            }else{
+                $sql = "SELECT * FROM subject_child WHERE id_subject = ? ";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->bind_param('i', $idSubject);
+                $stmt->execute();
+                $query = $stmt->get_result();
+    
+                if(!$query){
+                    return array("success" => false, "message" => "Error al obtener las materias, por favor intente de nuevo más tarde");
+                }else{
+                    $subjects = array();
+                    if($query->num_rows > 0){
+                        while($row = $query->fetch_assoc()){
+                            $subjects[] = array(
+                                'success' => true,
+                                'id_child_subject' => $row['id'],
+                                'id_subject' => $row['id_subject'],
+                                'name_child_subject' => $row['nombre']
                             );
                         }
                     }else{
@@ -379,36 +414,101 @@ class StudentsControl {
             }
     }
 
-    public function AddGradeStudent($gradeDataArray){
-            
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
-            if(!$VerifySession['success']){
-                return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-            }else{
-                if($gradeDataArray['subjectChild'] != ""){
-                    $id_subject_child= $gradeDataArray['subjectChild'];
-                    $id_subject = NULL;
-                }else{
-                    $id_subject= $gradeDataArray['subject'];
-                    $id_subject_child= NULL;
-                }
+    public function AddGradeStudent($gradeDataArray) {
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if (!$VerifySession['success']) :
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        endif;
+            try {
+                $this->connection->begin_transaction();
 
-                $sql = "INSERT INTO student_grades (id_student, id_subject, id_subject_child, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?, ?)";
-                $stmt = $this->connection->prepare($sql);
-                $stmt->bind_param('iiiiii', $gradeDataArray['studentIdDB'], $id_subject, $id_subject_child, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
-                $stmt->execute();
-        
-                if($stmt->affected_rows > 0){
-                    $stmt->close();
-                    $this->connection->close();
-                    return array("success" => true, "message" => "Calificación registrada correctamente");
-                }else{
-                    $stmt->close();
-                    $this->connection->close();
-                    return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
+                $idStudent = $gradeDataArray['studentId'];
+                $idSubject = $gradeDataArray['subject'];
+
+                if (isset($gradeDataArray['subjectChild'])) {
+                    $sqlChild  = "INSERT INTO student_grades_child (id_student, id_subject, id_subject_child, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmtChild  = $this->connection->prepare($sqlChild);
+                    if ($stmtChild  === false) {
+                        return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
+                    }
+                    $stmtChild ->bind_param('iiiddd', $idStudent, $idSubject, $gradeDataArray['subjectChild'], $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
+                    $stmtChild ->execute();
+    
+                    if ($stmtChild ->affected_rows > 0) {
+                        $stmtChild ->close();
+    
+                        $count = "SELECT SUM(final_grade) as sum_grades, COUNT(*) as total FROM student_grades_child WHERE id_subject = ?";
+                        $stmtCount  = $this->connection->prepare($count);
+                        $stmtCount ->bind_param('i', $idSubject);
+    
+                        $stmtCount ->execute();
+                        $result = $stmtCount ->get_result();
+    
+                        $row = $result->fetch_assoc();
+                        $sumGrades = $row['sum_grades'];
+                        $total = $row['total'];
+                        $stmtCount ->close();
+    
+                        $average = ($total > 0) ? $sumGrades / $total : 0;
+    
+                        if ($average > 0) {
+                            $sqlMain = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade) 
+                                    VALUES (?, ?, ?, ?, ?) 
+                                    ON DUPLICATE KEY UPDATE 
+                                    continuos_grade = VALUES(continuos_grade), 
+                                    exam_grade = VALUES(exam_grade), 
+                                    final_grade = VALUES(final_grade)";
+                            $stmtMain = $this->connection->prepare($sqlMain);
+                            if ($stmtMain === false) {
+                                return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
+                            }
+                            $stmtMain->bind_param('iiddd', $idStudent, $idSubject, $average, $average, $average);
+                            $stmtMain->execute();
+    
+                            if ($stmtMain->affected_rows > 0) {
+                                $stmtMain->close();
+                                $this->connection->commit();
+                                return array("success" => true, "message" => "Calificación registrada correctamente");
+                            } else {
+                                $stmtMain->close();
+                                return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
+                            }
+                        } else {
+                            $this->connection->commit();
+                            return array("success" => true, "message" => "Se registro la calificación correctamente, pero no se pudo calcular el promedio de la materia principal");
+                        }
+                    } else {
+                        $stmtChild->close();
+                        return array("success" => false, "message" => $stmt->error);
+                    }
+                } else {
+                    $sql = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?)";
+                    $stmt = $this->connection->prepare($sql);
+                    if ($stmt === false) {
+                        return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
+                    }
+                    $stmt->bind_param('iiddd', $idStudent, $idSubject, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
+                    $stmt->execute();
+    
+                    if ($stmt->affected_rows > 0) {
+                        $stmt->close();
+                        $this->connection->commit();
+                        return array("success" => true, "message" => "Calificación registrada correctamente");
+                    } else {
+                        $stmt->close();
+                        return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
+                    }
                 }
+            } catch (mysqli_sql_exception $e) {
+                $this->connection->rollback();
+                return array("success" => false, "message" => "Error de MySQL: " . $e->getMessage());
+            } catch (Exception $e) {
+                $this->connection->rollback();
+                return array("success" => false, "message" => "Error: " . $e->getMessage());
             }
+        
     }
+    
 
 }
 
