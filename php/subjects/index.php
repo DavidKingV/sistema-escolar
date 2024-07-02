@@ -159,9 +159,9 @@ class SubjectsControlChild extends SubjectsControl{
             $newlyCreatedId = $this->connection->insert_id;
 
             if($stmt->affected_rows > 0){
-                $secondQuery = "INSERT INTO carreers_subjects (id_subject, id_child_subject, id_carreer) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE id_child_subject = VALUES (id_child_subject)";
+                $secondQuery = "UPDATE carreers_subjects SET id_child_subject = ? WHERE id_subject = ? AND id_carreer = ?";
                 $secondStmt = $this->connection->prepare($secondQuery);
-                $secondStmt->bind_param("iii", $subjectChildDataArray['idMainSubject'], $newlyCreatedId, $subjectChildDataArray['carrerId']);
+                $secondStmt->bind_param("iii", $newlyCreatedId, $subjectChildDataArray['idMainSubject'], $subjectChildDataArray['carrerId']);
 
                 $secondStmt->execute();
 
