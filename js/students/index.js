@@ -1,8 +1,62 @@
-import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade } from './forms.js';
+import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener } from './forms.js';
 import { initializeStudentDataTable, initializeStudentsUsersTable } from '../datatables/index.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
+
+$(function () {
+    let currentPath = window.location.pathname;
+    let specificPath = "/alumnos/calificaciones.php";
+
+    if (currentPath === specificPath) {
+        let urlParams = new URLSearchParams(window.location.search);
+        let studentIdGroup = urlParams.get('id'); 
+        let token = urlParams.get('jtw');       
+
+        if (studentIdGroup) {
+            VerifyToken(studentIdGroup, token)
+            .then((response) => {
+                if(response){
+                    VerifyGroupStudent(studentIdGroup).then((response) => {
+                        if(response){
+                            
+                            localStorage.setItem('studentIdJTW', studentIdGroup);
+                            var studentIdJTW = localStorage.getItem('studentIdJTW');
+                            
+                            if(!studentIdJTW){
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'ID del estudiante no proporcionado',
+                                    text: 'Por favor proporciona un ID válido para asignar un usuario.'
+                                }).then((result) => {
+                                    if(result.isConfirmed){
+                                        window.location.href = '../alumnos.php';
+                                    }
+                                });
+                            }
+
+                            $(window).on('beforeunload', function() {
+                                console.log("Limpiando el localStorage");
+                                localStorage.removeItem('studentIdJTW');
+                            });
+
+                        }
+                    });
+                }
+            });
+        
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'No se ha podido obtener el ID del alumno, por favor intenta de nuevo.',
+            });
+        }
+
+        initializeSubjectChangeListener(".subjectName");
+
+    }
+});
 
 $('#studentTable').on('click', '.editStudent', function() {
     // Get the student id
@@ -285,7 +339,23 @@ $("#studentTable").on("click", ".GradeStudent", function(){
 
 $("#addGradeStudent").on("submit", function(event){
     event.preventDefault();
-    const studentGradeData = $(this).serialize();
+    let studentGradeData = $(this).serialize();
+    const studentId = localStorage.getItem('studentIdJTW');
+
+    if(studentId){
+        studentGradeData += `&studentId=${encodeURIComponent(studentId)}`;
+    }else{
+        Swal.fire({
+            icon: 'error',
+            title: 'ID del estudiante no proporcionado',
+            text: 'Por favor proporciona un ID válido para asignar un usuario.'
+        }).then((result) => {
+            if(result.isConfirmed){
+                window.location.href = '../alumnos.php';
+            }
+        });
+    }
+
     Swal.fire({
         title: '¿Estás seguro de agregar la calificación al estudiante?',
         text: 'Esta acción no se puede deshacer',
@@ -312,61 +382,6 @@ $("#addGradeStudent").on("submit", function(event){
 
 $("#gradeCont, #gradetest").on("input", function(){
     AverageGrade();
-});
-
-$(function () {
-    let currentPath = window.location.pathname;
-    let specificPath = "/alumnos/calificaciones.php";
-
-    if (currentPath === specificPath) {
-        let urlParams = new URLSearchParams(window.location.search);
-        let studentIdGroup = urlParams.get('id'); 
-        let token = urlParams.get('jtw');       
-
-        if (studentIdGroup) {
-            VerifyToken(studentIdGroup, token)
-            .then((response) => {
-                if(response){
-                    VerifyGroupStudent(studentIdGroup).then((response) => {
-                        if(response){
-                            
-                            localStorage.setItem('studentIdJTW', studentIdGroup);
-                            var studentIdJTW = localStorage.getItem('studentIdJTW');
-                            
-                            if(studentIdJTW){
-                                $("#studentIdDB").val(studentIdJTW);
-                            }else{
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'ID del estudiante no proporcionado',
-                                    text: 'Por favor proporciona un ID válido para asignar un usuario.'
-                                }).then((result) => {
-                                    if(result.isConfirmed){
-                                        window.location.href = '../alumnos.php';
-                                    }
-                                });
-                            }
-
-                            $(window).on('beforeunload', function() {
-                                console.log("Limpiando el localStorage");
-                                localStorage.removeItem('studentIdJTW');
-                            });
-
-                        }
-                    });
-                }
-            });
-        
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'No se ha podido obtener el ID del alumno, por favor intenta de nuevo.',
-            });
-        }
-
-
-    }
 });
 
 const VerifyToken = async (studentId, token) => {
@@ -511,18 +526,12 @@ const GetSubjectsNames = async (careerId) => {
             if (subject.success !== false) {
                 let $option = $('<option>', {
                     value: subject.id_subject,
-                    text: subject.name_subject
+                    text: subject.name_subject,
+                    class: subject.id_child_subject
                 });
 
                 $select.append($option);
                 
-                if(subject.id_child_subject && subject.name_child_subject){
-                    let $optionChild = $('<option>', {
-                        value: 'sub'+subject.id_child_subject,
-                        text: subject.name_child_subject
-                    });
-                    $select.append($optionChild);
-                }
             }
         });
 
@@ -531,22 +540,57 @@ const GetSubjectsNames = async (careerId) => {
             placeholder: 'Selecciona la materia',
         });
 
-        $select.on('change', function () {
-            let selectedValue = $(this).val(); // Obtener el valor seleccionado
-            //si selectedValue empieza con sub 
-            if(selectedValue.startsWith('sub')){
-                selectedValue = selectedValue.substring(3);
-                $("#subjectChild").val(selectedValue);
-            }else{
-                $("#subjectChild").val('');
-            }
-
-        });
-
     } catch (error) {
         console.error('Error al procesar los datos:', error.message);
     } 
    
+};
+
+export const GetChildSubjectsNames = async (idSubject) => {
+
+    const GetChildSubjectSelect = async () => {
+        try {
+            const response = await $.ajax({
+                url: '../php/students/routes.php',
+                type: 'GET',
+                data: {idSubject: idSubject, action: 'getChildSubjectsNames'}
+            });
+            return response;
+        } catch (error) {
+            throw new Error('Error al obtener los datos');
+        }
+    };
+
+    try {
+        const childSubjects = await GetChildSubjectSelect();
+
+        if (!childSubjects || childSubjects.length === 0) {
+            console.log('No se encontraron materias para la carrera seleccionada');
+            return;
+        }
+
+        let $select = $('.subjectChildName');
+        $.each(childSubjects, function(index, childSubject) {
+            if (childSubject.success !== false) {
+                let $option = $('<option>', {
+                    value: childSubject.id_child_subject,
+                    text: childSubject.name_child_subject
+                });
+
+                $select.append($option);
+            }
+        });
+
+        $select.select2({
+            theme: "bootstrap-5",
+            disabled: false,
+            placeholder: 'Selecciona la submateria',
+        });
+
+    } catch (error) {
+        console.error('Error al procesar los datos:', error.message);
+    }
+
 };
 
 
