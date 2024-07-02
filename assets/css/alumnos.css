@@ -1,0 +1,16 @@
+.select2-container--bootstrap-5 .select2-selection--single{
+    padding: .375rem .75rem .375rem !important;
+}
+
+.select2-container--bootstrap-5{
+    width: 100% !important;
+}
+
+.select2-selection--single{
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered{
+    padding-left: 8px !important;
+    padding-right: 20px !important;
+}
