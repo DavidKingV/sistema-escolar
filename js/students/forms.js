@@ -1,3 +1,4 @@
+import { GetChildSubjectsNames } from "./index.js";
 //llenado de los inputs para edicion
 function FillTable(response){
     $("#idStudentDB").val(response.id);
@@ -54,4 +55,28 @@ function AverageGrade(){
     $("#gradefinal").val(average);
 }
 
-export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade};
+function initializeSubjectChangeListener(selector) {
+    $(selector).on('change', function() {
+        if ($(this).attr('class')) {
+            let idChildSubject = $(this).find(':selected').attr('class');
+            if (typeof idChildSubject !== "undefined") {
+                let idSubject = $(this).val();
+                GetChildSubjectsNames(idSubject);
+            } else {
+                let select2Element = $(".subjectChildName");
+                select2Element.val(null).trigger('change');  // Limpiar el valor seleccionado
+                select2Element.empty();  // Borrar las opciones
+                select2Element.select2({
+                    theme: "bootstrap-5", // Puedes personalizar el placeholder
+                    placeholder: 'Sin submaterias',
+                    disabled: true,
+                    allowClear: true
+                });
+            }
+        } else {
+            return;
+        }
+    });
+}
+
+export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener};
