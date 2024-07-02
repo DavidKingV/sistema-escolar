@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require_once(__DIR__.'/../vendor/autoload.php');
 
 use Vendor\Schoolarsystem\loadEnv;
@@ -9,18 +10,37 @@ loadEnv::cargar();
 
 class AdvancedStudentsControl{
 
-    public function VerifyIdStudentId($studentId, $studentSecretKey){
-        
+    public function VerifyIdStudentId(int $studentId, string $studentSecretKey): array{
     
-        $secret_key = $_ENV['KEY'];
-        //comparar el id del estudiante con el id del token
-         $decoded = JWT::decode($studentSecretKey, new Key($secret_key, 'HS256'));
-
-        if($decoded->sId == $studentId){
-            return array("success" => true, "token" => true, "studentId" => $decoded->sId, "message" => "El id del estudiante coincide con el token");
-        }else{
-            return array("success" => false, "token" => false, "message" => "El id del estudiante no coincide con el token");
-        }   
+        $secretKey = $_ENV['KEY'];
+        
+        try {
+            // Decodificar el JWT usando la clave secreta
+            $decoded = JWT::decode($studentSecretKey, new Key($secretKey, 'HS256'));
+    
+            // Verificar si el ID del estudiante coincide con el ID en el token
+            if ($decoded->sId == $studentId) {
+                return array(
+                    "success" => true,
+                    "token" => true,
+                    "studentId" => $decoded->sId,
+                    "message" => "El id del estudiante coincide con el token"
+                );
+            } else {
+                return array(
+                    "success" => false,
+                    "token" => false,
+                    "message" => "El id del estudiante no coincide con el token"
+                );
+            }
+        } catch (Exception $e) {
+            // Manejo de errores si la decodificación falla
+            return array(
+                "success" => false,
+                "token" => false,
+                "message" => "Error al decodificar el token: " . $e->getMessage()
+            );
+        }
        
     }
 }
