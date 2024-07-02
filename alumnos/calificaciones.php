@@ -60,7 +60,7 @@ if (!$VerifySession['success']) {
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/all.min.css">
-    <!--<link rel="stylesheet" href="../assets/css/alumnos.css">-->
+    <link rel="stylesheet" href="../assets/css/alumnos.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
@@ -195,8 +195,6 @@ if (!$VerifySession['success']) {
                     <div class="card-body">
                         <div class="row g-2">
                             <form id="addGradeStudent">
-
-                                <input name="studentIdDB" id="studentIdDB" class="hidden">
                             
                                 <table class="table table-striped" id="addGradesTable">
                                     <thead>
@@ -210,10 +208,18 @@ if (!$VerifySession['success']) {
                                     <tbody>
                                         <tr>
                                         <th scope="row">
-                                            <select class="form-select subjectName" name="subject" id="subject" style="">
-                                                <option value="0">Selecciona una materia</option>
-                                            </select>
-                                            <input name="subjectChild" id="subjectChild" class="" hidden>
+                                            <div class="row g-2">  
+                                                <div class="col-md">
+                                                    <select class="form-select subjectName" name="subject" id="subject" style="">
+                                                        <option value="0">Selecciona una materia</option>
+                                                    </select>  
+                                                </div>
+                                                <div class="col-md">
+                                                    <select class="form-select subjectChildName" name="subjectChild" id="subjectChild" style="">
+                                                        <option value="0">Selecciona una submateria</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </th>
                                         <td><input type="text" name="gradeCont" id="gradeCont" class="form-control"></td>
                                         <td><input type="text" name="gradetest" id="gradetest" class="form-control"></td>
