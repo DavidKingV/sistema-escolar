@@ -414,6 +414,15 @@ class StudentsControl {
             }
     }
 
+    /*public function GetStudentGrades($studentId){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if (!$VerifySession['success']) :
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        endif;
+
+        $sql = 
+    }*/
+
     public function AddGradeStudent($gradeDataArray) {
         $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
         if (!$VerifySession['success']) :
