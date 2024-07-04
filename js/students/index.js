@@ -1,5 +1,5 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener } from './forms.js';
-import { initializeStudentDataTable, initializeStudentsUsersTable } from '../datatables/index.js';
+import { initializeStudentDataTable, initializeStudentsUsersTable,InitializeStudentGrades } from '../datatables/index.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
@@ -19,6 +19,7 @@ $(function () {
                 if(response){
                     VerifyGroupStudent(studentIdGroup).then((response) => {
                         if(response){
+                            InitializeStudentGrades(studentIdGroup);
                             
                             localStorage.setItem('studentIdJTW', studentIdGroup);
                             var studentIdJTW = localStorage.getItem('studentIdJTW');
