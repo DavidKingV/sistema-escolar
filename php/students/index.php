@@ -414,14 +414,93 @@ class StudentsControl {
             }
     }
 
-    /*public function GetStudentGrades($studentId){
+    public function GetStudentGrades($studentId){
         $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
         if (!$VerifySession['success']) :
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         endif;
 
-        $sql = 
-    }*/
+        $sql = "SELECT 
+    sg.id AS grade_id,
+    s.id AS student_id,
+    s.nombre AS student_name,
+    sub.id AS subject_id,
+    sub.nombre AS subject_name,
+    NULL AS subject_child_id,
+    NULL AS subject_child_name,
+    sg.continuos_grade AS continuous_grade,
+    sg.exam_grade AS exam_grade,
+    sg.final_grade AS final_grade,
+    sg.updated_at AS update_at
+    FROM 
+        student_grades sg
+    JOIN 
+        students s ON sg.id_student = s.id
+    JOIN 
+        subjects sub ON sg.id_subject = sub.id
+    WHERE 
+        sg.id_student = ?
+
+    UNION
+
+    SELECT 
+        sgc.id AS grade_id,
+        s.id AS student_id,
+        s.nombre AS student_name,
+        sub.id AS subject_id,
+        sub.nombre AS subject_name,
+        sub_child.id AS subject_child_id,
+        sub_child.nombre AS subject_child_name,
+        sgc.continuos_grade AS continuous_grade,
+        sgc.exam_grade AS exam_grade,
+        sgc.final_grade AS final_grade,
+        sgc.updated_at AS update_at
+    FROM 
+        student_grades_child sgc
+    JOIN 
+        students s ON sgc.id_student = s.id
+    JOIN 
+        subjects sub ON sgc.id_subject = sub.id
+    JOIN 
+        subject_child sub_child ON sgc.id_subject_child = sub_child.id
+    WHERE 
+        sgc.id_student = ?";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param('ii', $studentId, $studentId);
+        $stmt->execute();
+        $query = $stmt->get_result();
+
+        if (!$query) {
+            return array("success" => false, "message" => "Error al obtener las calificaciones del alumno, por favor intente de nuevo más tarde");
+        } else {
+            $grades = array();
+            if ($query->num_rows > 0) {
+                while ($row = $query->fetch_assoc()) {
+                    $grades[] = array(
+                        'success' => true,
+                        'grade_id' => $row['grade_id'],
+                        'student_id' => $row['student_id'],
+                        'student_name' => $row['student_name'],
+                        'subject_id' => $row['subject_id'],
+                        'subject_name' => $row['subject_name'],
+                        'subject_child_id' => $row['subject_child_id'],
+                        'subject_child_name' => $row['subject_child_name'],
+                        'continuous_grade' => $row['continuous_grade'],
+                        'exam_grade' => $row['exam_grade'],
+                        'final_grade' => $row['final_grade'],
+                        'update_at' => $row['update_at']
+                    );
+                }
+            } else {
+                $grades[] = array("success" => false, "message" => "No se encontraron calificaciones registradas");
+            }
+            $stmt->close();
+            $this->connection->close();
+
+            return $grades;
+        }
+    }
 
     public function AddGradeStudent($gradeDataArray) {
         $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);

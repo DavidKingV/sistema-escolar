@@ -129,6 +129,17 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
                 break;
 
+            case 'getStudentGrades':
+                $studentId = $_POST['studentId'];
+
+                $getGrades = new StudentsControl($connection);
+                $grades = $getGrades->GetStudentGrades($studentId);
+
+                header('Content-Type: application/json');
+                echo json_encode($grades);
+
+                break;
+
             case 'addGradeStudent':
                 $gradeData = $_POST['studentGradeData'];
                 parse_str($gradeData, $gradeDataArray);
