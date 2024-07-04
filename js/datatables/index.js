@@ -102,6 +102,64 @@ function initializeStudentsUsersTable() {
     
 }
 
+function InitializeStudentGrades(studentIdGroup) {
+    $("#gradesStudentTable").DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+        },
+        ordering: false,
+        paging: true,
+        processing: true,
+        ajax: {
+            url: "../php/students/routes.php", 
+            type: "POST",
+            data: {studentId: studentIdGroup, action: "getStudentGrades" },
+            dataSrc: function(data){
+                console.log(data);
+                if(!data[0].success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data[0].message,
+                    });
+                    return [];
+                }
+                return data;
+            }
+        },
+        "columns": [
+            // Define las columnas
+            { "data": "grade_id", "className": "text-center" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    if (row.subject_child_name == null){  
+                        return '<h6>'+row.subject_name+'</h6>';
+                    }
+                    else {
+                        return '<h6>'+row.subject_name+'</h6><p>'+row.subject_child_name+'</p>';
+                    }
+                    
+                
+                },
+                "className": "text-center"
+            },
+            { "data": "continuous_grade", "className": "text-center" },
+            { "data": "exam_grade", "className": "text-center" },
+            { "data": "final_grade", "className": "text-center" },
+            { "data": "update_at", "className": "text-center" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" disabled class="btn btn-primary btn-circle editGrade" data-bs-toggle="modal" data-bs-target="#GradeEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGrade" disabled><i class="bi bi-trash-fill"></i></button>';
+                
+                },
+                "className": "text-center"
+            }
+        ]
+    });
+}
+
 function initializeTeachersDataTable() {
     
     $("#teachersTable").DataTable({
@@ -385,4 +443,4 @@ function initializeSubjectsDataTable(){
 
 }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeGroupsStudentsDataTable, initializeSubjectsDataTable };
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeGroupsStudentsDataTable, initializeSubjectsDataTable, InitializeStudentGrades};
