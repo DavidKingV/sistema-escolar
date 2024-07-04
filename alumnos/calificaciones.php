@@ -258,7 +258,7 @@ if (!$VerifySession['success']) {
 
                             <div class="tab-pane fade show active" id="studentGradesTable" role="tabpanel" aria-labelledby="studentGradesTable" tabindex="0">
                                 <h4 class="card-title py-3">Lista de calificaciones</h4>
-                                <table class="table" id="gradesStudentTable">
+                                <table class="table table-secondary table-striped" id="gradesStudentTable">
                                     <thead>
                                         <tr>             
                                             <th class="text-center">ID</th>                           
@@ -266,6 +266,7 @@ if (!$VerifySession['success']) {
                                             <th class="text-center">C. Continua</th>
                                             <th class="text-center">C. de Examen</th>
                                             <th class="text-center">C. Final</th>
+                                            <th class="text-center">Ult. Actualización</th>
                                             <th class="text-center">Acciones</th>
                                         </tr>
                                     </thead>
