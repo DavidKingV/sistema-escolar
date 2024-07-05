@@ -7,7 +7,7 @@ initializeStudentsUsersTable();
 $(function () {
     let currentPath = window.location.pathname;
     let specificPath = "/alumnos/calificaciones.php";
-console.log(currentPath);
+    
     if (currentPath === specificPath) {
         let urlParams = new URLSearchParams(window.location.search);
         let studentIdGroup = urlParams.get('id'); 
