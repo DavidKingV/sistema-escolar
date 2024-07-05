@@ -79,4 +79,15 @@ function initializeSubjectChangeListener(selector) {
     });
 }
 
-export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener};
+function HideTab(tab){
+    $(tab).hide();
+}
+
+function RenderAlertMessage(message, type, container){
+    let alert = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <strong>${message}</strong>                    
+                </div>`;
+    $(container).html(alert);
+}
+
+export { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage};
