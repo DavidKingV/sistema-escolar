@@ -7,7 +7,7 @@ initializeStudentsUsersTable();
 $(function () {
     let currentPath = window.location.pathname;
     let specificPath = "/alumnos/calificaciones.php";
-    
+
     if (currentPath === specificPath) {
         let urlParams = new URLSearchParams(window.location.search);
         let studentIdGroup = urlParams.get('id'); 
@@ -512,7 +512,7 @@ const VerifyGroupStudent = async (studentIdGroup) => {
                 GetGroupsNames();
                 return false;
             }else{
-                GetSubjectsNames(response.id_career);
+                GetSubjectsNames(response.id_carrer);
                 return true;
             }
         }else{
@@ -532,14 +532,14 @@ const VerifyGroupStudent = async (studentIdGroup) => {
     }
 }
 
-const GetSubjectsNames = async (careerId) => {
+const GetSubjectsNames = async (carrerId) => {
 
     const GetSubjectSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../php/students/routes.php',
+                url: '../../php/students/routes.php',
                 type: 'GET',
-                data: {careerId: careerId, action: 'getSubjectsNames'}
+                data: {carrerId: carrerId, action: 'getSubjectsNames'}
             });
             return response;
         } catch (error) {

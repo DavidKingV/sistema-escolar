@@ -190,10 +190,10 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
         break;
 
         case 'getSubjectsNames':
-            $careerId = $_GET['careerId'];
+            $carrerId = $_GET['carrerId'];
 
             $getSubjects = new StudentsControl($connection);
-            $subjects = $getSubjects->GetSubjectsNames($careerId);
+            $subjects = $getSubjects->GetSubjectsNames($carrerId);
 
             header('Content-Type: application/json');
             echo json_encode($subjects);

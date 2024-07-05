@@ -321,7 +321,7 @@ class StudentsControl {
         }
     }
 
-    public function GetSubjectsNames($careerId){
+    public function GetSubjectsNames($carrerId){
             
             $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
             if(!$VerifySession['success']){
@@ -329,7 +329,7 @@ class StudentsControl {
             }else{
                 $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id WHERE carreers_subjects.id_carreer = ?";
                 $stmt = $this->connection->prepare($sql);
-                $stmt->bind_param('i', $careerId);
+                $stmt->bind_param('i', $carrerId);
                 $stmt->execute();
                 $query = $stmt->get_result();
     
@@ -407,7 +407,7 @@ class StudentsControl {
                 $query = $stmt->get_result();
     
                 if($query->num_rows > 0){
-                    return array("success" => true, "group" => true, "id_career" => $query->fetch_assoc()['id_carreer'], "message" => "Alumno con grupo asignado");
+                    return array("success" => true, "group" => true, "id_carrer" => $query->fetch_assoc()['id_carreer'], "message" => "Alumno con grupo asignado");
                 }else{
                     return array("success" => true, "group" => false, "message" => "Alumno sin grupo asignado");
                 }
