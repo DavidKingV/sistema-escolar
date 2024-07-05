@@ -741,7 +741,7 @@ $("#addGradeStudent").validate({
     }
 });
 
-$("#studentGroupDetails").validate({
+$("#studentGroupDetailsForm").validate({
     rules: {
         studentIdGroup: {
             required: true,
