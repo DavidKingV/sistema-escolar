@@ -741,6 +741,23 @@ $("#addGradeStudent").validate({
     }
 });
 
+$("#studentGroupDetails").validate({
+    rules: {
+        studentIdGroup: {
+            required: true,
+            valueNotEquals: "0"
+        }
+    }, messages: {
+        studentGroup: {
+            required: "Por favor selecciona un grupo"
+        },
+    },
+    errorPlacement: function(error, element) {
+        var elementId = element.attr("id");
+        error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+    }
+});
+
 $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);
 }, "Por favor, ingresa solo letras");
