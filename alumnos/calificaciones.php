@@ -277,24 +277,26 @@ if (!$VerifySession['success']) {
                             </div>
 
                             <div class="tab-pane fade show" id="studentGroupDetails" role="tabpanel" aria-labelledby="studentGroupDetails" tabindex="0">
-                                <h4 class="card-title py-3">Agregar alumno al grupo</h4>
-                                <form id="studentGroupDetails">
-                                    <div class="row g-2">                                
-                                        <div class="col-md">                                            
-                                            <select class="form-select" id="studentIdGroup" name="studentIdGroup[]" multiple="multiple">                                                 
-                                            </select>     
-                                            <div>
-                                                <p class="py-1">                                                                        
-                                                <label id="studentNameGroup-error" class="error text-bg-danger" for="studentNameGroup" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
-                                                </p>
-                                            </div>                                        
-                                        </div>                                                                                
-                                    </div>
-                                    <div class="col-md py-1">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                        <button type="submit" class="btn btn-primary">Agregar</button>
-                                    </div>
-                                </form>
+                                <div id="alertDisplay">
+                                    <h4 class="card-title py-3">Agregar alumno al grupo</h4>
+                                    <form id="studentGroupDetailsForm">
+                                        <div class="row g-2">                                
+                                            <div class="col-md">                                            
+                                                <select class="form-select" id="studentIdGroup" name="studentIdGroup">                                                 
+                                                </select>     
+                                                <div>
+                                                    <p class="py-1">                                                                        
+                                                    <label id="studentIdGroup-error" class="error text-bg-danger" for="studentIdGroup" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                                                    </p>
+                                                </div>                                        
+                                            </div>                                                                                
+                                        </div>
+                                        <div class="col-md py-1">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            <button type="submit" class="btn btn-primary">Agregar</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
