@@ -1,4 +1,4 @@
-import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener } from './forms.js';
+import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
 import { initializeStudentDataTable, initializeStudentsUsersTable,InitializeStudentGrades } from '../datatables/index.js';
 
 initializeStudentDataTable();
@@ -20,6 +20,8 @@ $(function () {
                     VerifyGroupStudent(studentIdGroup).then((response) => {
                         if(response){
                             InitializeStudentGrades(studentIdGroup);
+                            HideTab("#alertDisplay");
+                            RenderAlertMessage("El alumno ya tiene un grupo asignado", "info", "#studentGroupDetails");
                             
                             localStorage.setItem('studentIdJTW', studentIdGroup);
                             var studentIdJTW = localStorage.getItem('studentIdJTW');
@@ -385,6 +387,37 @@ $("#gradeCont, #gradetest").on("input", function(){
     AverageGrade();
 });
 
+$("#studentGroupDetailsForm").on("submit", function(event){
+    event.preventDefault();
+    let studentGroupData = $(this).serialize();
+
+    let urlParams = new URLSearchParams(window.location.search);
+    studentGroupData += `&studentId=${encodeURIComponent(urlParams.get('id'))}`;
+
+    Swal.fire({
+        title: 'Se agregara al estudiante al grupo seleccionado',
+        text: '¿Estas seguro de agregar al estudiante al grupo seleccionado?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(48, 133, 214)',
+        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            if($(this).valid()){
+                AddStudentGroup(studentGroupData);
+            }else{
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en la validación',
+                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                });
+            }
+        }
+    });
+});
+
 const VerifyToken = async (studentId, token) => {
     try {
         const response = await $.ajax({
@@ -476,6 +509,7 @@ const VerifyGroupStudent = async (studentIdGroup) => {
                     title: 'Grupo no encontrado',
                     text: 'No se encontró el grupo al que pertenece el estudiante, por favor verifica que el ID sea correcto.'
                 });
+                GetGroupsNames();
                 return false;
             }else{
                 GetSubjectsNames(response.id_career);
@@ -905,6 +939,88 @@ const DeleteStudent = async (studentId) => {
             icon: 'error',
             title: 'Error al eliminar el estudiante',
             text: 'Ocurrió un error al eliminar el estudiante, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const GetGroupsNames = async () => {
+
+    const GetGroupSelect = async () => {
+        try {
+            const response = await $.ajax({
+                url: '../php/students/routes.php',
+                type: 'GET',
+                data: {action: 'getGroupsNames'}
+            });
+            return response;
+        } catch (error) {
+            throw new Error('Error al obtener los datos');
+        }
+    };
+
+    try {
+        const groups = await GetGroupSelect();
+
+        if (!groups || groups.length === 0) {
+            console.log('No se encontraron materias para la carrera seleccionada');
+            return;
+        }
+
+        let $select = $('#studentIdGroup');
+        $.each(groups, function(index, groupsNames) {
+            if (groupsNames.success !== false) {
+                let $option = $('<option>', {
+                    value: groupsNames.id,
+                    text: groupsNames.name
+                });
+
+                $select.append($option);
+            }
+        });
+
+        $select.select2({
+            theme: "bootstrap-5",
+            disabled: false,
+            placeholder: 'Selecciona un grupo',
+        });
+
+    } catch (error) {
+        console.error('Error al procesar los datos:', error.message);
+    }
+
+};
+
+const AddStudentGroup = async (studentGroupData) => {
+    try {
+        const response = await $.ajax({
+            url: '../php/students/routes.php',
+            type: 'POST',
+            data: {studentGroupData: studentGroupData, action: 'addStudentGroup'}
+        });
+        if(response.success){
+            // Show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Estudiante agregado al grupo',
+                text: response.message,
+                timer: 3000
+            });
+            // Reload the table
+            window,location.reload();
+        }else{
+            // Show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al agregar el estudiante al grupo',
+                text: response.message
+            });
+        }
+    }
+    catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al agregar el estudiante al grupo',
+            text: 'Ocurrió un error al agregar el estudiante al grupo, por favor intenta de nuevo más tarde.'
         });
     }
 }
