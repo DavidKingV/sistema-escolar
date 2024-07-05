@@ -596,6 +596,62 @@ class StudentsControl {
             }
         
     }
+
+    public function GetGroupsNames(){
+
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "SELECT * FROM groups";
+            $query = $this->connection->query($sql);
+
+            if(!$query){
+                return array("success" => false, "message" => "Error al obtener los grupos, por favor intente de nuevo más tarde");
+            }else{
+                $groups = array();
+                if($query->num_rows > 0){
+                    while($row = $query->fetch_assoc()){
+                        $groups[] = array(
+                            'success' => true,
+                            'id' => $row['id'],
+                            'name' => $row['nombre'],
+                            'id_career' => $row['id_carreer']
+                        );
+                    }
+                }else{
+                    $groups[] = array("success" => false, "message" => "No se encontraron grupos registrados");
+                }
+                $this->connection->close();
+
+                return $groups;
+            }
+        }  
+
+    }
+
+    public function addStudentGroup($studentGroupDataArray){
+            
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "UPDATE students SET id_group = ? WHERE id = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param('ii', $studentGroupDataArray['studentIdGroup'], $studentGroupDataArray['studentId']);
+            $stmt->execute();
+    
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->connection->close();
+                return array("success" => true, "message" => "Grupo asignado correctamente");
+            }else{
+                $stmt->close();
+                $this->connection->close();
+                return array("success" => false, "message" => "Error al asignar el grupo, por favor intente de nuevo más tarde");
+            }
+        }
+    }
     
 
 }

@@ -153,6 +153,19 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 break;
 
         default:
+
+        case 'addStudentGroup':
+            $studentGroupData = $_POST['studentGroupData'];
+            parse_str($studentGroupData, $studentGroupDataArray);
+
+            $addStudentGroup = new StudentsControl($connection);
+            $add = $addStudentGroup->AddStudentGroup($studentGroupDataArray);
+
+            header('Content-Type: application/json');
+            echo json_encode($add);
+
+            break;
+
         echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
 
@@ -218,6 +231,16 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
 
             header('Content-Type: application/json');
             echo json_encode($verify);
+
+            break;
+
+        case 'getGroupsNames':
+
+            $getGroups = new StudentsControl($connection);
+            $groups = $getGroups->GetGroupsNames();
+
+            header('Content-Type: application/json');
+            echo json_encode($groups);
 
             break;
 
