@@ -267,10 +267,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         case 'logout':
-            $control = new LoginControl($con);
-            $control -> logout();
+            $control = new LoginControl($connection);
+            $logout = $control -> logout();
+
             header('Content-Type: application/json');
-            echo json_encode(array("status" => "success", "message" => "Sesión cerrada"));
+            echo json_encode($logout);
         break;
         default:
         // code...
