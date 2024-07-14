@@ -1,3 +1,7 @@
+function openInNewWindow(url) {
+    window.open(url, '_blank', 'width=800,height=600');
+}
+
 function login(data){
     $.ajax({
         url: 'php/login/routes.php',
@@ -25,6 +29,26 @@ function login(data){
         alert('Error');
     })
 }
+
+$("#openInNewWindow").on("click", function(event) {
+    event.preventDefault();
+    openInNewWindow("php/login/MicrosoftLogin.php");
+});
+
+window.addEventListener('message', function(event) {
+    if (event.data.MiAccto) {
+        // Guardar el accessToken en la sesión o cookie si es necesario
+        document.cookie = 'MiAccto=' + event.data.MiAccto
+        // Redirigir a inicio.php
+        window.location.href = 'dashboard.php?MiAccto=' + event.data.MiAccto;
+    } else if (event.data.error) {
+        // Manejar errores de autenticación
+        alert('Authentication failed');
+    } else{
+        // Manejar otros mensajes
+        alert('Unknown message');
+    }
+}, false);
 
 $("#loginForm").submit(function(e){
     e.preventDefault();
