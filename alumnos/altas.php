@@ -1,33 +1,57 @@
 <?php
 require_once(__DIR__.'/../php/vendor/autoload.php');
 
-use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\authLocal;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
+use myPHPnotes\Microsoft\Models\User;
+use myPHPnotes\Microsoft\Handlers\Session;
 
 session_start();
 
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = authLocal::verify($_COOKIE['auth'] ?? NULL);
 
 if (!$VerifySession['success']) {
-    header('Location: ../index.html?sesion=expired');
+    header('Location: index.html?sesion=expired');
     exit();
 }else{
-    $userId = $VerifySession['userId'];
+    $userId = $VerifySession['userId'] ?? NULL;
+    $accessToken = $VerifySession['accessToken']?? NULL;
 
     $dbConnection = new DBConnection();
     $connection = $dbConnection->getConnection();
 
-    $userDataInstance = new userData($connection);
-    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+    if($userId == NULL && $accessToken != NULL){
+        $microsoft = new Auth(Session::get("tenant_id"),Session::get("client_id"),  Session::get("client_secret"), Session::get("redirect_uri"), Session::get("scopes"));
+        if(!isset($_REQUEST['code'])){
+            header('Location: ../index.html?sesion=expired');
+            exit();
+        }else{
+            $tokens = $microsoft->getToken($_REQUEST['code'], Session::get("state"));
+            $microsoft->setAccessToken($tokens->access_token);                        
+    
+            if($tokens->access_token) {
+                $user = (new User);
+                $userName = $user->data->getDisplayName();
+            } else {
+                throw new Exception('User data not found');
+            }
+        }        
 
-
-    if (!$GetCurrentUserData['success']) {
-        echo 'Error al obtener los datos del usuario';
+    }else if($userId == NULL && $accessToken == NULL){
+        header('Location: index.html?sesion=expired');
+        exit();
     }else{
-        $userName = $GetCurrentUserData['userName'];
-        $userEmail = $GetCurrentUserData['email'];
-        $userPhone = $GetCurrentUserData['phone'];
+        $userDataInstance = new userData($connection);
+        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+        if (!$GetCurrentUserData['success']) {
+            echo 'Error al obtener los datos del usuario';
+        }else{
+            $userName = $GetCurrentUserData['userName'];
+            $userEmail = $GetCurrentUserData['email'];
+            $userPhone = $GetCurrentUserData['phone'];
+        }
     }
 }
 ?>
@@ -230,7 +254,17 @@ if (!$VerifySession['success']) {
                                 <div class="col-md py-3">
                                     <label for="studentPhone" class="form-label">Teléfono</label>
                                     <label id="studentPhone-error" class="error text-bg-danger" for="studentPhone" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="studentPhone" name="studentPhone">
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">País</button>
+                                        <ul class="dropdown-menu">
+                                            <li><button class="dropdown-item" type="button" data-id="52">México</button></li>
+                                            <li><button class="dropdown-item" type="button" data-id="54">Argentina</button></li>
+                                            <li><button class="dropdown-item" type="button" data-id="57">Colombia</button></li>
+                                            <li><button class="dropdown-item" type="button" data-id="01">Estados Unidos</button></li>
+                                            <li><button class="dropdown-item" type="button" data-id="01">Canadá</button></li>
+                                        </ul>
+                                        <input type="text" class="form-control" id="studentPhone" name="studentPhone">
+                                    </div>
                                 </div>
                                 <div class="col-md py-3">
                                     <label for="studentEmail" class="form-label">Email</label>

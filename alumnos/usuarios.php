@@ -4,30 +4,60 @@ require_once(__DIR__.'/../php/vendor/autoload.php');
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
+use GuzzleHttp\Client;
 
 session_start();
 
 $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
 
 if (!$VerifySession['success']) {
-    header('Location: ../index.html?sesion=expired');
+    header('Location: index.html?sesion=expired');
     exit();
 }else{
-    $userId = $VerifySession['userId'];
+    $userId = $VerifySession['userId'] ?? NULL;
+    $accessToken = $VerifySession['accessToken']?? NULL;
 
     $dbConnection = new DBConnection();
     $connection = $dbConnection->getConnection();
 
-    $userDataInstance = new userData($connection);
-    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
-
-
-    if (!$GetCurrentUserData['success']) {
-        echo 'Error al obtener los datos del usuario';
+    if($userId == NULL && $accessToken != NULL){
+        $client = new Client();
+        try{
+            $response = $client->request('GET', 'https://graph.microsoft.com/v1.0/me',[
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken
+            ]
+            ]);
+    
+            //obten el nombre del usuario
+            $user = json_decode($response->getBody()->getContents());
+            $userName = $user->displayName;
+            $userEmail = $user->mail ?? NULL;          
+        }catch (\GuzzleHttp\Exception\ClientException $e) {
+            if ($e->getResponse()->getStatusCode() == 401) {
+                // redirige al usuario a la página de inicio de sesión o a donde desees
+                header('Location: ../index.html?sesion=expired');
+                exit();
+            } else {
+                // maneja otros códigos de error si es necesario
+                echo 'Error: ' . $e->getMessage();
+            }
+        }
+                          
+    }else if($userId == NULL && $accessToken == NULL){
+        header('Location: index.html?sesion=expired');
+        exit();
     }else{
-        $userName = $GetCurrentUserData['userName'];
-        $userEmail = $GetCurrentUserData['email'];
-        $userPhone = $GetCurrentUserData['phone'];
+        $userDataInstance = new userData($connection);
+        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+        if (!$GetCurrentUserData['success']) {
+            echo 'Error al obtener los datos del usuario';
+        }else{
+            $userName = $GetCurrentUserData['userName'];
+            $userEmail = $GetCurrentUserData['email'];
+            $userPhone = $GetCurrentUserData['phone'];
+        }
     }
 }
 ?>
@@ -203,7 +233,7 @@ if (!$VerifySession['success']) {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="StutentUserModalTitle">Alta de Usuario</h1>
+        <h1 class="modal-title fs-5" id="StutentUserModalTitle">Alta de Usuario Local</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
