@@ -4,6 +4,7 @@ require_once(__DIR__.'/php/vendor/autoload.php');
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
+use GuzzleHttp\Client;
 
 session_start();
 
@@ -13,21 +14,53 @@ if (!$VerifySession['success']) {
     header('Location: index.html?sesion=expired');
     exit();
 }else{
-    $userId = $VerifySession['userId'];
+    $userId = $VerifySession['userId'] ?? NULL;
+    $accessToken = $VerifySession['accessToken']?? NULL;
 
     $dbConnection = new DBConnection();
     $connection = $dbConnection->getConnection();
 
-    $userDataInstance = new userData($connection);
-    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+    if($userId == NULL && $accessToken != NULL){
+        $client = new Client();
+        try{
+            $response = $client->request('GET', 'https://graph.microsoft.com/v1.0/me',[
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken
+            ]
+            ]);
+    
+            //obten el nombre del usuario
+            $user = json_decode($response->getBody()->getContents());
+            $userName = $user->displayName;
+            $userEmail = $user->mail ?? NULL;    
+            
+            
+        }catch (\GuzzleHttp\Exception\ClientException $e) {
+            if ($e->getResponse()->getStatusCode() == 401) {
+                // redirige al usuario a la página de inicio de sesión o a donde desees
+                header('Location: index.html?sesion=expired');
+                exit();
+            } else {
+                // maneja otros códigos de error si es necesario
+                echo 'Error: ' . $e->getMessage();
+            }
+        }
+                          
 
-
-    if (!$GetCurrentUserData['success']) {
-        echo 'Error al obtener los datos del usuario';
+    }else if($userId == NULL && $accessToken == NULL){
+        header('Location: index.html?sesion=expired');
+        exit();
     }else{
-        $userName = $GetCurrentUserData['userName'];
-        $userEmail = $GetCurrentUserData['email'];
-        $userPhone = $GetCurrentUserData['phone'];
+        $userDataInstance = new userData($connection);
+        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+        if (!$GetCurrentUserData['success']) {
+            echo 'Error al obtener los datos del usuario';
+        }else{
+            $userName = $GetCurrentUserData['userName'];
+            $userEmail = $GetCurrentUserData['email'];
+            $userPhone = $GetCurrentUserData['phone'];
+        }
     }
 }
 ?>
@@ -156,11 +189,11 @@ if (!$VerifySession['success']) {
             <hr>
             <div class="dropdown">
             <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <img src="https://esmefis.edu.mx/wp-content/uploads/2023/07/personaje.png" alt="" width="32" height="32" class="rounded-circle me-2" id="profilePhoto">
                 <strong><?php echo $userName ?></strong>
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+                <li><a class="dropdown-item" id="endSession" href="#">Cerrar Sesión</a></li>
             </ul>
             </div>
         </div>
@@ -186,3 +219,8 @@ if (!$VerifySession['success']) {
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js" integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
+
+<!-- customs scripts -->
+<script src="js/dashboard/index.js"></script>
+<script type="module" src="js/utils/sessions.js"></script>
+
