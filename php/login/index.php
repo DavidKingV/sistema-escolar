@@ -50,10 +50,24 @@ class LoginControl{
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
     public function logout() {
-        // Eliminar la sesión y la cookie
         session_start();
-        session_destroy();
-        setcookie("auth", "", time() - 3600, "/", "", 1, 1);
+
+        if (!isset($_SESSION["adnanhussainturki/microsoft"])) {
+            session_unset();
+            session_destroy();  
+
+            // Eliminar todas las cookies
+            foreach ($_COOKIE as $key => $value) {
+                setcookie($key, '', time() - 3600, '/');
+            }
+
+            return array("success" => true, "message" => "Sesión cerrada");
+        } else {
+            session_unset();
+            session_destroy();  
+
+            return array("success" => true, "microsoftLogout" => true, "message" => "Cerrando sesión de Microsoft");
+        }
     }
 
     public function VerifySession($jwt){
