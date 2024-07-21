@@ -1,5 +1,8 @@
 <?php
 namespace Vendor\Schoolarsystem;
+
+use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\MicrosoftActions;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -14,15 +17,30 @@ class auth {
         if(isset($_SESSION['userId'])&&isset($_COOKIE['auth'])){
             try {
                 $decoded = JWT::decode($jwt, new Key($secretKey, 'HS256'));     
-                return array('success' => true, 'userId' => $decoded->userId);
+                return array('success' => true, 'userId' => $decoded->userId, 'admin' => 'Local');
             } catch (\Exception $e) {
                 return array('success' => false, 'message' => $e->getMessage());
             }
         } else if(isset($microsoftAccessToken)){
-            return array('success' => true, 'accessToken' => $microsoftAccessToken);
+
+            $dbConnection = new DBConnection();
+            $connection = $dbConnection->getConnection();
+            $microsoftActions = new MicrosoftActions($connection);
+
+            $userId = $microsoftActions->getUserId($microsoftAccessToken);
+            if($userId['success']){
+                $verifyUserRegistration = $microsoftActions->getUserRegistration($userId['userId']);
+                if($verifyUserRegistration){
+                    return array('success' => true, 'userId' => $userId['userId'], 'admin' => true, 'accessToken' => $microsoftAccessToken);
+                }else{
+                    return array('success' => true, 'admin' => NULL, 'accessToken' => $microsoftAccessToken);
+                }
+            }else{
+                return array('success' => false, 'message' => $userId['error']);
+            }
         }
         else{
-            return array('success' => false, 'message' => 'No tiene permisos para realizar esta acción');
+            return array('success' => false, 'message' => 'Sesión no iniciada');
         }
     }
 
