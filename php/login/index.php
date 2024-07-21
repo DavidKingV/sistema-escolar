@@ -61,7 +61,7 @@ class LoginControl{
                 setcookie($key, '', time() - 3600, '/');
             }
 
-            return array("success" => true, "message" => "Sesión cerrada");
+            return array("success" => true, "microsoftLogout" => false, "message" => "Sesión cerrada");
         } else {
             session_unset();
             session_destroy();  
