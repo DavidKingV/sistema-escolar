@@ -28,12 +28,12 @@ $("#endSession").click(function(e){
 
                         window.addEventListener('message', function(event) {
                             if (event.data.success) {
-                                window.location.href = "/index.html";
+                                window.location.href = "/index.php";
                                 successAlert(event.data.message);
                             }
                         }, false);
                     }
-                    window.location.href = "http://localhost:8080/CONTROL%20ESCOLAR%20NUEVO/index.html?sesion=expired";
+                    window.location.href = "http://localhost:8080/CONTROL%20ESCOLAR%20NUEVO/index.php?sesion=close";
                 } else {
                     errorAlert(data.message);
                 }
