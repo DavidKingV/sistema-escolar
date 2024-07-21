@@ -37,10 +37,8 @@ $("#openInNewWindow").on("click", function(event) {
 
 window.addEventListener('message', function(event) {
     if (event.data.MiAccto) {
-        // Guardar el accessToken en la sesión o cookie si es necesario
-        document.cookie = 'MiAccto=' + event.data.MiAccto
         // Redirigir a inicio.php
-        window.location.href = 'dashboard.php?MiAccto=' + event.data.MiAccto;
+        window.location.href = 'dashboard.php';
     } else if (event.data.error) {
         // Manejar errores de autenticación
         alert('Authentication failed');
