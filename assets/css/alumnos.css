@@ -14,3 +14,7 @@
     padding-left: 8px !important;
     padding-right: 20px !important;
 }
+
+#userList .list-group-item {
+    cursor: pointer;
+}

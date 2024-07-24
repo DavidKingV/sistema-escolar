@@ -4,60 +4,52 @@ require_once(__DIR__.'/php/vendor/autoload.php');
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
-use GuzzleHttp\Client;
+use Vendor\Schoolarsystem\MicrosoftActions;
+use Vendor\Schoolarsystem\loadEnv;
 
 session_start();
 
+loadEnv::cargar();
 $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
 
+$dbConnection = new DBConnection();
+$connection = $dbConnection->getConnection();
+
 if (!$VerifySession['success']) {
-    header('Location: index.html?sesion=expired');
+    header('Location: index.php?sesion=expired');
     exit();
 }else{
     $userId = $VerifySession['userId'] ?? NULL;
     $accessToken = $VerifySession['accessToken']?? NULL;
+    $admin = $VerifySession['admin'];
 
-    $dbConnection = new DBConnection();
-    $connection = $dbConnection->getConnection();
+    $userName='';
+    $userPhoto='';
 
-    if($userId == NULL && $accessToken != NULL){
-        $client = new Client();
-        try{
-            $response = $client->request('GET', 'https://graph.microsoft.com/v1.0/me',[
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $accessToken
-            ]
-            ]);
-    
-            //obten el nombre del usuario
-            $user = json_decode($response->getBody()->getContents());
-            $userName = $user->displayName;
-            $userEmail = $user->mail ?? NULL;          
-        }catch (\GuzzleHttp\Exception\ClientException $e) {
-            if ($e->getResponse()->getStatusCode() == 401) {
-                // redirige al usuario a la página de inicio de sesión o a donde desees
-                header('Location: index.html?sesion=expired');
-                exit();
-            } else {
-                // maneja otros códigos de error si es necesario
-                echo 'Error: ' . $e->getMessage();
-            }
-        }
-                          
+    if($userId !== NULL && $accessToken != NULL && $admin == true){
+        
+        $userName = MicrosoftActions::getUserName($accessToken);
+        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
 
     }else if($userId == NULL && $accessToken == NULL){
-        header('Location: index.html?sesion=expired');
+        header('Location: index.php?sesion=no-started');
         exit();
-    }else{
+    }else if($admin == NULL){
+        include('php/views/alerts.php');
+        exit();
+    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
         $userDataInstance = new userData($connection);
         $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
 
         if (!$GetCurrentUserData['success']) {
             echo 'Error al obtener los datos del usuario';
-        }else{
+            $userName = 'Usuario';
+            $userPhoto = $_ENV['NO_PHOTO'];
+        }else{            
             $userName = $GetCurrentUserData['userName'];
             $userEmail = $GetCurrentUserData['email'];
             $userPhone = $GetCurrentUserData['phone'];
+            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
         }
     }
 }
