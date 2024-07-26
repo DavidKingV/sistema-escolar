@@ -367,10 +367,10 @@ $("#editStudentsUsers").on( "submit", function( event ) {
 });
 
 $("#studentTable").on("click", ".GradeStudent", function(){
-    let studentId = $(this).data('id');
-    let token = $(this).data('token');
+    let studentId = $(this).data('student');
+    let encodeJWT = $(this).data('encode');
     if(studentId){
-        window.location.href = `alumnos/calificaciones.php?id=${studentId}&jtw=${token}`;
+        window.location.href = `alumnos/calificaciones.php?student=${studentId}&encode=${encodeJWT}`;
     }else{
         Swal.fire({
             icon: 'error',

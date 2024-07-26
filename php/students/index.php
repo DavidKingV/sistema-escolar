@@ -35,14 +35,14 @@ class StudentsControl {
                 if($query->num_rows > 0){                    
                     while($row = $query->fetch_assoc()){
                         $payload = [
-                            "sId" => $row['id']
+                            "studentId" => $row['id']
                         ];                    
-                        $token = JWT::encode($payload, $secretKey, 'HS256');
+                        $encodeJWT = JWT::encode($payload, $secretKey, 'HS256');
 
                         $students[] = array(
                             'success' => true,
-                            'token' => $token,
-                            'id' => $row['id'],
+                            'encodeJWT' => $encodeJWT,
+                            'studentId' => $row['id'],
                             'no_control' => $row['no_control'],
                             'name' => $row['nombre'],
                             'phone' => $row['telefono'],

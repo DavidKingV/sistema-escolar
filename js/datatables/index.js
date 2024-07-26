@@ -33,7 +33,7 @@ function initializeStudentDataTable() {
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-token="'+row.token+'" data-id="'+row.id+'" class="btn btn-primary btn-circle GradeStudent"><i class="bi bi-journal-check"></i></button>';
+                    return '<button data-encode="'+row.encodeJWT+'" data-student="'+row.studentId+'" class="btn btn-primary btn-circle GradeStudent"><i class="bi bi-journal-check"></i></button>';
                 
                 },
                 "className": "text-center"
@@ -41,7 +41,7 @@ function initializeStudentDataTable() {
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle editStudent" data-bs-toggle="modal" data-bs-target="#StutentEditModal"><i class="bi bi-pencil-square"></i></button><button id="deleteStudent" data-id="'+row.id+'" class="btn btn-danger btn-circle"><i class="bi bi-trash-fill"></i></button>';
+                    return '<button data-id="'+row.studentId+'" class="btn btn-primary btn-circle editStudent" data-bs-toggle="modal" data-bs-target="#StutentEditModal"><i class="bi bi-pencil-square"></i></button><button id="deleteStudent" data-id="'+row.studentId+'" class="btn btn-danger btn-circle"><i class="bi bi-trash-fill"></i></button>';
                 
                 },
                 "className": "text-center"

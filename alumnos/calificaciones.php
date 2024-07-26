@@ -5,48 +5,66 @@ require_once __DIR__ . '/../php/students/verify.php';
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 
 session_start();
 
 $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
 
+$dbConnection = new DBConnection();
+$connection = $dbConnection->getConnection();
+
 if (!$VerifySession['success']) {
-    header('Location: ../index.html?sesion=expired');
+    header('Location: ../index.php?sesion=expired');
     exit();
 }else{
-    $userId = $VerifySession['userId'];
 
-    $dbConnection = new DBConnection();
-    $connection = $dbConnection->getConnection();
-
-    $userDataInstance = new userData($connection);
-    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
-
-
-    if (!$GetCurrentUserData['success']) {
-        echo 'Error al obtener los datos del usuario';
-    }else{
-        $userName = $GetCurrentUserData['userName'];
-        $userEmail = $GetCurrentUserData['email'];
-        $userPhone = $GetCurrentUserData['phone'];
-    }
-
-    if (!isset($_GET['id']) && !isset($_GET['jtw'])) {
+    if (!isset($_GET['student']) && !isset($_GET['encode'])) {
         header('Location: ../alumnos.php');
         exit();
     }else{
-        $studentId = $_GET['id'];
-        $studentSecretKey = $_GET['jtw'];
+        $studentId = $_GET['student'];
+        $studentSecretKey = $_GET['encode'];
 
         $StudentsIdControl = new AdvancedStudentsControl();
         $GetStudentId = $StudentsIdControl->VerifyIdStudentId($studentId, $studentSecretKey);
 
         if (!$GetStudentId['success']) {
-            echo 'Error al verificar el id del estudiante';
+            include('../php/views/studentError.php');
         }
-    
+    }
+
+    $userId = $VerifySession['userId'] ?? NULL;
+    $accessToken = $VerifySession['accessToken']?? NULL;
+    $admin = $VerifySession['admin'];
+
+    $userName='';
+    $userPhoto='';
+
+    if($userId !== NULL && $accessToken != NULL && $admin == true){
+        
+        $userName = MicrosoftActions::getUserName($accessToken);
+        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
+
+    }else if($userId == NULL && $accessToken == NULL){
+        header('Location: ../index.php?sesion=no-started');
+        exit();
+    }else if($admin == NULL){
+        include('../php/views/alerts.php');
+        exit();
+    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
+        $userDataInstance = new userData($connection);
+        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+        if (!$GetCurrentUserData['success']) {
+            echo 'Error al obtener los datos del usuario';
+            $userName = 'Usuario';
+            $userPhoto = $_ENV['NO_PHOTO'];
+        }else{            
+            $userName = $GetCurrentUserData['userName'];
+            $userEmail = $GetCurrentUserData['email'];
+            $userPhone = $GetCurrentUserData['phone'];
+            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
+        }
     }
 }
 
@@ -169,11 +187,11 @@ if (!$VerifySession['success']) {
             <hr>
             <div class="dropdown">
             <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <img src="<?php echo $userPhoto ?>" alt="" width="32" height="32" class="rounded-circle me-2">
                 <strong><?php echo $userName ?></strong>
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+                <li><a class="dropdown-item" id="endSession" href="#">Cerrar Sesión</a></li>
             </ul>
             </div>
         </div>
@@ -333,3 +351,4 @@ if (!$VerifySession['success']) {
 <!-- Custom JS -->
 <script type="module" src="../js/students/index.js"></script>
 <script src="../js/utils/validate.js"></script>
+<script type="module" src="../js/utils/sessions.js"></script>

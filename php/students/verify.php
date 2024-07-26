@@ -19,11 +19,11 @@ class AdvancedStudentsControl{
             $decoded = JWT::decode($studentSecretKey, new Key($secretKey, 'HS256'));
     
             // Verificar si el ID del estudiante coincide con el ID en el token
-            if ($decoded->sId == $studentId) {
+            if ($decoded->studentId == $studentId) {
                 return array(
                     "success" => true,
                     "token" => true,
-                    "studentId" => $decoded->sId,
+                    "studentId" => $decoded->studentId,
                     "message" => "El id del estudiante coincide con el token"
                 );
             } else {
