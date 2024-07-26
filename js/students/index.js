@@ -1,5 +1,7 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
 import { initializeStudentDataTable, initializeStudentsUsersTable,InitializeStudentGrades } from '../datatables/index.js';
+import { enviarPeticionAjax } from '../utils/ajax.js';
+import { errorAlert, successAlert, infoAlert, loadingSpinner } from '../utils/alerts.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
@@ -134,7 +136,6 @@ $("#updateStudent").on( "submit", function( event ) {
 });
 
 $("#addStudents").on( "submit", function( event ) {
-    console.log("entro");
     event.preventDefault();
     const studentData = $(this).serialize();
     Swal.fire({
@@ -159,6 +160,45 @@ $("#addStudents").on( "submit", function( event ) {
             }
         }
     });
+});
+
+$("#studentName").on("blur", function(){
+    let studentName = $(this).val();
+   
+    if(studentName){
+        loadingSpinner(true, "#userList");
+        enviarPeticionAjax('../php/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
+        .done(function(data) {
+            loadingSpinner(false, "#userList");
+            $("#microsoftId, #microsoftEmail").val('');
+            $("#microsoftId, #microsoftEmail").prop("disabled", true);
+            if (data.success) {
+                $("#userList").append('<div class="list-group-item" data-id="' + data.data.id + '">' + data.data.displayName + '</div>');
+
+                $(".list-group-item").on("click", function() {
+                    loadingSpinner(false, "#userList");
+                    $("#studentName").val($(this).text());
+                    $("#microsoftId").val($(this).data('id'));
+                    $("#microsoftEmail").val(data.data.mail);
+                    $("#microsoftId, #microsoftEmail").prop("disabled", false);
+                    $("#microsoftDiv").show();
+                });
+            
+            } else {
+                infoAlert(data.message);
+                loadingSpinner(false, "#userList");
+                $("#microsoftId, #microsoftEmail").val('');
+                $("#microsoftId, #microsoftEmail").prop("disabled", true);
+                $("#microsoftDiv").hide();
+                return;
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            errorAlert("Error en la petición" + errorThrown);
+        });
+
+    }
+    return;
 });
 
 $("#studentsUsersTable").on( "click", ".addUserStudents", function() {
@@ -788,7 +828,7 @@ const VerifyUser = async (studentUserAdd) => {
                 confirmButtonText: 'Iniciar sesión'
             }).then((result) => {
                 if(result.isConfirmed){
-                    window.location.href = '../index.html';
+                    window.location.href = '../index.php';
                 }
             });
         }
@@ -823,7 +863,7 @@ const GetStudentsData = async (studentId) => {
                 confirmButtonText: 'Inciar sesión'
             }).then((result) => {
                 if(result.isConfirmed){
-                    window.location.href = 'index.html';
+                    window.location.href = 'index.php';
                 }
             });
         }
@@ -852,6 +892,9 @@ const AddStudent = async (studentData) => {
                 text: response.message
             });
             // Reload the table
+            $("#microsoftId, #microsoftEmail").val('');
+            $("#microsoftId, #microsoftEmail").prop("disabled", true);
+            $("#microsoftDiv").hide();
             $('#addStudents')[0].reset();
         }else{
             // Show an error message
@@ -862,7 +905,7 @@ const AddStudent = async (studentData) => {
                 confirmButtonText: 'Iniciar sesión'
             }).then((result) => {
                 if(result.isConfirmed){
-                    window.location.href = '../index.html';
+                    window.location.href = '../index.php';
                 }
             });
         }
