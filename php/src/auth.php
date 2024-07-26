@@ -21,7 +21,7 @@ class auth {
             } catch (\Exception $e) {
                 return array('success' => false, 'message' => $e->getMessage());
             }
-        } else if(isset($microsoftAccessToken)){
+        } else if($microsoftAccessToken != NULL){
 
             $dbConnection = new DBConnection();
             $connection = $dbConnection->getConnection();
