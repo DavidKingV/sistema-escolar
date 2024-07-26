@@ -155,7 +155,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         default:
 
         case 'addStudentGroup':
-            $studentGroupData = $_POST['studentGroupData'];
+            $studentGroupData = $_POST['studentGroupData'] ?? NULL;
             parse_str($studentGroupData, $studentGroupDataArray);
 
             $addStudentGroup = new StudentsControl($connection);
@@ -241,6 +241,17 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
 
             header('Content-Type: application/json');
             echo json_encode($groups);
+
+            break;
+
+        case 'searchMicrosoftUser':
+            $displayName = $_GET['displayName'];
+
+            $searchUser = new StudentsControl($connection);
+            $search = $searchUser->SearchMicrosoftUser($displayName);
+
+            header('Content-Type: application/json');
+            echo json_encode($search);
 
             break;
 

@@ -6,6 +6,7 @@ session_start();
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\loadEnv;
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\MicrosoftActions;
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
@@ -109,12 +110,32 @@ class StudentsControl {
             $sql = "INSERT INTO students (no_control, nombre, genero, nacimiento, estado_civil, nacionalidad, curp, telefono, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('sssssssss', $studentDataArray['controlNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail']);
-            $stmt->execute();
+            $stmt->execute();        
     
             if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Alumno registrado correctamente");
+                $lastStudentId = $stmt->insert_id;
+                $stmt->close();                
+
+
+                if(isset($studentDataArray['microsoftId']) && isset($studentDataArray['microsoftEmail'])){
+                    $sqlMicrosoft = "INSERT INTO microsoft_students (id, student_id, displayName, mail) VALUES (?, ?, ?, ?)";
+                    $stmtMicrosoft = $this->connection->prepare($sqlMicrosoft);
+                    $stmtMicrosoft->bind_param('siss', $studentDataArray['microsoftId'], $lastStudentId, $studentDataArray['studentName'], $studentDataArray['microsoftEmail']);
+                    $stmtMicrosoft->execute();
+
+                    if($stmtMicrosoft->affected_rows > 0){
+                        $stmtMicrosoft->close();
+                        $this->connection->close();
+                        return array("success" => true, "message" => "Alumno registrado correctamente");
+                    }else{
+                        $stmtMicrosoft->close();
+                        $this->connection->close();
+                        return array("success" => false, "message" => "Error al registrar el alumno, por favor intente de nuevo más tarde");
+                    }
+                }
+
+                $this->connection->close();        
+                return array("success" => true, "message" => "Alumno local registrado correctamente");
             }else{
                 $stmt->close();
                 $this->connection->close();
@@ -653,6 +674,27 @@ class StudentsControl {
         }
     }
     
+    public function SearchMicrosoftUser($displayName){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+            }else{
+                $accessToken = $VerifySession['accessToken']?? NULL;
+
+                if($accessToken != NULL){
+                    $searchUser = new MicrosoftActions($this->connection);
+                    $search = $searchUser->getStudentByName($accessToken, $displayName);
+                    
+                    if($search['success']){
+                        return array("success" => true, "message" => "Usuario encontrado", "data" => $search);
+                    }else{
+                        return array("success" => false, "message" => $search['error']);
+                    }
+                }else{
+                    return array("success" => false, "message" => "Debes iniciar sesión en Microsoft para poder enlazar un usuario a una cuenta");
+                }                
+            }
+    }
 
 }
 
