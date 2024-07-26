@@ -1,56 +1,55 @@
 <?php
 require_once(__DIR__.'/../php/vendor/autoload.php');
 
-use Vendor\Schoolarsystem\authLocal;
+use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
-use myPHPnotes\Microsoft\Models\User;
-use myPHPnotes\Microsoft\Handlers\Session;
+use Vendor\Schoolarsystem\MicrosoftActions;
+use Vendor\Schoolarsystem\loadEnv;
 
 session_start();
 
-$VerifySession = authLocal::verify($_COOKIE['auth'] ?? NULL);
+loadEnv::cargar();
+$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+
+$dbConnection = new DBConnection();
+$connection = $dbConnection->getConnection();
 
 if (!$VerifySession['success']) {
-    header('Location: index.html?sesion=expired');
+    header('Location: ../index.php?sesion=expired');
     exit();
 }else{
     $userId = $VerifySession['userId'] ?? NULL;
     $accessToken = $VerifySession['accessToken']?? NULL;
+    $admin = $VerifySession['admin'];
 
-    $dbConnection = new DBConnection();
-    $connection = $dbConnection->getConnection();
+    $userName='';
+    $userPhoto='';
 
-    if($userId == NULL && $accessToken != NULL){
-        $microsoft = new Auth(Session::get("tenant_id"),Session::get("client_id"),  Session::get("client_secret"), Session::get("redirect_uri"), Session::get("scopes"));
-        if(!isset($_REQUEST['code'])){
-            header('Location: ../index.html?sesion=expired');
-            exit();
-        }else{
-            $tokens = $microsoft->getToken($_REQUEST['code'], Session::get("state"));
-            $microsoft->setAccessToken($tokens->access_token);                        
-    
-            if($tokens->access_token) {
-                $user = (new User);
-                $userName = $user->data->getDisplayName();
-            } else {
-                throw new Exception('User data not found');
-            }
-        }        
+    if($userId !== NULL && $accessToken != NULL && $admin == true){
+        
+        $userName = MicrosoftActions::getUserName($accessToken);
+        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
 
     }else if($userId == NULL && $accessToken == NULL){
-        header('Location: index.html?sesion=expired');
+        header('Location: ../index.php?sesion=no-started');
         exit();
-    }else{
+    }else if($admin == NULL){
+        include('../php/views/alerts.php');
+        exit();
+    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
         $userDataInstance = new userData($connection);
         $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
 
         if (!$GetCurrentUserData['success']) {
             echo 'Error al obtener los datos del usuario';
-        }else{
+            $userName = 'Usuario';
+            $userPhoto = $_ENV['NO_PHOTO'];
+        }else{            
             $userName = $GetCurrentUserData['userName'];
             $userEmail = $GetCurrentUserData['email'];
             $userPhone = $GetCurrentUserData['phone'];
+            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
         }
     }
 }
@@ -64,6 +63,7 @@ if (!$VerifySession['success']) {
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/alumnos.css">
     <!--<link rel="stylesheet" href="../assets/css/alumnos.css">-->
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <title>Altas</title>
@@ -171,11 +171,11 @@ if (!$VerifySession['success']) {
             <hr>
             <div class="dropdown">
             <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <img src="<?php echo $userPhoto ?>" alt="" width="32" height="32" class="rounded-circle me-2">
                 <strong><?php echo $userName ?></strong>
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+                <li><a class="dropdown-item" id="endSession" href="#">Cerrar Sesión</a></li>
             </ul>
             </div>
         </div>
@@ -200,12 +200,22 @@ if (!$VerifySession['success']) {
                                 <div class="col-md py-3">
                                     <label for="controlNumber" class="form-label">No. Control</label>
                                     <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" placeholder="123456">
+                                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" placeholder="123456">                                    
                                 </div>
                                 <div class="col-md py-3">
                                     <label for="studentName" class="form-label">Nombre Completo</label>
                                     <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                                     <input type="text" class="form-control" id="studentName" name="studentName">
+                                    <div id="userList" class="list-group"></div>
+                                </div>
+                            </div>
+                            <div class="row g-2" id="microsoftDiv" style="display: none;">
+                                <div class="col-md py-3">
+                                    <div class="alert alert-success" role="alert">
+                                        <h5 class="alert-heading">Usuario Microsoft Encontrado</h5>
+                                        <input type="text" readonly class="form-control-plaintext" id="microsoftId" name="microsoftId" >                                   
+                                        <input type="text" readonly class="form-control-plaintext" id="microsoftEmail" name="microsoftEmail" >
+                                    </div>
                                 </div>
                             </div>
                             <div class="row g-2">
@@ -306,7 +316,10 @@ if (!$VerifySession['success']) {
 <!-- datables -->
 <script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
 
+<!-- select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
 <script type="module" src="../js/students/index.js"></script>
 <script src="../js/utils/validate.js"></script>
+<script type="module" src="../js/utils/sessions.js"></script>
