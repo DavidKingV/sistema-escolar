@@ -27,6 +27,22 @@ export function errorAlert(message) {
     })
 }
 
+export function infoAlert(message) {
+    Swal.fire({
+        icon: 'info',
+        title: 'Información',
+        text: message,
+    })
+}
+
+export function loadingSpinner(show, element) {
+    if (show) {
+        $(element).append('<div class="d-flex align-items-center py-2"><strong role="status" class="text-primary">Buscando...</strong><div class="spinner-border ms-auto text-primary" aria-hidden="true"></div></div>');
+    } else {
+        $(element).empty();
+    }
+}
+
 export function confirmAlert(message, confirmButtonText, cancelButtonText, confirmCallback) {
     Swal.fire({
         title: '¿Estás seguro de realizar esta acción?',
