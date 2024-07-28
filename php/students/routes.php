@@ -70,6 +70,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+        case 'getStudentsMicrosoftUsers':
+
+            $getStudentsMicrosoftUsers = new StudentsControl($connection);
+            $studentsMicrosoftUsers = $getStudentsMicrosoftUsers->GetMicrosoftStudentsUsers();
+    
+            header('Content-Type: application/json');
+            echo json_encode($studentsMicrosoftUsers);
+    
+            break;
+
         case 'verifyStudentUser':
 
             $studentUser = $_POST['studentUserAdd'];

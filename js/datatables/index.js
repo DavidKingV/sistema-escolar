@@ -81,7 +81,21 @@ function initializeStudentsUsersTable() {
             { "data": "id", "className": "text-center" },
             { "data": "name", "className": "text-center" },
             { "data": "user", "className": "text-center", "defaultContent": "No asignado"},
-            { "data": "status", "className": "text-center", "defaultContent": "Inactivo"},
+            {
+                "data": "status",
+                "className": "text-center",
+                "defaultContent": "Inactivo",
+                "render": function(data, type, row) {
+                    // Asigna el contenido por defecto "Inactivo" si data es null o vacío
+                    var statusText = data ? data : "Inactivo";
+                    var badgeClass = data === "Activo" ? "text-bg-success" : "text-bg-danger";
+                    // Si el contenido es "Inactivo", cambia la clase del badge
+                    if (statusText === "Inactivo") {
+                        badgeClass = "text-bg-secondary";
+                    }
+                    return '<span class="badge ' + badgeClass + '">' + statusText + '</span>';
+                }
+            },
             {
                 "data": null,
                 "render": function(data, type, row) {
@@ -97,6 +111,43 @@ function initializeStudentsUsersTable() {
                 },
                 "className": "text-center"
             }
+        ]
+    });
+    
+}
+
+
+function initializeStudentsMicrosoftUsersTable() {
+    
+    $("#studentsMicrosoftUsersTable").DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+        },
+        ordering: false,
+        paging: true,
+        processing: true,
+        ajax: {
+            url: "../php/students/routes.php", 
+            type: "POST",
+            data: { action: "getStudentsMicrosoftUsers" },
+            dataSrc: function(data){
+                if(!data[0].success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data[0].message,
+                    });
+                    return [];
+                }
+                return data;
+            }
+        },
+        "columns": [
+            // Define las columnas
+            { "data": "id", "className": "text-center" },
+            { "data": "name", "className": "text-center" },
+            { "data": "email", "className": "text-center", "defaultContent": "No asignado"}, 
+            { "data": null , "render": function(data, type, row) { return '<span class="badge text-bg-success">Activo</span>'}, "className": "text-center"}            
         ]
     });
     
@@ -443,4 +494,4 @@ function initializeSubjectsDataTable(){
 
 }
 
-export { initializeStudentDataTable, initializeStudentsUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeGroupsStudentsDataTable, initializeSubjectsDataTable, InitializeStudentGrades};
+export { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, initializeTeachersDataTable, initializeTeachersUsersTable, initializeCarreersDataTable, initializeGroupsDataTable, initializeGroupsStudentsDataTable, initializeSubjectsDataTable, InitializeStudentGrades};

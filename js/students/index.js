@@ -1,10 +1,11 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
-import { initializeStudentDataTable, initializeStudentsUsersTable,InitializeStudentGrades } from '../datatables/index.js';
+import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, InitializeStudentGrades } from '../datatables/index.js';
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner } from '../utils/alerts.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
+initializeStudentsMicrosoftUsersTable();
 
 $(function () {
     let currentPath = window.location.pathname;

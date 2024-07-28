@@ -198,7 +198,7 @@ class StudentsControl {
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $sql = "SELECT students.id, students.no_control, students.nombre, login_students.user, login_students.status FROM students LEFT JOIN login_students ON students.id = login_students.student_id";
+            $sql = "SELECT students.id, students.no_control, students.nombre, login_students.user, login_students.status FROM students LEFT JOIN login_students ON students.id = login_students.student_id WHERE students.id NOT IN (SELECT student_id FROM microsoft_students)";
             $query = $this->connection->query($sql);
 
             if(!$query){
@@ -214,6 +214,40 @@ class StudentsControl {
                             'name' => $row['nombre'],
                             'user' => $row['user'],
                             'status' => $row['status']
+                        );
+                    }
+                }else{
+                    $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
+                }
+                $this->connection->close();
+
+                return $students;
+            }
+        }  
+
+    }
+
+    function GetMicrosoftStudentsUsers(){
+
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "SELECT * FROM microsoft_students";
+            $query = $this->connection->query($sql);
+
+            if(!$query){
+                return array("success" => false, "message" => "Error al obtener los alumnos, por favor intente de nuevo más tarde");
+            }else{
+                $students = array();
+                if($query->num_rows > 0){
+                    while($row = $query->fetch_assoc()){
+                        $students[] = array(
+                            'success' => true,
+                            'id' => $row['id'],
+                            'student_id' => $row['student_id'],
+                            'name' => $row['displayName'],
+                            'email' => $row['mail']
                         );
                     }
                 }else{
