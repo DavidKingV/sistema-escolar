@@ -4,30 +4,53 @@ require_once(__DIR__.'/php/vendor/autoload.php');
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
+use Vendor\Schoolarsystem\MicrosoftActions;
+use Vendor\Schoolarsystem\loadEnv;
 
 session_start();
 
+loadEnv::cargar();
 $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
 
+$dbConnection = new DBConnection();
+$connection = $dbConnection->getConnection();
+
 if (!$VerifySession['success']) {
-    header('Location: index.html?sesion=expired');
+    header('Location: index.php?sesion=expired');
     exit();
 }else{
-    $userId = $VerifySession['userId'];
+    $userId = $VerifySession['userId'] ?? NULL;
+    $accessToken = $VerifySession['accessToken']?? NULL;
+    $admin = $VerifySession['admin'];
 
-    $dbConnection = new DBConnection();
-    $connection = $dbConnection->getConnection();
+    $userName='';
+    $userPhoto='';
 
-    $userDataInstance = new userData($connection);
-    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+    if($userId !== NULL && $accessToken != NULL && $admin == true){
+        
+        $userName = MicrosoftActions::getUserName($accessToken);
+        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
 
+    }else if($userId == NULL && $accessToken == NULL){
+        header('Location: index.php?sesion=no-started');
+        exit();
+    }else if($admin == NULL){
+        include('php/views/alerts.php');
+        exit();
+    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
+        $userDataInstance = new userData($connection);
+        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
 
-    if (!$GetCurrentUserData['success']) {
-        echo 'Error al obtener los datos del usuario';
-    }else{
-        $userName = $GetCurrentUserData['userName'];
-        $userEmail = $GetCurrentUserData['email'];
-        $userPhone = $GetCurrentUserData['phone'];
+        if (!$GetCurrentUserData['success']) {
+            echo 'Error al obtener los datos del usuario';
+            $userName = 'Usuario';
+            $userPhoto = $_ENV['NO_PHOTO'];
+        }else{            
+            $userName = $GetCurrentUserData['userName'];
+            $userEmail = $GetCurrentUserData['email'];
+            $userPhone = $GetCurrentUserData['phone'];
+            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
+        }
     }
 }
 ?>
@@ -149,11 +172,11 @@ if (!$VerifySession['success']) {
             <hr>
             <div class="dropdown">
             <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <img src="<?php echo $userPhoto ?>" alt="" width="32" height="32" class="rounded-circle me-2">
                 <strong><?php echo $userName ?></strong>
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+                <li><a class="dropdown-item" id="endSession" href="#">Cerrar Sesión</a></li>
             </ul>
             </div>
         </div>
@@ -284,3 +307,4 @@ if (!$VerifySession['success']) {
 <!-- Custom JS -->
 <script type="module" src="js/carreers/index.js"></script>
 <script src="js/utils/validate.js"></script>
+<script type="module" src="js/utils/sessions.js"></script>
