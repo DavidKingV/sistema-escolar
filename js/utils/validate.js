@@ -1,6 +1,6 @@
 /*import { VerifyUser } from './../students/index.js';*/
 
-$("#controlNumber, #studentCurp, #keyGroupEdit, #nameGroupEdit, #keyGroup, #nameGroup, #descriptionSubjectEdit, #subjectDes").on("input", function(event) {
+$("#controlNumber, #studentCurp, #keyGroupEdit, #nameGroupEdit, #keyGroup, #nameGroup, #descriptionSubjectEdit, #subjectDes, #subjectKey, #subjectKeyEdit").on("input", function(event) {
     event.preventDefault();
     let cursorPosition = $(this).prop('selectionStart');
         
@@ -628,6 +628,9 @@ $("#groupStudentsTable").validate({
 
 $("#updateSubject").validate({
     rules: {
+        subjectKeyEdit: {
+            required: true
+        },
         subjectNameEdit: {
             required: true,
             specialChars: true
@@ -636,6 +639,9 @@ $("#updateSubject").validate({
             lettersonly: true
         }
     }, messages: {
+        subjectKeyEdit: {
+            required: "Por favor, ingresa una clave"
+        },
         subjectNameEdit: {
             required: "Por favor, ingresa un nombre",
             specialChars: "Por favor, ingresa solo letras y números"
@@ -652,6 +658,9 @@ $("#updateSubject").validate({
 
 $("#addSubjects").validate({
     rules: {
+        subjectKey: {
+            required: true
+        },
         subjectName: {
             required: true,
             specialChars: true
@@ -660,6 +669,9 @@ $("#addSubjects").validate({
             lettersonly: true
         }
     }, messages: {
+        subjectKey: {
+            required: "Por favor, ingresa una clave"
+        },
         subjectName: {
             required: "Por favor, ingresa un nombre",
             specialChars: "Por favor, ingresa solo letras y números"
@@ -676,6 +688,9 @@ $("#addSubjects").validate({
 
 $("#addSubjectChild").validate({
     rules: {
+        subjectChildKey: {
+            required: true
+        },
         subjectChildName: {
             required: true,
             specialChars: true
@@ -684,6 +699,9 @@ $("#addSubjectChild").validate({
             lettersonly: true
         }
     }, messages: {
+        subjectChildKey: {
+            required: "Por favor, ingresa una clave"
+        },
         subjectChildName: {
             required: "Por favor, ingresa un nombre",
             specialChars: "Por favor, ingresa solo letras y números"

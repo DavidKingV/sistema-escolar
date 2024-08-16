@@ -240,7 +240,13 @@ if (!$VerifySession['success']) {
                     <input type="text" class="form-control" id="idSubjectDB" name="idSubjectDB" readonly>
                     <label for="idSubjectDB">ID</label>
                     </div>                    
-                </div>                
+                </div> 
+                <div class="col-md">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="subjectKeyEdit" name="subjectKeyEdit">
+                        <label for="subjectKeyEdit" class="form-label">Clave de la Materia</label>
+                    </div>
+                </div>                  
                 <div class="col-md">
                     <div class="form-floating">
                     <input type="text" class="form-control" id="subjectNameEdit" name="subjectNameEdit" value="">
@@ -299,6 +305,12 @@ if (!$VerifySession['success']) {
                 </div>                
             </div>            
             <div class="row g-2 py-4">
+                <div class="col-md">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="subjectChildKey" name="subjectChildKey">
+                        <label for="subjectChildKey" class="form-label">Clave de la Materia</label>
+                    </div>
+                </div>   
                 <div class="col-md">
                     <div class="form-floating">
                     <input type="text" class="form-control" id="subjectChildName" name="subjectChildName" value="">

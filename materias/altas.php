@@ -199,6 +199,11 @@ if (!$VerifySession['success']) {
                         <form id="addSubjects">
                             <div class="row g-2">
                                 <div class="col-md py-3">
+                                    <label for="subjectKey" class="form-label">Clave de la Materia</label>
+                                    <label id="subjectKey-error" class="error text-bg-danger" for="subjectKey" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="subjectKey" name="subjectKey">
+                                </div>   
+                                <div class="col-md py-3">
                                     <label for="subjectName" class="form-label">Nombre de la Materia</label>
                                     <label id="subjectName-error" class="error text-bg-danger" for="subjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                                     <input type="text" class="form-control" id="subjectName" name="subjectName">

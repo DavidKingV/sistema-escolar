@@ -69,6 +69,7 @@ class SubjectsControl{
                 $subject = array(
                     "success" => true,
                     "id" => $row['id'],
+                    "key" => $row['clave'],
                     "name" => $row['nombre'],
                     "description" => $row['descripcion'],
                 );
@@ -83,9 +84,9 @@ class SubjectsControl{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $query = "INSERT INTO subjects (nombre, descripcion) VALUES (?, ?)";
+            $query = "INSERT INTO subjects (clave, nombre, descripcion) VALUES (?, ?, ?)";
             $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("ss", $subjectDataArray['subjectName'], $subjectDataArray['subjectDes']);
+            $stmt->bind_param("sss", $subjectDataArray['subjectKey'], $subjectDataArray['subjectName'], $subjectDataArray['subjectDes']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
@@ -102,9 +103,9 @@ class SubjectsControl{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $query = "UPDATE subjects SET nombre = ?, descripcion = ? WHERE id = ?";
+            $query = "UPDATE subjects SET clave = ?, nombre = ?, descripcion = ? WHERE id = ?";
             $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("ssi", $subjectDataEditArray['subjectNameEdit'], $subjectDataEditArray['descriptionSubjectEdit'], $subjectDataEditArray['idSubjectDB']);
+            $stmt->bind_param("ssi", $subjectDataArray['subjectKeyEdit'], $subjectDataEditArray['subjectNameEdit'], $subjectDataEditArray['descriptionSubjectEdit'], $subjectDataEditArray['idSubjectDB']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
@@ -151,9 +152,9 @@ class SubjectsControlChild extends SubjectsControl{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $query = "INSERT INTO subject_child (id_subject, nombre, descripcion) VALUES (?, ?, ?)";
+            $query = "INSERT INTO subject_child (id_subject, clave, nombre, descripcion) VALUES (?, ?, ?)";
             $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("iss", $subjectChildDataArray['idMainSubject'], $subjectChildDataArray['subjectChildName'], $subjectChildDataArray['descriptionChildSubject']);
+            $stmt->bind_param("iss", $subjectChildDataArray['idMainSubject'], $subjectChildDataArray['subjectChildKey'], $subjectChildDataArray['subjectChildName'], $subjectChildDataArray['descriptionChildSubject']);
             $stmt->execute();
 
             $newlyCreatedId = $this->connection->insert_id;
@@ -211,9 +212,9 @@ class SubjectsControlChild extends SubjectsControl{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $query = "UPDATE subject_child SET nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
+            $query = "UPDATE subject_child SET clave = ?, nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
             $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("ssii", $subjectChildDataEditArray['subjectChildNameInfo'], $subjectChildDataEditArray['descriptionChildSubjectInfo'], $subjectChildDataEditArray['idMainSubjectInfo'], $subjectChildDataEditArray['idChildSubjectInfo']);
+            $stmt->bind_param("ssii", $subjectChildDataArray['subjectChildKey'], $subjectChildDataEditArray['subjectChildNameInfo'], $subjectChildDataEditArray['descriptionChildSubjectInfo'], $subjectChildDataEditArray['idMainSubjectInfo'], $subjectChildDataEditArray['idChildSubjectInfo']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
