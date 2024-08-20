@@ -204,6 +204,7 @@ if (!$VerifySession['success']) {
                                         <th class="text-center">Nombre</th>
                                         <th class="text-center">Area</th>
                                         <th class="text-center">Subarea</th>
+                                        <th class="text-center">Materias</th>
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
@@ -285,6 +286,67 @@ if (!$VerifySession['success']) {
   </div>
 </div>
 
+<!-- Modal materias -->
+<div class="modal fade modal-xl modal-dialog-scrollable" id="subjectsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="subjectsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="subjectsModalLabel">Materias de la carrera</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#add_subject_tab" type="button" role="tab" aria-controls="add_subject_tab" aria-selected="true">Registrar</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#view_subjects_tab" type="button" role="tab" aria-controls="view_subjects_tab" aria-selected="false">Ver Lista</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="add_subject_tab" role="tabpanel">
+                <form id="addSubjectCarreer">
+                    <input type="text" id="carreerId" name="carreerId" hidden>
+                    <div class="col-md py-4">
+                        <div class="form-floating">
+                        <select class="form-select subjectName" name="subjectName" id="subjectName" style="">
+                            <option selected value="0">Materia</option>
+                        </select>  
+                        <label for="floatingSelect">Selecciona</label>
+                        </div>
+                        <label id="subjectName-error" class="error text-bg-danger" for="subjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>                    
+                    </div>
+
+                    <div class="col-md" id="childSubjectDiv" hidden>
+                        <div class="form-floating">
+                        <select class="form-select childSubjectName" name="childSubjectName" id="childSubjectName" style="" disabled>
+                            <option selected value="0">Submateria</option>
+                        </select>  
+                        <label for="floatingSelect">Selecciona</label>
+                        </div>
+                        <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>                    
+                    </div>
+
+                    <div class="col-md" >
+                        <button type="submit" class="btn btn-success">Agregar</button>    
+                    </div>
+                </form>
+            </div>
+            <div class="tab-pane fade" id="view_subjects_tab" role="tabpanel">
+
+            </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Boostrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -306,5 +368,6 @@ if (!$VerifySession['success']) {
 
 <!-- Custom JS -->
 <script type="module" src="js/carreers/index.js"></script>
+<script type="module" src="js/carreers/carreers.js"></script>
 <script src="js/utils/validate.js"></script>
 <script type="module" src="js/utils/sessions.js"></script>
