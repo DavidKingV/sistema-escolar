@@ -141,4 +141,110 @@ class CareersControl{
             }
         }
     }
+
+    public function getSubjects($carreerId){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "SELECT s.id, s.clave, s.nombre FROM subjects s LEFT JOIN carreers_subjects sc ON s.id = sc.id_subject AND sc.id_carreer = ? WHERE sc.id_subject IS NULL;";
+            $query = $this->connection->prepare($sql);
+            $query->bind_param('i', $carreerId);
+            $query->execute();
+
+            $result = $query->get_result();
+            
+            if($result->num_rows === 0){
+                return array("success" => false, "message" => "No hay materias disponibles para agregar a la carrera");
+            }else{
+                $subjects = array();
+                
+                while($row = $result->fetch_assoc()){
+                    $subjects[] = array(
+                        "success" => true,  
+                        "subjectId" => $row['id'],
+                        "subjectClave" => $row['clave'],
+                        "subjectName" => $row['nombre']
+                    );
+                }
+                
+                $this->connection->close();
+                return $subjects;
+            }
+        }
+    }
+
+    public function getChildSubjects($subjectID){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "SELECT * FROM subject_child WHERE id_subject = ?";
+            $query = $this->connection->prepare($sql);
+            $query->bind_param('i', $subjectID);
+            $query->execute();
+
+            $result = $query->get_result();
+
+            if($result->num_rows === 0){
+                return array("success" => false, "message" => "Sin materias hijas");
+            }else{
+                $childSubjects = array();
+               
+                while($row = $result->fetch_assoc()){
+                    $childSubjects[] = array(
+                        "success" => true,  
+                        "childSubjectId" => $row['id'],
+                        "childSubjectClave" => $row['clave'],
+                        "childSubjectName" => $row['nombre']
+                    );
+                }
+               
+                $this->connection->close();
+                return $childSubjects;
+            }
+        }
+    }
+
+    public function addSubjectsCarreer($subjectsCarreerArray){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+
+            if(isset($subjectsCarreerArray['childSubjectName'])){
+                $sql = "INSERT INTO carreers_subjects (id_subject, id_child_subject, id_carreer) VALUES (?, ?)";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->bind_param('iii', $subjectsCarreerArray['childSubjectName'], $subjectsCarreerArray['childSubjectName'], $subjectsCarreerArray['carreerId']);
+                $stmt->execute();
+
+                if($stmt->affected_rows > 0){
+                    $stmt->close();
+                    $this->connection->close();
+                    return array("success" => true, "message" => "Materia hija agregada a la carrera correctamente");
+                }else{
+                    $stmt->close();
+                    $this->connection->close();
+                    return array("success" => false, "message" => "Error al agregar la materia hija a la carrera");
+                }
+            }else{
+                $sql = "INSERT INTO carreers_subjects (id_subject, id_carreer) VALUES (?, ?)";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->bind_param('ii', $subjectsCarreerArray['subjectName'], $subjectsCarreerArray['carreerId']);
+                $stmt->execute();
+    
+                if($stmt->affected_rows > 0){
+                    $stmt->close();
+                    $this->connection->close();
+                    return array("success" => true, "message" => "Materia agregada a la carrera correctamente");
+                }else{
+                    $stmt->close();
+                    $this->connection->close();
+                    return array("success" => false, "message" => "Error al agregar la materia a la carrera");
+                }
+
+            }
+
+        }
+    }
 }

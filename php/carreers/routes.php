@@ -56,7 +56,39 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+        case 'getSubject':
+            $carreerId = $_POST['carreerId'];
+
+            $getSubjects = new CareersControl($connection);
+            $subjects = $getSubjects->getSubjects($carreerId);
+
+            header('Content-Type: application/json');
+            echo json_encode($subjects);
+
+            break;
+
+        case 'getChildSubject':
+            $subjectID = $_POST['subjectId'];
+
+            $getSubjects = new CareersControl($connection);
+            $subjects = $getSubjects->getChildSubjects($subjectID);
     
+            header('Content-Type: application/json');
+            echo json_encode($subjects);
+    
+            break;
+
+        case 'addSubjectsCarreer':
+            $subjectsCarreer = $_POST['subjectAddData'];
+            parse_str($subjectsCarreer, $subjectsCarreerArray);
+
+            $addSubjectsCarreer = new CareersControl($connection);
+            $add = $addSubjectsCarreer->addSubjectsCarreer($subjectsCarreerArray);
+
+            header('Content-Type: application/json');
+            echo json_encode($add);
+
+            break;
     }
 
 }
