@@ -478,6 +478,26 @@ $("#editTeachersUsers").validate({
     }
 });
 
+$("#addSubjectCarreer").validate({
+    rules: {
+        subjectName: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        childSubjectName: {
+            required: true,
+            valueNotEquals: "0"
+        },
+    }, messages: {
+        subjectName: {
+            required: "Por favor, selecciona una materia",
+        },
+        childSubjectName: {
+            required: "Por favor, selecciona una materia hija",
+        }
+    }
+});
+
 $("#updateCareer").validate({
     rules: {
         careerNameEdit: {
