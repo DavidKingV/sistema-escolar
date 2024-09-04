@@ -796,6 +796,69 @@ $("#studentGroupDetailsForm").validate({
     }
 });
 
+$("#paymentsForm").validate({
+    rules:{
+        studentName: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentDate: {
+            required: true,
+            date: true
+        },
+        paymentConcept: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentPrice: {
+            required: true,
+            number: true
+        },
+        paymentTotal: {
+            required: true,
+            number: true
+        },
+        paymentMethod: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentInvoice: {
+            required: true,
+            valueNotEquals: " "
+        },
+        messages: {
+            studentName: {
+                required: "Por favor, ingresa un nombre"
+            },
+            paymentDate: {
+                required: "Por favor, ingresa una fecha",
+                date: "Por favor, ingresa una fecha válida"
+            },
+            paymentConcept: {
+                required: "Por favor, selecciona un concepto"
+            },
+            paymentPrice: {
+                required: "Por favor, ingresa un precio",
+                number: "Por favor, ingresa solo números"
+            },
+            paymentTotal: {
+                required: "Por favor, ingresa un total",
+                number: "Por favor, ingresa solo números"
+            },
+            paymentMethod: {
+                required: "Por favor, selecciona un método de pago"
+            },
+            paymentInvoice: {
+                required: "Por favor, selecciona el tipo de compronbante"
+            }
+        },
+        errorPlacement: function(error, element) {
+            var elementId = element.attr("id");
+            error.insertBefore($("#" + elementId + "-error")); // Coloca el error después de la etiqueta de error personalizada
+        }
+    }
+});
+
 $.validator.addMethod("lettersonly", function(value) {
     return /[a-zA-Z\'\-\sáéíóúñÑÁÉÍÓÚüÜ]+$/.test(value);
 }, "Por favor, ingresa solo letras");
