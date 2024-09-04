@@ -22,6 +22,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
             break;
 
+        case 'GetStudentsNames':
+
+            $getStudentsNames = new StudentsControl($connection);
+            $studentsNames = $getStudentsNames->GetStudentsNames();
+
+            header('Content-Type: application/json');
+            echo json_encode($studentsNames);
+
+            break;
+
         case 'addStudent':
             $studentData = $_POST['studentData'];
             

@@ -192,6 +192,36 @@ class StudentsControl {
 
     }
 
+    public function GetStudentsNames(){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $query = "SELECT id, nombre FROM students";
+            $result = mysqli_query($this->connection, $query);                
+            
+            if(!$result){
+                return array("success" => false, "message" => "Error al obtener los grupos");
+            }else{
+                $students = array();
+                if($result->num_rows > 0){
+                    while($row = $result->fetch_assoc()){
+                        $students[] = array(
+                            "success" => true,
+                            "id" => $row['id'],
+                            "name" => $row['nombre']
+                        );
+                    }
+                }else{
+                    $students = array("success" => false, "message" => "No se encontraron grupos");
+                }
+                $this->connection->close();
+                return $students;
+            }
+        }
+    }
+
+
     function GetStudentsUsers(){
 
         $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
