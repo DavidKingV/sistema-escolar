@@ -95,6 +95,20 @@ if (!$VerifySession['success']) {
 
             </li>
             <li class="py-1">                 
+                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayments" aria-expanded="false" aria-controls="collapsePayments">
+                <i class="bi bi-credit-card-fill px-3"></i>Pagos
+                </button>                
+                <div class="collapse" id="collapsePayments">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="pagos.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <!--<a href="alumnos.php" class="list-group-item list-group-item-action">Lista</a>
+                            <a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>-->
+                        </div>                       
+                    </div>
+                </div>                                                    
+            </li>
+            <li class="py-1">                 
                 <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
                 <i class="bi bi-person-badge-fill px-3"></i>Alumnos
                 </button>                
