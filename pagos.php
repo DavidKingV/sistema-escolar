@@ -94,8 +94,8 @@ if (!$VerifySession['success']) {
                     <div class="card card-body">
                         <div class="list-group">                            
                             <a href="pagos.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <!--<a href="alumnos.php" class="list-group-item list-group-item-action">Lista</a>
-                            <a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>-->
+                            <a href="pagos/fechas-pago.php" class="list-group-item list-group-item-action">Fechas de pago</a>
+                            <!--<a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>-->
                         </div>                       
                     </div>
                 </div>                                                    
