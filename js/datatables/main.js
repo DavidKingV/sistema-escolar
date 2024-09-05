@@ -1,4 +1,4 @@
-import { errorAlert } from '../alerts/main.js';
+import { errorAlert } from '../utils/alerts.js';
 
 export function initializeDataTable(element, url, data, columns) {
     $(element).DataTable({
