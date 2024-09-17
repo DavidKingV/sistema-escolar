@@ -267,12 +267,25 @@ if (!$VerifySession['success']) {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary">Asignae</button>
-      </div>
+        <form id="monthAmountForm">
+            <div class="row g-2">
+                <div class="col-md">                                                
+                    <label for="floatingSelect">Costo de la Mensualidad</label>
+                                            
+                    <label id="studentAmount-error" class="error text-bg-danger" for="studentAmount" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                    <div class="input-group mb-3 py-2">   
+                        <span class="input-group-text">$</span>                                                                  
+                        <input type="text" class="form-control" id="studentAmount" name="studentAmount">   
+                    </div>                      
+                </div>
+            </div>
+        
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary">Asignar costo</button>
+            </div>
+      </form>
     </div>
   </div>
 </div>
@@ -298,6 +311,6 @@ if (!$VerifySession['success']) {
 
 <!-- Custom JS -->
 <script type="module" src="../js/payments/payments-dates.js"></script>
-<script src="../js/utils/validate.js"></script>
+<script src="../js/payments/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>
 
