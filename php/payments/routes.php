@@ -33,6 +33,39 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             echo json_encode($verify);
             break;
 
+        case 'getStudentsPayMount':
+
+            $getStudentsPayMount = new PaymentsControl($connection);
+            $get = $getStudentsPayMount->GetStudentsPayMount();
+
+            header('Content-Type: application/json');
+            echo json_encode($get);
+            break;
+
+        case 'setStudentPayMount':
+
+            $data = $_POST['data'];
+            $studentId = $data['studentId'];
+            $amount = $data['amount'];
+
+            
+            $setStudentPayMount = new PaymentsControl($connection);
+            $set = $setStudentPayMount->SetStudentPayMount($studentId, $amount);
+            
+            header('Content-Type: application/json');
+            echo json_encode($set);
+            break;
+
+        case 'VerifyMonthlyPayment':
+            $studentId = $_POST['data'];
+
+            $verifyMonthlyPayment = new PaymentsControl($connection);
+            $verify = $verifyMonthlyPayment->VerifyMonthlyPayment($studentId);
+
+            header('Content-Type: application/json');
+            echo json_encode($verify);
+            break;
+
         default:
             # code...
             break;

@@ -242,6 +242,103 @@ class PaymentsControl{
 
         return array('year' => $year, 'month' => $month);
     }
+
+    public function GetStudentsPayMount(){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            try {
+                $sql = "SELECT students.id, students.nombre, students_payments_amounts.monthly_amount FROM students LEFT JOIN students_payments_amounts ON students.id = students_payments_amounts.id_student ORDER BY id;";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->execute();
+                $result = $stmt->get_result();
+            
+                $response = array();
+                if(!$result){
+                    return array("success" => false, "message" => "Error al obtener los grupos");
+                }else{
+                    if($result->num_rows > 0){
+                        while($row = $result->fetch_assoc()){
+                            $response[] = array(
+                                "success" => true,
+                                "id" => $row['id'],
+                                "name" => $row['nombre'],
+                                "amount" => $row['monthly_amount']
+                            );
+                        }
+                    }else{
+                        $response = array("success" => false, "message" => "No se encontraron grupos");
+                    }
+                    $this->connection->close();
+                    return $response;
+                }
+                           
+            } catch (mysqli_sql_exception $e) {
+                $response = array("success" => false, "message" => "Error al procesar la solicitud");
+            }finally {
+                if (isset($stmt)) {
+                    $stmt->close();
+                }
+            }
+            
+            return $response;
+        }
+    }
+
+    public function SetStudentPayMount($studentId, $amount){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            try {
+                $sql = "INSERT INTO students_payments_amounts (id_student, monthly_amount) VALUES (?, ?) ON DUPLICATE KEY UPDATE monthly_amount = ?";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->bind_param("iii", $studentId, $amount, $amount);
+                $stmt->execute();
+            
+                $response = ($stmt->affected_rows > 0)
+                    ? array("success" => true, "message" => "Monto actualizado exitosamente")
+                    : array("success" => false, "message" => "Error al actualizar el monto");
+                           
+            } catch (mysqli_sql_exception $e) {
+                $response = array("success" => false, "message" => $e->getMessage());
+            }finally {
+                if (isset($stmt)) {
+                    $stmt->close();
+                }
+            }
+            
+            return $response;
+        }
+    }
+
+    public function VerifyMonthlyPayment($studentId){
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            try {
+                $sql = "SELECT * FROM students_payments_amounts WHERE id_student = ?";
+                $stmt = $this->connection->prepare($sql);
+                $stmt->bind_param("i", $studentId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+            
+                $response = ($result->num_rows > 0)
+                    ? array("success" => true, "monthly_amount" => $result->fetch_assoc()['monthly_amount'])
+                    : array("success" => false, "message" => "No se encontraron pagos pendientes");
+                           
+            } catch (mysqli_sql_exception $e) {
+                $response = array("success" => false, "message" => "Error al procesar la solicitud");
+            }finally {
+                if (isset($stmt)) {
+                    $stmt->close();
+                }
+            }
+        }
+            return $response;
+    }
 }
 
 ?>
