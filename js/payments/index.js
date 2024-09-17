@@ -1,5 +1,5 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
-import { successAlert, errorAlert } from '../utils/alerts.js';
+import { successAlert, errorAlert, loadingAlert } from '../utils/alerts.js';
 
 let phpPath = 'php/payments/routes.php';
 
@@ -97,6 +97,25 @@ const VerifyTaxData = async (studentId) => {
     
 }
 
+const VerifyMonthlyPayment = async (studentId) => {
+    enviarPeticionAjaxAction(phpPath, 'POST', 'VerifyMonthlyPayment', studentId)
+    .done(function (response) {
+        if (response.success) {
+            let monthlyPayment = response.monthly_amount;
+
+            $("#paymentPrice").val(monthlyPayment);
+            $("#paymentPrice").prop('readonly', true);
+
+            CalculateTotal();
+
+        }
+    })
+    .fail(function (error) {
+        console.error('Error al verificar los datos:', error);
+    });
+
+}
+
 const CheckActive = (check, input) => {
     //verificar que check este activo
     if(check.prop('checked')){
@@ -184,6 +203,32 @@ $(document).ready(function() {
         
         if($(this).valid()){
             AddPayment(data);
+        }
+    });
+
+    $("#studentName").on('change', async function() {
+        let studentId = $("#studentName").val();
+        if($("#paymentConcept").val() === 'Mensualidad'){
+            loadingAlert();
+            await VerifyMonthlyPayment(studentId);
+            Swal.close();
+        }else{
+            $("#paymentPrice").prop('readonly', false);
+            $("#paymentPrice").val('');
+            CalculateTotal();
+        }
+    });
+
+    $("#paymentConcept").on('change', async function() {
+        let studentId = $("#studentName").val();
+        if($("#paymentConcept").val() === 'Mensualidad'){
+            loadingAlert();
+            await VerifyMonthlyPayment(studentId);
+            Swal.close();    
+        }else{
+            $("#paymentPrice").prop('readonly', false);
+            $("#paymentPrice").val('');
+            CalculateTotal();
         }
     });
 });
