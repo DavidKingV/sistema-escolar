@@ -65,7 +65,7 @@ if ($VerifySession['success']) {
         <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; min-height: calc(100vh);">
             <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item py-1">
-                <a href="dashboard.php" class="btn btn-light d-flex align-items-center justify-content-start"><i class="bi bi-house-fill px-3"></i>Inicio</a>
+                <a href="<?php echo $_ENV['BASE_URL']; ?>/dashboard.php" class="btn btn-light d-flex align-items-center justify-content-start"><i class="bi bi-house-fill px-3"></i>Inicio</a>
             </li>
             <li class="py-1">                 
                 <button class="btn btn-primary w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
