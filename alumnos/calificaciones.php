@@ -5,6 +5,7 @@ require_once __DIR__ . '/../php/students/verify.php';
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
+use Vendor\Schoolarsystem\MicrosoftActions;
 
 session_start();
 
@@ -349,6 +350,6 @@ if (!$VerifySession['success']) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="../js/students/index.js"></script>
+<script type="module" src="../js/students/notes.js"></script>
 <script src="../js/utils/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>

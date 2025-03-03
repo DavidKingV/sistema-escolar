@@ -8,60 +8,7 @@ initializeStudentsUsersTable();
 initializeStudentsMicrosoftUsersTable();
 
 $(function () {
-    let currentPath = window.location.pathname;
-    let specificPath = "/alumnos/calificaciones.php";
-
-    if (currentPath === specificPath) {
-        let urlParams = new URLSearchParams(window.location.search);
-        let studentIdGroup = urlParams.get('id'); 
-        let token = urlParams.get('jtw');       
-
-        if (studentIdGroup) {
-            VerifyToken(studentIdGroup, token)
-            .then((response) => {
-                if(response){
-                    VerifyGroupStudent(studentIdGroup).then((response) => {
-                        if(response){
-                            InitializeStudentGrades(studentIdGroup);
-                            HideTab("#alertDisplay");
-                            RenderAlertMessage("El alumno ya tiene un grupo asignado", "info", "#studentGroupDetails");
-                            
-                            localStorage.setItem('studentIdJTW', studentIdGroup);
-                            var studentIdJTW = localStorage.getItem('studentIdJTW');
-                            
-                            if(!studentIdJTW){
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'ID del estudiante no proporcionado',
-                                    text: 'Por favor proporciona un ID válido para asignar un usuario.'
-                                }).then((result) => {
-                                    if(result.isConfirmed){
-                                        window.location.href = '../alumnos.php';
-                                    }
-                                });
-                            }
-
-                            $(window).on('beforeunload', function() {
-                                console.log("Limpiando el localStorage");
-                                localStorage.removeItem('studentIdJTW');
-                            });
-
-                        }
-                    });
-                }
-            });
-        
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'No se ha podido obtener el ID del alumno, por favor intenta de nuevo.',
-            });
-        }
-
-        initializeSubjectChangeListener(".subjectName");
-
-    }
+    
 });
 
 $('#studentTable').on('click', '.editStudent', function() {
