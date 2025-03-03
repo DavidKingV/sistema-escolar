@@ -198,16 +198,21 @@ if (!$VerifySession['success']) {
                         <form id="addStudents">
                             <div class="row g-2">
                                 <div class="col-md py-3">
-                                    <label for="controlNumber" class="form-label">No. Control</label>
-                                    <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" placeholder="123456">                                    
-                                </div>
-                                <div class="col-md py-3">
                                     <label for="studentName" class="form-label">Nombre Completo</label>
                                     <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                                     <input type="text" class="form-control" id="studentName" name="studentName">
                                     <div id="userList" class="list-group"></div>
                                 </div>
+                                <div class="col-md py-3">
+                                    <label for="controlNumber" class="form-label">No. Control Interno</label>
+                                    <label id="controlNumber-error" class="error text-bg-danger" for="controlNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="controlNumber" name="controlNumber" placeholder="123456">                                    
+                                </div>  
+                                <div class="col-md py-3">
+                                    <label for="controlSepNumber" class="form-label">No. Control SEP</label>
+                                    <label id="controlSepNumber-error" class="error text-bg-danger" for="controlSepNumber" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <input type="text" class="form-control" id="controlSepNumber" name="controlSepNumber" placeholder="123456">                                    
+                                </div>                               
                             </div>
                             <div class="row g-2" id="microsoftDiv" style="display: none;">
                                 <div class="col-md py-3">

@@ -179,7 +179,10 @@ $("#addStudents").validate({
         controlNumber: {
             required: true,
             minlength: 4,
-            specialChars: true
+        },
+        controlSepNumber: {
+            required: false,
+            minlength: 4,
         },
 		studentName: {
 			required: true,
@@ -221,6 +224,10 @@ $("#addStudents").validate({
         controlNumber: {
             required: "Por favor, ingresa tu número de control",
             minlength: "El número de control debe tener al menos 4 caracteres"
+        },
+        controlSepNumber: {
+            required: "Por favor, ingresa tu número de control SEP",
+            minlength: "El número de control SEP debe tener al menos 4 caracteres"
         },
         studentName: {
             required: "Por favor, ingresa un nombre",
