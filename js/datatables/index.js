@@ -26,7 +26,16 @@ function initializeStudentDataTable() {
         "columns": [
             // Define las columnas
             { "data": "no_control", "className": "text-center" },
-            { "data": "name", "className": "text-center" },
+            { data: 'patientName', render: function(data, type, row) {
+                var html = `<div class=""><div class="ps-3"><div class="fw-600 pb-1"><strong>`+row.name+`</strong></div>`;
+                if (row.academicalStatus === '1') html += `<span class="badge text-bg-success" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Activo</span>`;
+                else if (row.academicalStatus === '2') html += `<span class="badge text-bg-warning" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Baja Temporal</span>`;
+                else if (row.academicalStatus === '3') html += `<span class="badge text-bg-danger" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Inactivo/Baja</span>`;
+                else if (row.academicalStatus === '4') html += `<span class="badge text-bg-primary" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Egresado</span>`;
+                else html += `<span class="badge text-bg-secondary" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">`+row.academicalStatus+`</span>`;
+                html += `</div></div>`;                
+                return html;
+            }, 'className': 'text-center py-2'},
             { "data": "phone", "className": "text-center" },
             { "data": "email", "className": "text-center" },
             { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},

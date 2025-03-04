@@ -80,6 +80,23 @@ if (!$VerifySession['success']) {
 </body>
 </html>
 
+<!-- Modal -->
+<div class="modal fade modal-lg" id="statusModal" tabindex="-1" aria-labelledby="statusModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="statusModalLabel">Editar estatus del alumno</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="edit_paciente">
+      <div class="modal-body" id="statusModalBody">
+        
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Modal EDIT -->
 <div class="modal fade modal-lg" id="StutentEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="StutentEditModalLabel" aria-hidden="true">
   <div class="modal-dialog">

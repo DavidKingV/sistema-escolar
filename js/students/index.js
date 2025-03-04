@@ -1,7 +1,8 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
 import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, InitializeStudentGrades } from '../datatables/index.js';
 import { enviarPeticionAjax } from '../utils/ajax.js';
-import { errorAlert, successAlert, infoAlert, loadingSpinner } from '../utils/alerts.js';
+import { sendFetch } from '../../public/js/global/fetchCall.js';
+import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '../utils/alerts.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
@@ -53,6 +54,21 @@ $('#studentTable').on('click', '#deleteStudent', function() {
         });
     }
 
+});
+
+$('#studentTable').on('click', '.badge', async function() {
+    let studentId = $(this).data('id');
+    let studentName = $(this).data('name');
+    let studentStatus = $(this).data('status');
+
+    await $.post('public/modals/studentStatus.modal.php', { studentId: studentId,studentName: studentName, studentStatus: studentStatus }, function (data) {
+        $("#statusModal").modal('show');
+        $('#statusModalBody').html(data);
+    });
+
+    if(!studentId){
+        errorAlert('ID del estudiante no proporcionado');
+    }
 });
 
 $("#updateStudent").on( "submit", function( event ) {

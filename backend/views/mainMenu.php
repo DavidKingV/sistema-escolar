@@ -54,7 +54,7 @@ if ($VerifySession['success']) {
 <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">
-            <img src="../assets/img/escudo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-mid">
+            <img src="<?php echo $_ENV['BASE_URL']; ?>/assets/img/escudo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-mid">
             ESMEFIS Centro Universitario
           </a>
         </div>

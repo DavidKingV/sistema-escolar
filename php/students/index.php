@@ -47,7 +47,8 @@ class StudentsControl {
                             'name' => $row['nombre'],
                             'phone' => $row['telefono'],
                             'email' => $row['email'],
-                            'group_name' => $row['nombre_grupo']
+                            'group_name' => $row['nombre_grupo'],
+                            'academicalStatus' => $row['academical_status']
                         );
                     }
                 }else{
@@ -163,6 +164,29 @@ class StudentsControl {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al actualizar el alumno, por favor intente de nuevo más tarde");
+            }
+        }
+    }
+
+    function UpdateStatus($statusDataArray){
+            
+        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "UPDATE students SET academical_status = ? WHERE id = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param('ii', $statusDataArray['status'], $statusDataArray['studentId']);
+            $stmt->execute();
+
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                $this->connection->close();
+                return array("success" => true, "message" => "Estatus actualizado correctamente");
+            }else{
+                $stmt->close();
+                $this->connection->close();
+                return array("success" => false, "message" => "Error al actualizar el estatus, por favor intente de nuevo más tarde");
             }
         }
     }
