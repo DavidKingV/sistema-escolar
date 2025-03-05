@@ -68,7 +68,7 @@ if ($VerifySession['success']) {
                 <a href="<?php echo $_ENV['BASE_URL']; ?>/dashboard.php" class="btn btn-light d-flex align-items-center justify-content-start"><i class="bi bi-house-fill px-3"></i>Inicio</a>
             </li>
             <li class="py-1">                 
-                <button class="btn btn-primary w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
+                <button class="btn w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
                 <i class="bi bi-person-badge-fill px-3"></i>Alumnos
                 </button>                
                 <div class="collapse" id="collapseStudents">
@@ -77,6 +77,19 @@ if ($VerifySession['success']) {
                             <a href="<?php echo $_ENV['BASE_URL']; ?>/alumnos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
                             <a href="<?php echo $_ENV['BASE_URL']; ?>/alumnos.php" class="list-group-item list-group-item-action">Lista</a>
                             <a href="<?php echo $_ENV['BASE_URL']; ?>/alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
+                        </div>                       
+                    </div>
+                </div>                                                    
+            </li>
+            <li class="py-1">                 
+                <button class="btn w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClinicalHours" aria-expanded="false" aria-controls="collapseClinicalHours">
+                <i class="bi bi-file-earmark-medical-fill px-3"></i>Horas practicas
+                </button>                
+                <div class="collapse" id="collapseClinicalHours">
+                    <div class="card card-body">
+                        <div class="list-group">                            
+                            <a href="<?php echo $_ENV['BASE_URL']; ?>/public/practicas/calendario.php" class="list-group-item list-group-item-action">Calendario</a>
+                            <a href="<?php echo $_ENV['BASE_URL']; ?>/public/practicas/historial.php" class="list-group-item list-group-item-action">Historial</a>
                         </div>                       
                     </div>
                 </div>                                                    
