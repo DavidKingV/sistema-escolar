@@ -20,8 +20,18 @@ class SubjectsControl{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $query = "SELECT DISTINCT subjects.nombre, subjects.descripcion, carreers_subjects.id_subject, carreers_subjects.id_carreer AS id_carrera, carreers.nombre AS nombre_carrera, subject_child.nombre AS nombre_subject_child, subject_child.id AS id_subjet_child FROM subjects INNER JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject INNER JOIN carreers ON carreers_subjects.id_carreer = carreers.id LEFT JOIN 
-            subject_child ON subjects.id = subject_child.id_subject";
+            $query = "SELECT DISTINCT 
+    subjects.nombre, 
+    subjects.descripcion, 
+    subjects.id AS id_subject, 
+    carreers_subjects.id_carreer AS id_carrera, 
+    carreers.nombre AS nombre_carrera, 
+    subject_child.nombre AS nombre_subject_child, 
+    subject_child.id AS id_subjet_child
+FROM subjects 
+LEFT JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject 
+LEFT JOIN carreers ON carreers_subjects.id_carreer = carreers.id 
+LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
             $result = mysqli_query($this->connection, $query); 
             
             if (!$result) {
