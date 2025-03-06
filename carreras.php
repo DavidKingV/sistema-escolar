@@ -71,116 +71,7 @@ if (!$VerifySession['success']) {
 </head>
 <body>
 
-    <nav class="navbar bg-body-tertiary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            <img src="assets/img/escudo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-mid">
-            ESMEFIS Centro Universitario
-          </a>
-        </div>
-    </nav>
-
-    <nav class="sidebar" id="nav">
-
-        <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; min-height: calc(100vh);">
-            <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item py-1">
-                <a href="dashboard.php" class="btn btn-light d-flex align-items-center justify-content-start"><i class="bi bi-house-fill px-3"></i>Inicio</a>
-            </li>
-            <li class="py-1">                 
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
-                <i class="bi bi-person-badge-fill px-3"></i>Alumnos
-                </button>                
-                <div class="collapse" id="collapseStudents">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="alumnos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="alumnos.php" class="list-group-item list-group-item-action">Lista</a>
-                            <a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
-                        </div>                       
-                    </div>
-                </div>                                                    
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTeachers" aria-expanded="false" aria-controls="collapseTeachers">
-                <i class="bi bi-person-workspace px-3"></i>Profesores
-                </button>                
-                <div class="collapse" id="collapseTeachers">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="profesores/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="profesores.php" class="list-group-item list-group-item-action">Lista</a>
-                            <a href="profesores/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
-                        </div>                          
-                    </div>
-                </div> 
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroups" aria-expanded="false" aria-controls="collapseGroups">
-                <i class="bi bi-person-badge-fill px-3"></i>Grupos
-                </button>                
-                <div class="collapse" id="collapseGroups">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="grupos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="grupos.php" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-            </li>
-            <li class="py-1">                    
-                <button class="btn btn-primary w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCarreers" aria-expanded="false" aria-controls="collapseCarreers">
-                <i class="bi bi-mortarboard-fill px-3"></i>Carreras
-                </button>                
-                <div class="collapse" id="collapseCarreers">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="carreras/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="carreras.php" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSubjects" aria-expanded="false" aria-controls="collapseSubjects">
-                <i class="bi bi-book-half px-3"></i>Materias
-                </button>                
-                <div class="collapse" id="collapseSubjects">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="materias/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="materias.php" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUsers" aria-expanded="false" aria-controls="collapseUsers">
-                <i class="bi bi-person-lines-fill px-3"></i>Usuarios
-                </button>                
-                <div class="collapse" id="collapseUsers">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="#" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="#" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-
-            </li>
-            </ul>
-            <hr>
-            <div class="dropdown">
-            <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="<?php echo $userPhoto ?>" alt="" width="32" height="32" class="rounded-circle me-2">
-                <strong><?php echo $userName ?></strong>
-            </a>
-            <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                <li><a class="dropdown-item" id="endSession" href="#">Cerrar Sesión</a></li>
-            </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include_once 'backend/views/mainMenu.php'; ?>
       
     <section class="home" id="home">           
         <div class="text">Carreras</div>
@@ -294,50 +185,7 @@ if (!$VerifySession['success']) {
         <h1 class="modal-title fs-5" id="subjectsModalLabel">Materias de la carrera</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        
-
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#add_subject_tab" type="button" role="tab" aria-controls="add_subject_tab" aria-selected="true">Registrar</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#view_subjects_tab" type="button" role="tab" aria-controls="view_subjects_tab" aria-selected="false">Ver Lista</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="add_subject_tab" role="tabpanel">
-                <form id="addSubjectCarreer">
-                    <input type="text" id="carreerId" name="carreerId" hidden>
-                    <div class="col-md py-4">
-                        <div class="form-floating">
-                        <select class="form-select subjectName" name="subjectName" id="subjectName" style="">
-                            <option selected value="0">Materia</option>
-                        </select>  
-                        <label for="floatingSelect">Selecciona</label>
-                        </div>
-                        <label id="subjectName-error" class="error text-bg-danger" for="subjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>                    
-                    </div>
-
-                    <div class="col-md" id="childSubjectDiv" hidden>
-                        <div class="form-floating">
-                        <select class="form-select childSubjectName" name="childSubjectName" id="childSubjectName" style="" disabled>
-                            <option selected value="0">Submateria</option>
-                        </select>  
-                        <label for="floatingSelect">Selecciona</label>
-                        </div>
-                        <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>                    
-                    </div>
-
-                    <div class="col-md" >
-                        <button type="submit" class="btn btn-success">Agregar</button>    
-                    </div>
-                </form>
-            </div>
-            <div class="tab-pane fade" id="view_subjects_tab" role="tabpanel">
-
-            </div>
-        </div>
+      <div class="modal-body" id="subjectsModalBody">
 
       </div>
       <div class="modal-footer">
@@ -369,5 +217,8 @@ if (!$VerifySession['success']) {
 <!-- Custom JS -->
 <script type="module" src="js/carreers/index.js"></script>
 <script type="module" src="js/carreers/carreers.js"></script>
+
+<script type="module" src="public/js/careers.js"></script>
+
 <script src="js/utils/validate.js"></script>
 <script type="module" src="js/utils/sessions.js"></script>

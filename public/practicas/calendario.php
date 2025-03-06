@@ -30,6 +30,11 @@ if (!$VerifySession['success']) {
     <link rel="stylesheet" href="../../assets/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/alumnos.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
+    <!-- timepicker -->
+    <link href="https://cdn.jsdelivr.net/npm/timepicker@1.14.1/jquery.timepicker.min.css" rel="stylesheet">
+    <!-- select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <title>Alumnos</title>
 </head>
 <body>
@@ -59,6 +64,23 @@ if (!$VerifySession['success']) {
         </div>
     </section>
 
+<!-- Modales-->
+
+<div class="modal fade" id="addEventModal" aria-labelledby="addEventModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addEventModalLabel"></h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="addEventModalBody">
+            
+        </div>
+        </div>
+    </div>
+</div>
+
+
 </body>
 </html>
 <!-- Boostrap -->
@@ -75,7 +97,12 @@ if (!$VerifySession['success']) {
 <!--fullcalendar-->
 <script src="../js/global/fullcalendar/dist/index.global.js"></script>
 <script src="../js/global/fullcalendar/packages/google-calendar/index.global.js"></script>
-
+<!-- timepicker -->
+<script src="https://cdn.jsdelivr.net/npm/timepicker@1.14.1/jquery.timepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjs@12.2.1/lib/browser/math.min.js"></script>
+<script src="../js/global/moment.js"></script>
+<!-- select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
 <script type="module" src="../js/calendar.js"></script>

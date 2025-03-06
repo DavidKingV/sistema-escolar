@@ -136,17 +136,12 @@ const AddSubjectsCarreer = async (subjectAddData) => {
     }
 }   
 
-$("#carreersTable").on("click", ".subjectsCarreer", function(){
-    $("#carreerId").val($(this).data("id"));
-    GetSubject($(this).data("id"));
-});
 
-$("#subjectName").on("change", function(){
-    GetChildSubject( $(this).val() );
-});
+
+
 
 $("#subjectsModal").on("hidden.bs.modal", function(){
-    $('#subjectName').val('').trigge('change');
+    $('#subjectName').val('').trigger('change');
     $('#subjectName').select2('destroy');
     $('#subjectName').empty();
 
@@ -154,34 +149,7 @@ $("#subjectsModal").on("hidden.bs.modal", function(){
     $("#childSubjectDiv").prop("disabled", true);
     $(".childSubjectName").empty();
 
-    $("#addSubjectCarreer")[0].reset();
+    //$("#addSubjectCarreer")[0].reset();
     $("#addSubjectCarreer").validate().resetForm();
 });
 
-$("#addSubjectCarreer").on("submit", function(e){
-    e.preventDefault();
-
-    const subjectAddData = $(this).serialize();
-
-    Swal.fire({
-        title: '¿Estás seguro de agregar esta materia a la carrera?', 
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
-        confirmButtonText: 'Sí, agregar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if(result.isConfirmed){
-            if($(this).valid()){
-                AddSubjectsCarreer(subjectAddData);
-            }else{
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error en la validación',
-                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
-                });
-            }
-        }
-    });
-});

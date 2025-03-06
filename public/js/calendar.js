@@ -4,7 +4,7 @@ import { loadingSpinner } from './global/alerts.js';
 
 let calendarInstance;
 var element = '#calendar';
-var api = 'api/inicio.php';
+var api = '../api.php';
 
 $(function() {
 
@@ -53,7 +53,7 @@ $(function() {
         dateClick: async  function(info) {
             $("#addEventModalLabel").html('Agregar alumno para el '+info.dateStr+'');
             $("#addEventModal").modal('show');
-            $.post('modals/addEventModal.php', { date: info.dateStr }, function (data) {
+            $.post('../modals/addEvent.Modal.php', { date: info.dateStr }, function (data) {
                 $('#addEventModalBody').html(data);
             });
         },

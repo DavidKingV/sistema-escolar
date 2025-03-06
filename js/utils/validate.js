@@ -762,7 +762,7 @@ $("#addGradeStudent").validate({
         gradefinal: {
             required: true,
             number: true,
-            maxlength: 3,
+            maxlength: 4,
         },
     }, messages: {
         subject: {
@@ -781,7 +781,7 @@ $("#addGradeStudent").validate({
         gradefinal: {
             required: "Por favor ingresa una calificación",
             number: "Por favor ingresa solo números",
-            maxlength: "La calificación debe tener máximo 3 caracteres"
+            maxlength: "La calificación debe tener máximo 4 caracteres"
         }
     }
 });
