@@ -179,7 +179,7 @@ class SubjectsModel{
         }
     }
 
-    public function addSubjectCareer(array $subjectData): array {
+    public function addSubjectCareer($subjectData) {
         // Convertir y validar los datos de entrada
         $subject    = (int)$subjectData['subjectName'];
         $childSubject = isset($subjectData['childSubjectName']) ? (int)$subjectData['childSubjectName'] : NULL;
@@ -214,13 +214,13 @@ class SubjectsModel{
             }
             return [
                 'success' => false,
-                'error'   => 'No se pudo agregar la materia'
+                'message'   => 'No se pudo agregar la materia'
             ];
     
         } catch (Exception $e) {
             return [
                 'success' => false,
-                'error'   => 'Error al agregar la materia: ' . $e->getMessage()
+                'message'   => 'Error al agregar la materia: comprueba que se haya elegido una materia y su submateria'
             ];
         }
     }

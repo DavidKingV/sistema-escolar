@@ -51,7 +51,7 @@ $careerId = $_POST['careerId'];
             <div class="col-md" id="childSubjectDiv">
                 <div class="form-floating">
                     <select class="form-select childSubjectName" name="childSubjectName" id="childSubjectName" disabled>
-                        <option selected value="0">Submateria</option>
+                        <option selected value="">Submateria</option>
                     </select>
                     <label for="floatingSelect">Selecciona</label>
                 </div>
@@ -161,19 +161,19 @@ $careerId = $_POST['careerId'];
 
             input.on('select2:unselect', function(e) {
                 $('#childSubjectName').empty();
-                $('#childSubjectName').append('<option selected value="0">Submateria</option>');
+                $('#childSubjectName').append('<option selected value="">Submateria</option>');
                 $('#childSubjectName').prop("disabled", true);
             });
 
             input.on('select2:clear', function(e) {
                 $('#childSubjectName').empty();
-                $('#childSubjectName').append('<option selected value="0">Submateria</option>');
+                $('#childSubjectName').append('<option selected value="">Submateria</option>');
                 $('#childSubjectName').prop("disabled", true);
             });
 
             input.on('change', function(e) {
                 $('#childSubjectName').empty();
-                $('#childSubjectName').append('<option selected value="0">Submateria</option>');
+                $('#childSubjectName').append('<option selected value="">Submateria</option>');
                 $('#childSubjectName').prop("disabled", true);
             });
 
