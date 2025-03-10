@@ -108,6 +108,9 @@ class StudentsControl {
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
+            if($studentDataArray['controlSepNumber'] === ''){
+                $studentDataArray['controlSepNumber'] = NULL;
+            }
             $sql = "INSERT INTO students (no_control, noControlSep, nombre, genero, nacimiento, estado_civil, nacionalidad, curp, telefono, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('ssssssssss', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail']);
