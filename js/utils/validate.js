@@ -193,30 +193,71 @@ $("#addStudents").validate({
             valueNotEquals: "0"
         },
         studentBirthday: {
-            required: true,
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
             date: true
         },
         studentState: {
-            required: true,
-            valueNotEquals: "0"
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
+            valueNotEquals: {
+                param: "0",
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            }
         },
         studentNation: {
-            required: true,
-            lettersonly: true
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
+            lettersonly: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            }
         },
         studentCurp: {
-            required: true,
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
             minlength: 18,
             maxlength: 18
         },
         studentPhone: {
-            required: true,
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
             number: true,
             minlength: 10,
             maxlength: 12
         },
         studentEmail: {
-            required: true,
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
             email: true
         }
 

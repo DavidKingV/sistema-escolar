@@ -291,6 +291,11 @@ if (!$VerifySession['success']) {
                             <div class="row g-2">
                                 <div class="col-md py-3">
                                     <button type="submit" class="btn btn-primary">Guardar</button>
+                                
+                                    <div class="form-check form-switch py-4">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="noExtraData">
+                                        <label class="form-check-label" for="noExtraData">No se cuenta con todos los datos</label>
+                                    </div>
                                 </div>
                             </div>
                         </form>
