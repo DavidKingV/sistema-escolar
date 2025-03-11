@@ -2,13 +2,14 @@ import { fullCalendar } from './global/fullcalendar/index.js';
 import { initializeDataTable } from './global/dataTables.js';
 import { loadingSpinner } from './global/alerts.js';
 
-let calendarInstance;
+
 var element = '#calendar';
 var api = '../api.php';
 
 $(function() {
+    const calendarEl = document.getElementById('calendar');
 
-    calendarInstance = fullCalendar(element, {
+    window.calendar = new FullCalendar.Calendar(calendarEl, {
         googleCalendarApiKey: 'AIzaSyAZYDsaS_Gv_8vievQAPLB4Cd8D6K2AoAM',
 
         eventSources:[ {
@@ -32,6 +33,8 @@ $(function() {
         locale: 'es',
         
         hiddenDays: [ 6 ],
+
+        displayEventEnd: true,
 
         businessHours: [ // specify an array instead
             {
@@ -60,14 +63,16 @@ $(function() {
 
         eventClick: async function(info) {
             info.jsEvent.preventDefault();
-            $("#eventDetailsModalBody").html('');
-            loadingSpinner(true, '#eventDetailsModalBody');
-            $('#eventDetailsModal').modal('show');
-            $("#eventDetailsModalLabel").html(info.event.title);
-            await $.post('modals/addEventModal.php', { eventId: info.event._def.publicId, eventData: info.event._def, dateTime : info.event._instance.range }, function (data) {                
-                $('#eventDetailsModalBody').html(data);
+            $("#eventDetailsBody").html('');
+            loadingSpinner(true, '#eventDetailsBody');
+            $('#eventDetails').modal('show');
+            $("#eventDetailsLabel").html(info.event.title);
+            await $.post('../modals/eventDetails.Modal.php', { eventId: info.event._def.publicId, eventData: info.event._def, dateTime : info.event._instance.range }, function (data) {                
+                $('#eventDetailsBody').html(data);
             });
         },
     });
+
+    window.calendar.render();
     
 });

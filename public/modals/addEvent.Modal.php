@@ -33,10 +33,14 @@ $date = $_POST['date'] ?? NULL;
             <input class="form-control" id="date" name="date" type="text" placeholder="" value="<?php echo $date ?>" readonly>    
         </div>
         <div class="mb-3">
-            <label for="studentName">Nombre del alumno: </label>
-            <select class="form-select" id="studentName" name="studentName">
+            <label for="student">Nombre del alumno: </label>
+            <select class="form-select" id="student" name="student">
                 <option selected value="0">Nombre</option>   
             </select>       
+        </div>
+        <div class="mb-3">
+            <label for="studentName">Nombre del alumno: </label>
+            <input class="form-control" id="studentName" name="studentName" type="text" placeholder="" value="" readonly>
         </div>
         <div class="mb-3">
             <label for="start">Hora de ingreso: </label>
@@ -56,14 +60,15 @@ $date = $_POST['date'] ?? NULL;
 
 <script type="module">    
     import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/utils/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js';
+    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js'
+    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fullcalendar/index.js';
 
     let api = '<?php echo $_ENV['BASE_URL']; ?>/public/api.php';
 
     $(function() {
         configurarTimepickers();
 
-        getStudentsList($('#studentName'));
+        getStudentsList($('#student'));
     }); 
 
     $('#addEvent').submit(function(e) {
@@ -82,10 +87,10 @@ $date = $_POST['date'] ?? NULL;
                 })
                 .then(data => {
                     if (data.success) {
-                        if(data.error != null)infoAlert(data.error);
+                        if(data.error != null)
                         successAlert(data.message);
-                        $('#statusModal').modal('hide');
-                        $('#studentTable').DataTable().ajax.reload();
+                        $('#addEventModal').modal('hide');
+                        window.calendar.refetchEvents();
                     } else {
                         errorAlert(data.message);
                     }
@@ -107,15 +112,13 @@ $date = $_POST['date'] ?? NULL;
     $('#end').on('changeTime', function() {
         if ($('#start').val() === '') {
             infoAlert("Por favor ingrese la hora de entrada");
-        } else {
-            calcularHoras();
         }
     });
 
      // Manejador de eventos para 'start'
      $('#start').on('changeTime', function() {
         if ($('#end').val()) {
-            calcularHoras();
+            
         }
     });
 
@@ -170,7 +173,8 @@ $date = $_POST['date'] ?? NULL;
             });
 
             input.on('select2:select', function(e) {
-                //const selectedData = e.params.data;
+                let text = e.params.data.text;
+                $('#studentName').val(text);
                 //alert('Seleccionado: ' + selectedData.text);
                 //$('#patientId').val(e.params.data.id);
                 console.log(e);

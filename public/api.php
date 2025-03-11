@@ -2,6 +2,7 @@
 require __DIR__.'/../php/vendor/autoload.php';
 require __DIR__.'/../backend/controllers/studentsController.php';
 require __DIR__.'/../backend/controllers/subjectsController.php';
+require __DIR__.'/../backend/controllers/practicalHoursController.php';
 
 use Vendor\Schoolarsystem\DBConnection;
 
@@ -9,6 +10,8 @@ $connection = new DBConnection();
 $students = new StudentsController($connection);
 
 $subjects = new SubjectsController($connection);
+
+$practicalHours = new PracticalHoursController($connection);
 
 function responseJson($data) {
     header('Content-Type: application/json');
@@ -56,6 +59,26 @@ if(!isset($data['action'])){
             $subjectData = $data['subjectAddData'] ?? null;
             parse_str($subjectData, $subjectData);
             responseJson($subjects->addSubjectCareer($subjectData));
+            break;
+
+        case 'addEvent':
+            $eventData = $data['eventData'] ?? null;
+            parse_str($eventData, $eventData);
+            responseJson($practicalHours->addEvent($eventData));
+            break;
+        case 'getEventDetails' :
+            $eventId = $data['eventId'] ?? null;            
+            responseJson($practicalHours->getEventDetails($eventId));
+            break;
+        case 'confirmHours':
+            $hoursData = $data['hoursData'] ?? null;
+            parse_str($hoursData, $hoursData);
+            responseJson($practicalHours->confirmHours($hoursData));
+            break;
+        case 'deteleEvent':
+            $hoursData = $data['hoursData'] ?? null;
+            parse_str($hoursData, $hoursData);
+            responseJson($practicalHours->deteleEvent($hoursData));
             break;
     }
 }
