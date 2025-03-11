@@ -3,6 +3,7 @@ import { GetChildSubjectsNames } from "./index.js";
 function FillTable(response){
     $("#idStudentDB").val(response.id);
     $("#controlNumber").val(response.no_control);
+    $("#controlSepNumber").val(response.noControlSep);
     $("#studentName").val(response.name);
 
     $("#studentGender option[value='" + response.gender + "']").prop('selected', true);

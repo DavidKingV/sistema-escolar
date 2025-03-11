@@ -44,6 +44,7 @@ class StudentsControl {
                             'encodeJWT' => $encodeJWT,
                             'studentId' => $row['id'],
                             'no_control' => $row['no_control'],
+                            'noControlSep' => $row['noControlSEP'],
                             'name' => $row['nombre'],
                             'phone' => $row['telefono'],
                             'email' => $row['email'],
@@ -83,6 +84,7 @@ class StudentsControl {
                     'success' => true,
                     'id' => $row['id'],
                     'no_control' => $row['no_control'],
+                    'noControlSep' => $row['noControlSEP'],
                     'name' => $row['nombre'],
                     'gender' => $row['genero'],
                     'birthdate' => $row['nacimiento'],
@@ -154,9 +156,14 @@ class StudentsControl {
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
+
+            if(empty($studentDataArray['controlSepNumber'])){
+                $controlSepNumber = NULL;
+            }
+
             $sql = "UPDATE students SET no_control = ?, noControlSEP = ?, nombre = ?, genero = ?, nacimiento = ?, estado_civil = ?, nacionalidad = ?, curp = ?, telefono = ?, email = ? WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('ssssssssssi', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail'], $studentDataArray['idStudentDB']);
+            $stmt->bind_param('ssssssssssi', $studentDataArray['controlNumber'], $controlSepNumber, $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail'], $studentDataArray['idStudentDB']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){

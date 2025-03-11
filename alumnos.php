@@ -127,7 +127,7 @@ if (!$VerifySession['success']) {
                 </div>
                 <div class="col-md">
                     <div class="form-floating">
-                    <input type="text" class="form-control" id="controlSepNumber" name="controlSepNumber" value="">
+                    <input type="text" class="form-control" id="controlSepNumber" name="controlSepNumber">
                     <label for="controlSepNumber">No. Control SEP</label>
                     </div>
                     <div>
