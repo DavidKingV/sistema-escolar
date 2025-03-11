@@ -1,6 +1,6 @@
 <?php
 require __DIR__.'/../../php/vendor/autoload.php';
-require __DIR__.'/../models/PracticalHoursModel.php';
+require __DIR__.'/../models/practicalHoursModel.php';
 
 use Vendor\Schoolarsystem\DBConnection;
 

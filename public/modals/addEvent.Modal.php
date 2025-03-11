@@ -38,7 +38,7 @@ $date = $_POST['date'] ?? NULL;
                 <option selected value="0">Nombre</option>   
             </select>       
         </div>
-        <div class="mb-3">
+        <div class="mb-3" hidden>
             <label for="studentName">Nombre del alumno: </label>
             <input class="form-control" id="studentName" name="studentName" type="text" placeholder="" value="" readonly>
         </div>
