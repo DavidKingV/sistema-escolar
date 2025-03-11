@@ -9,7 +9,7 @@ export function loadingAlert() {
             Swal.showLoading();
         },
         willClose: () => {
-            Swal.stopLoading();
+            Swal.hideLoading();
         }
     })
 }

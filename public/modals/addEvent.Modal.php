@@ -59,7 +59,7 @@ $date = $_POST['date'] ?? NULL;
 </form>
 
 <script type="module">    
-    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/utils/alerts.js';
+    import { errorAlert, successAlert, successAlertAuto, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/alerts.js';
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js'
     import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fullcalendar/index.js';
 
@@ -87,8 +87,7 @@ $date = $_POST['date'] ?? NULL;
                 })
                 .then(data => {
                     if (data.success) {
-                        if(data.error != null)
-                        successAlert(data.message);
+                        successAlertAuto(data.message);
                         $('#addEventModal').modal('hide');
                         window.calendar.refetchEvents();
                     } else {
@@ -177,7 +176,6 @@ $date = $_POST['date'] ?? NULL;
                 $('#studentName').val(text);
                 //alert('Seleccionado: ' + selectedData.text);
                 //$('#patientId').val(e.params.data.id);
-                console.log(e);
             });
 
         } catch (error) {
