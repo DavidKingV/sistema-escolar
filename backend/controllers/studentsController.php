@@ -19,6 +19,10 @@ class StudentsController{
         return $updateStatus;
     }
 
+    public function getStudentName($studentId){
+        return $this->students->getStudentName($studentId);
+    }
+
     public function getStudentsListSelect(){
 
         $search = $_POST['search'] ?? '';

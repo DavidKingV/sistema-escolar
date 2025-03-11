@@ -10,6 +10,37 @@ class StudentsModel{
         $this->connection = $dbConnection->getConnection();
     }
 
+    public function getStudentName($studentId){
+        try{
+            $sql = "SELECT nombre FROM students WHERE id = ?";
+            $stmt = $this->connection->prepare($sql);
+            
+            if (!$stmt) {
+                throw new Exception('Error al preparar la consulta SQL: ' . $this->connection->error);
+            }
+
+            $stmt->bind_param('i', $studentId);
+
+            if (!$stmt->execute()) {
+                throw new Exception('Error al ejecutar la consulta SQL: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            return [
+                'success' => true,
+                'studentName' => $result['nombre'],
+            ];
+        }catch(Exception $e){
+            return [
+                'success' => false,
+                'message' => 'Error al obtener el nombre del estudiante',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
     public function getStudentsListSelect($search = '', $page = 1, $limit = 30){
         try {
             // Query base

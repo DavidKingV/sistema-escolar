@@ -38,7 +38,10 @@ if (!$VerifySession['success']) {
     <?php include('../backend/views/mainMenu.php'); ?>
       
     <section class="home" id="home">           
-        <div class="text">Calificaciones del Alumno</div>
+        <div class="text">
+            <p class="placeholder-glow">
+            <span class="placeholder col-12" id="placeholder">Calificaciones del Alumno</span>
+            </p></div>
         <hr class="border-top border-2 border-dark mx-auto w-25">
 
         <div class="row">
@@ -190,5 +193,6 @@ if (!$VerifySession['success']) {
 
 <!-- Custom JS -->
 <script type="module" src="../js/students/notes.js"></script>
+<script type="module" src="../public/js/notes.js"></script>
 <script src="../js/utils/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>

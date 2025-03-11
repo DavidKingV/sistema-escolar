@@ -40,6 +40,10 @@ if(!isset($data['action'])){
         case 'getStudentsListSelect':
             responseJson($students->getStudentsListSelect());
             break;
+        case 'getStudentName':
+            $studentId = $data['studentId'] ?? null;
+            responseJson($students->getStudentName($studentId));
+            break;
 
 
         case 'getSubjectsListSelect':
