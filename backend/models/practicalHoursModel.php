@@ -174,4 +174,124 @@ class PracticalHoursModel{
             ];
         }
     }
+
+    public function addStudentHours($hoursData) {
+        $this->connection->begin_transaction();
+        $status = 1;
+        try {
+            $sql = "INSERT INTO practical_hours (status_id, id_student, date, start, end, hours) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $this->connection->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Error preparando sentencia para INSERT en practical_hours: " . $this->connection->error);
+            }
+
+            $stmt->bind_param(
+                'iissss',
+                $status,
+                $hoursData['studentId'],
+                $hoursData['date'],
+                $hoursData['start'],
+                $hoursData['end'],
+                $hoursData['totalHours']
+            );
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error ejecutando sentencia para INSERT en practical_hours: " . $stmt->error);
+            }
+
+            $result = $stmt->affected_rows;
+            $stmt->close();
+            if ($result > 0) {
+                $this->connection->commit();
+                return [
+                    'success' => true,
+                    'message' => 'Horas registradas correctamente'
+                ];
+            } else {
+                throw new Exception("Error al registrar horas en la base de datos");
+            }
+        } catch (Exception $e) {
+            $this->connection->rollback();
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function studentsHours() {
+        try{
+            $sql = "SELECT sub.id_student, s.nombre, sub.date, sub.start, sub.end, sub.hours, sub.total_hours FROM ( SELECT ph.*, SUM(hours) OVER (PARTITION BY id_student) AS total_hours, ROW_NUMBER() OVER (PARTITION BY id_student ORDER BY date DESC) AS rn FROM practical_hours ph ) sub JOIN students s ON sub.id_student = s.id WHERE sub.rn = 1;";
+
+            $result = $this->connection->query($sql);
+            if(!$result){
+                throw new Exception("Error al obtener horas de los alumnos: " . $this->connection->error);
+            }
+
+            $data = [];
+
+            while($row = $result->fetch_assoc()){
+                $data[] =[
+                        'success' => true,
+                        'studentId' => $row['id_student'],
+                        'nombre' => $row['nombre'],
+                        'date' => $row['date'],
+                        'start' => $row['start'],
+                        'end' => $row['end'],
+                        'hours' => $row['hours'],
+                        'total_hours' => $row['total_hours'] ?? 0
+                    ];
+            }
+
+            return $data;
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getStudentlHoursData($studentId) {
+        try{
+            $sql = "SELECT practical_hours.*, practical_hours_status.status FROM practical_hours LEFT JOIN practical_hours_status ON practical_hours.status_id = practical_hours_status.id WHERE id_student = ? ORDER BY date DESC";
+
+            $stmt = $this->connection->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Error preparando sentencia para SELECT en practical_hours: " . $this->connection->error);
+            }
+
+            $stmt->bind_param('i', $studentId);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error ejecutando sentencia para SELECT " . $stmt->error);
+            }
+
+            $result = $stmt->get_result();
+            $stmt->close();
+
+            $data = [];
+
+            while($row = $result->fetch_assoc()){
+                
+                $data[] =[
+                        'success' => true,
+                        'date' => $row['date'],
+                        'start' => $row['start'],
+                        'end' => $row['end'],
+                        'status' => $row['status'] ?? 'Pendiente',
+                        'hours' => $row['hours']
+                    ];
+            }
+
+            return $data;
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }

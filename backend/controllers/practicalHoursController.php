@@ -28,4 +28,16 @@ class PracticalHoursController{
     public function deteleEvent($hoursData){
         return $this->practicalHours->deteleEvent($hoursData);
     }
+
+    public function studentsHours(){
+        return $this->practicalHours->studentsHours();
+    }
+
+    public function addStudentHours($hoursData){
+        return $this->practicalHours->addStudentHours($hoursData);
+    }
+
+    public function getStudentlHoursData($studentId){
+        return $this->practicalHours->getStudentlHoursData($studentId);
+    }
 }

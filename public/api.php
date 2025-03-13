@@ -70,6 +70,13 @@ if(!isset($data['action'])){
             parse_str($eventData, $eventData);
             responseJson($practicalHours->addEvent($eventData));
             break;
+        case 'getStudentsHours':
+            responseJson($practicalHours->studentsHours());
+            break;
+        case 'getStudentlHoursData':
+            $studentId = $data['studentId'] ?? null;
+            responseJson($practicalHours->getStudentlHoursData($studentId));
+            break;
         case 'getEventDetails' :
             $eventId = $data['eventId'] ?? null;            
             responseJson($practicalHours->getEventDetails($eventId));
@@ -78,6 +85,11 @@ if(!isset($data['action'])){
             $hoursData = $data['hoursData'] ?? null;
             parse_str($hoursData, $hoursData);
             responseJson($practicalHours->confirmHours($hoursData));
+            break;
+        case 'addStudentHours':
+            $hoursData = $data['data'] ?? null;
+            parse_str($hoursData, $hoursData);
+            responseJson($practicalHours->addStudentHours($hoursData));
             break;
         case 'deteleEvent':
             $hoursData = $data['hoursData'] ?? null;

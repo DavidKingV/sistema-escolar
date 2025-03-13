@@ -128,3 +128,12 @@ export function selectAlert(title, text, inputOptions, confirmText, confirmCallb
         }
     });
 }
+
+export function warningAlert(message) {
+    Swal.fire({
+        title: "Warning!",
+        text: message,
+        icon: "warning",
+        confirmButtonText: "Ok",
+    });
+}
