@@ -107,13 +107,13 @@ class PracticalHoursModel{
     public function confirmHours($hoursData) {
         $this->connection->begin_transaction();
         try {
-            $sql = "UPDATE practical_hours SET status_id = 1, hours = ? WHERE googleCalendarId = ?";
+            $sql = "UPDATE practical_hours SET status_id = 1, start = ?, end = ?, hours = ? WHERE googleCalendarId = ?";
             $stmt = $this->connection->prepare($sql);
             if (!$stmt) {
                 throw new Exception("Error preparando sentencia para UPDATE en practical_hours: " . $this->connection->error);
             }
 
-            $stmt->bind_param('ss', $hoursData['totalHours'], $hoursData['eventId']);
+            $stmt->bind_param('ssss', $hoursData['start'], $hoursData['end'], $hoursData['totalHours'], $hoursData['eventId']);
 
             if (!$stmt->execute()) {
                 throw new Exception("Error ejecutando sentencia para UPDATE en practical_hours: " . $stmt->error);

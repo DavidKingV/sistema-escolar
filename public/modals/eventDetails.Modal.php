@@ -140,7 +140,42 @@ $dateTime = $_POST['dateTime'] ?? null;
             deleteEvent(data);
         });
 
+        configurarTimepickers();
+
     }); 
+
+    function configurarTimepickers() {
+        var opcionesComunes = {
+            'minTime': '09:00am',
+            'maxTime': '06:00pm',
+            'timeFormat': 'H:i',
+            'showDuration': false
+        };
+
+        $('#start, #end').timepicker(opcionesComunes);
+    }
+
+    $('#end').on('changeTime', function() {
+        if ($('#start').val() === '') {
+            infoAlert("Por favor ingrese la hora de entrada");
+        }else{
+            reCalcularHoras();
+        }
+    });
+
+     // Manejador de eventos para 'start'
+     $('#start').on('changeTime', function() {
+        if ($('#end').val()) {
+            reCalcularHoras();
+        }
+    });
+
+    //funcion para que al borrarse la hora de salida se borre la hora total
+    $('#end').on('keyup', function() {
+        if($('#end').val() == ''){
+            $('#totalHours').val('');
+        }
+    });
 
     const calcularHoras = async (startTime, endTime, totalHours, format) => {
        
@@ -221,7 +256,34 @@ $dateTime = $_POST['dateTime'] ?? null;
 
     }
 
-    
+    function reCalcularHoras() {
+        let start = $('#start').val();
+        let end = $('#end').val();
+        let format = 'h:mm A';
+
+        // Utilizando moment.js para parsear las horas
+        var entrada = moment(start, format);
+        var salida = moment(end, format);
+
+        // Calculando la diferencia
+        var duracion = moment.duration(salida.diff(entrada));
+
+        // Convirtiendo la duración a horas y minutos
+        var horas = Math.floor(duracion.asHours());
+        var minutos = Math.floor(duracion.asMinutes()) - horas * 60;
+
+        // Formateando la salida
+        var horasTotales = `${horas < 10 ? '0' : ''}${horas}:${minutos < 10 ? '0' : ''}${minutos}`;
+
+        // Validaciones y manejo de errores
+        if (duracion.asMinutes() <= 0) {
+            warningAlert("La hora de salida debe ser posterior a la hora de entrada");
+        } else if (isNaN(duracion.asMinutes())) {
+            warningAlert("Por favor, asegúrese de que las horas de entrada y salida sean válidas");
+        } else {
+            $('#totalHours').val(horasTotales);
+        }
+    }
 
     
 
