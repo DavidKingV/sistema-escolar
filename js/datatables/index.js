@@ -206,7 +206,21 @@ function InitializeStudentGrades(studentIdGroup) {
             },
             { "data": "continuous_grade", "className": "text-center" },
             { "data": "exam_grade", "className": "text-center" },
-            { "data": "final_grade", "className": "text-center" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    if (data.final_grade < 5.99 && data.final_grade > 0) {
+                        return '<span class="badge text-bg-danger studentGrade" data-subject='+data.subject_id+' data-subjectChild='+data.subject_child_id+'>'+data.final_grade+'</span>';
+                    }else if (data.final_grade >= 6 && data.final_grade <= 7.99) {
+                        return '<span class="badge text-bg-warning">'+data.final_grade+'</span>';
+                    }else if (data.final_grade >= 8 && data.final_grade <= 10) {
+                        return '<span class="badge text-bg-success">'+data.final_grade+'</span>';
+                    }else{
+                        return '<span class="badge text-bg-secondary">No asignado</span>';
+                    }   
+                },
+                "className": "text-center"
+            },
             { "data": "update_at", "className": "text-center" },
             {
                 "data": null,
@@ -402,7 +416,7 @@ function initializeGroupsDataTable() {
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle groupDetails"><i class="bi bi-eye-fill"></i></button><button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle groupDetails"><i class="bi bi-eye-fill"></i></button> <button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button> <button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
                         
                 },
                 "className": "text-center"

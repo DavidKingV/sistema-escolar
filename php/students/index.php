@@ -607,7 +607,7 @@ class StudentsControl {
                         'subject_child_name' => $row['subject_child_name'],
                         'continuous_grade' => $row['continuous_grade'],
                         'exam_grade' => $row['exam_grade'],
-                        'final_grade' => $row['final_grade'],
+                        'final_grade' => $row['final_grade'] ?? 'N/A',
                         'update_at' => $row['update_at']
                     );
                 }
