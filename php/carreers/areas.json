@@ -108,6 +108,12 @@
         "Fisioterapia": [
             "Fisioterapia",
             "Especialidad en rehabilitación integral"
+        ],
+        "Diplomados": [
+            "Diagnóstico de la Extremidad Inferior para la Implementación de Plantillas Ortopédicas"
+        ],
+        "Cursos": [
+            "Punción seca"
         ]
     },
     "Agronomía y veterinaria": {
@@ -116,14 +122,6 @@
         ],
         "Veterinaria": [
             "Veterinaria"
-        ]
-    },
-    "Diplomados y cursos": {
-        "Diplomados": [
-            "Diagnóstico de la Extremidad Inferior para la Implementación de Plantillas Ortopédicas"
-        ],
-        "Cursos": [
-            "Punción seca"
         ]
     }
     
