@@ -117,7 +117,16 @@
         "Veterinaria": [
             "Veterinaria"
         ]
+    },
+    "Diplomados y cursos": {
+        "Diplomados": [
+            "Diagnóstico de la Extremidad Inferior para la Implementación de Plantillas Ortopédicas"
+        ],
+        "Cursos": [
+            "Punción seca"
+        ]
     }
+    
 }
       
    
