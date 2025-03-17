@@ -80,7 +80,7 @@ $(function () {
     let specificPath = "/grupos/detalles.php";
 
     if (currentPath === specificPath) {
-        GetStudentsNames();
+        //GetStudentsNames();
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');
 

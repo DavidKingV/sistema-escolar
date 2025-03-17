@@ -127,6 +127,7 @@ if (!$VerifySession['success']) {
                                             <th class="text-center">C. Continua</th>
                                             <th class="text-center">C. de Examen</th>
                                             <th class="text-center">C. Final</th>
+                                            <th class="text-center">Extraordinario</th>
                                             <th class="text-center">Ult. Actualización</th>
                                             <th class="text-center">Acciones</th>
                                         </tr>
@@ -171,6 +172,36 @@ if (!$VerifySession['success']) {
 
 </body>
 </html>
+
+<!-- Modales-->
+
+<div class="modal fade" id="makeOverExamModal" aria-labelledby="makeOverExamModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="makeOverExamModalLabel"></h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="makeOverExamModalBody">
+            
+        </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="makeOverViewModal" aria-labelledby="makeOverViewModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="makeOverViewModalLabel"></h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="makeOverViewModalBody">
+            
+        </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Boostrap -->

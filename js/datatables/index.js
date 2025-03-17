@@ -175,7 +175,6 @@ function InitializeStudentGrades(studentIdGroup) {
             type: "POST",
             data: {studentId: studentIdGroup, action: "getStudentGrades" },
             dataSrc: function(data){
-                console.log(data);
                 if(!data[0].success) {
                     Swal.fire({
                         icon: 'error',
@@ -209,8 +208,15 @@ function InitializeStudentGrades(studentIdGroup) {
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    if (data.final_grade < 5.99 && data.final_grade > 0) {
-                        return '<span class="badge text-bg-danger studentGrade" data-subject='+data.subject_id+' data-subjectChild='+data.subject_child_id+'>'+data.final_grade+'</span>';
+                    if (row.final_grade < 5.99 && row.final_grade > 0) {
+                        return '<span class="badge text-bg-danger studentGrade" ' +
+                        'data-grade="' + row.grade_id + '" ' +
+       'data-subject="' + row.subject_id + '" ' +
+       'data-subjectname="' + row.subject_name + '" ' +
+       'data-subjectchild="' + row.subject_child_id + '" ' +
+       'data-subjectchildname="' + row.subject_child_name + '">' +
+       row.final_grade +
+       '</span>';
                     }else if (data.final_grade >= 6 && data.final_grade <= 7.99) {
                         return '<span class="badge text-bg-warning">'+data.final_grade+'</span>';
                     }else if (data.final_grade >= 8 && data.final_grade <= 10) {
@@ -218,6 +224,19 @@ function InitializeStudentGrades(studentIdGroup) {
                     }else{
                         return '<span class="badge text-bg-secondary">No asignado</span>';
                     }   
+                },
+                "className": "text-center"
+            },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    if(row.makeOverId != null){
+                        return '<span class="badge text-bg-primary mekeOver" data-makeoverid="'+row.makeOverId+'" data-makeoverchildid="'+row.makeOverIdChild+'">Recursamiento</span>';
+                    } else if(row.makeOverIdChild != null){
+                        return '<span class="badge text-bg-primary makeOverChild" data-makeoverid="'+row.makeOverId+'" data-makeoverchildid="'+row.makeOverIdChild+'">Recursamiento</span>';
+                    }else{
+                        return '<span class="badge text-bg-secondary">-</span>';
+                    }
                 },
                 "className": "text-center"
             },

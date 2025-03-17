@@ -3,6 +3,8 @@ require __DIR__.'/../php/vendor/autoload.php';
 require __DIR__.'/../backend/controllers/studentsController.php';
 require __DIR__.'/../backend/controllers/subjectsController.php';
 require __DIR__.'/../backend/controllers/practicalHoursController.php';
+require __DIR__.'/../backend/controllers/groupsController.php';
+require __DIR__.'/../backend/controllers/gradesController.php';
 
 use Vendor\Schoolarsystem\DBConnection;
 
@@ -12,6 +14,10 @@ $students = new StudentsController($connection);
 $subjects = new SubjectsController($connection);
 
 $practicalHours = new PracticalHoursController($connection);
+
+$groups = new GroupsController($connection);
+
+$grades = new GradesController($connection);
 
 function responseJson($data) {
     header('Content-Type: application/json');
@@ -95,6 +101,20 @@ if(!isset($data['action'])){
             $hoursData = $data['hoursData'] ?? null;
             parse_str($hoursData, $hoursData);
             responseJson($practicalHours->deteleEvent($hoursData));
+            break;
+
+        case 'getNoGroupStudentsList':
+            responseJson($groups->getNoGroupStudentsList());
+            break;
+
+        case 'addMakeOverGrade':
+            $makeOverData = $data['gradesData'] ?? null;
+            parse_str($makeOverData, $makeOverData);
+            responseJson($grades->addMakeOverGrade($makeOverData));
+            break;
+        case 'getMakeOverDetails':
+            $makeOverId = $data['makeOverId'] ?? null;
+            responseJson($grades->getMakeOverGrades($makeOverId));
             break;
     }
 }

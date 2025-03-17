@@ -550,7 +550,8 @@ class StudentsControl {
     sg.continuos_grade AS continuous_grade,
     sg.exam_grade AS exam_grade,
     sg.final_grade AS final_grade,
-    sg.updated_at AS update_at
+    sg.updated_at AS update_at,
+    sg.makeOver AS makeOverId
     FROM 
         student_grades sg
     JOIN 
@@ -573,7 +574,8 @@ class StudentsControl {
         sgc.continuos_grade AS continuous_grade,
         sgc.exam_grade AS exam_grade,
         sgc.final_grade AS final_grade,
-        sgc.updated_at AS update_at
+        sgc.updated_at AS update_at,
+        sgc.makeOverId AS makeOverIdChild
     FROM 
         student_grades_child sgc
     JOIN 
@@ -608,7 +610,9 @@ class StudentsControl {
                         'continuous_grade' => $row['continuous_grade'],
                         'exam_grade' => $row['exam_grade'],
                         'final_grade' => $row['final_grade'] ?? 'N/A',
-                        'update_at' => $row['update_at']
+                        'update_at' => $row['update_at'],
+                        'makeOverId' => $row['makeOverId'] ?? NULL,
+                        'makeOverIdChild' => $row['makeOverIdChild'] ?? NULL
                     );
                 }
             } else {

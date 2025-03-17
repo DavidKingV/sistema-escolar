@@ -7,6 +7,8 @@ let studentIdGroup = urlParams.get('student');
 
 let api = '../public/api.php';
 
+let studentName;
+
 $(function () {
     getStudentName(studentIdGroup);
 });
@@ -22,6 +24,7 @@ const getStudentName = async (studentIdGroup) => {
                 })
                 .then(data => {
                     if (data.success) {
+                        studentName = data.studentName;
                         $("#placeholder").text('Calificaciones de '+data.studentName).attr("class", "studentName");
                     } else {
                         errorAlert(data.message);
@@ -31,3 +34,57 @@ const getStudentName = async (studentIdGroup) => {
         errorAlert(error);
     }
 }
+
+$("#studentGradesTable").on('click', '.studentGrade', function () {
+    let subjectId = $(this).data('subject');
+    let subjectName = $(this).data('subjectname');
+
+    let subjectChildId = $(this).data('subjectchild');
+    let subjectChildName = $(this).data('subjectchildname');
+
+    let gradeId = $(this).data('grade');
+
+    $("#makeOverExamModalLabel").html(
+        'Recursamiento para ' + studentName + ' - ' + subjectName + '  ' + (subjectChildName ? subjectChildName : '')
+      );
+    $("#makeOverExamModal").modal('show');
+    $.post('../public/modals/makeOverExam.Modal.php', { studentId: studentIdGroup, subjectId: subjectId, subjectName : subjectName, subjectChildName: subjectChildName, subjectChildId: subjectChildId, gradeId: gradeId }, function (data) {
+        $('#makeOverExamModalBody').html(data);
+    });
+});
+
+$("#studentGradesTable").on('click', '.mekeOver', function () {
+    let makeOverId;
+
+    if($(this).data('makeoverid')){
+        makeOverId = $(this).data('makeoverid');
+    }else{
+        makeOverId = null;
+    }
+
+    $("#makeOverViewModalLabel").html(
+        'calificacion de Recursamiento para ' + studentName
+      );
+    $("#makeOverViewModal").modal('show');
+    $.post('../public/modals/viewMakeOver.Modal.php', { studentId: studentIdGroup, makeOverId: makeOverId }, function (data) {
+        $('#makeOverViewModalBody').html(data);
+    });
+});
+
+$("#studentGradesTable").on('click', '.makeOverChild', function () {  
+    let makeOverChildId;
+
+    if($(this).data('makeoverchildid')){
+        makeOverChildId = $(this).data('makeoverchildid');
+    }else{
+        makeOverChildId = null;
+    }
+
+    $("#makeOverViewModalLabel").html(
+        'calificacion de Recursamiento para ' + studentName
+      );
+    $("#makeOverViewModal").modal('show');
+    $.post('../public/modals/viewMakeOver.Modal.php', { studentId: studentIdGroup, makeOverChildId: makeOverChildId }, function (data) {
+        $('#makeOverViewModalBody').html(data);
+    });
+});
