@@ -28,7 +28,7 @@ $("#formAddSchedule").on('submit', function (e) {
 const addSchedule = async (data) => {  
     loadingAlert(); 
     try {
-        sendFetch(callback, 'POST', { action: 'addSchedule', data})
+        sendFetch(callback, 'POST', { action: 'addSchedule', scheduleData: data})
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
