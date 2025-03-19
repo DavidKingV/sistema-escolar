@@ -2,7 +2,7 @@ import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensE
 import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, InitializeStudentGrades } from '../datatables/index.js';
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { sendFetch } from '../../public/js/global/fetchCall.js';
-import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '../utils/alerts.js';
+import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
@@ -89,11 +89,10 @@ $("#updateStudent").on( "submit", function( event ) {
                 UpdateStudent(studentData);
             $('#StutentEditModal').modal('hide');
             }else{
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error en la validación',
-                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
-                });
+                confirmAlert('Seguro que deseas dejar estos campos vacios', 'Si', 'No', function() {
+                    UpdateStudent(studentData);
+                    $('#StutentEditModal').modal('hide');                    
+                });                                
             }
         }
     });
@@ -131,7 +130,7 @@ $("#studentName").on("blur", function(){
    
     if(studentName){
         loadingSpinner(true, "#userList");
-        enviarPeticionAjax('../php/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
+        enviarPeticionAjax('php/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
         .done(function(data) {
             loadingSpinner(false, "#userList");
             $("#microsoftId, #microsoftEmail").val('');
