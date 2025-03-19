@@ -5,7 +5,9 @@ import { sendFetch } from './global/fetchCall.js';
 const callback = '../public/api.php';
 
 $(function () {
-    initializeDataTable('#schedulesTable', callback, { action: 'getSchedulesGroup' }, [
+    var groupId = $('#groupId').val();
+
+    initializeDataTable('#schedulesTable', callback, { action: 'getSchedulesGroup', groupId: groupId }, [
         { "data": "title", "className": "text-center" },
         { "data": "date", "className": "text-center" },
         { "data": "start", "className": "text-center" },     

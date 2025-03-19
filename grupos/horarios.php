@@ -32,10 +32,10 @@ if (!$VerifySession['success']) {
         $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
 
     }else if($userId == NULL && $accessToken == NULL){
-        header('Location: index.php?sesion=no-started');
+        header('Location: ../index.php?sesion=no-started');
         exit();
     }else if($admin == NULL){
-        include('php/views/alerts.php');
+        include('../php/views/alerts.php');
         exit();
     }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
         $userDataInstance = new userData($connection);
