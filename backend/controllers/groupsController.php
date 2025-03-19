@@ -47,4 +47,14 @@ class GroupsController{
             );
         }
     }
+
+    public function addSchedule($data){
+        $addSchedule = $this->groups->addSchedule($data);
+        return $addSchedule;
+    }
+
+    public function getSchedulesGroup($groupId){
+        $schedulesGroup = $this->groups->getSchedulesGroup($groupId);
+        return $schedulesGroup;
+    }
 }

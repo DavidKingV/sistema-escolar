@@ -106,6 +106,15 @@ if(!isset($data['action'])){
         case 'getNoGroupStudentsList':
             responseJson($groups->getNoGroupStudentsList());
             break;
+        case 'addSchedule':
+            $scheduleData = $data['scheduleData'] ?? null;
+            parse_str($scheduleData, $scheduleData);
+            responseJson($groups->addSchedule($scheduleData));
+            break;
+        case 'getSchedulesGroup':
+            $groupId = $data['groupId'] ?? null;
+            responseJson($groups->getSchedulesGroup($groupId));
+            break;
 
         case 'addMakeOverGrade':
             $makeOverData = $data['gradesData'] ?? null;

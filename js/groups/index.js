@@ -75,6 +75,19 @@ $("#groupsTable").on("click", ".groupDetails", function(){
     }
 });
 
+$("#groupsTable").on("click", ".groupSchedules", function(){
+    let groupId = $(this).data("id");
+    if (groupId) {
+        window.location.href = 'grupos/horarios.php?id=' + groupId;
+    }else{
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'No se ha podido obtener el ID del grupo',
+        });
+    }
+});
+
 $(function () {
     let currentPath = window.location.pathname;
     let specificPath = "/grupos/detalles.php";

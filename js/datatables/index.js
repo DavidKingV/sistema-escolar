@@ -435,7 +435,7 @@ function initializeGroupsDataTable() {
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle groupDetails"><i class="bi bi-eye-fill"></i></button> <button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button> <button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
+                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle groupSchedules"><i class="bi bi-calendar-date-fill"></i></button> <button data-id="'+row.id+'" class="btn btn-primary btn-circle groupDetails"><i class="bi bi-eye-fill"></i></button> <button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button> <button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
                         
                 },
                 "className": "text-center"
