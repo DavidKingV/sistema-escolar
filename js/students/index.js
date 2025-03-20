@@ -130,7 +130,7 @@ $("#studentName").on("blur", function(){
    
     if(studentName){
         loadingSpinner(true, "#userList");
-        enviarPeticionAjax('php/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
+        enviarPeticionAjax('../php/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
         .done(function(data) {
             loadingSpinner(false, "#userList");
             $("#microsoftId, #microsoftEmail").val('');
