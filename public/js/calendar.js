@@ -51,7 +51,7 @@ $(function() {
         headerToolbar: {
             start: 'title', // will normally be on the left. if RTL, will be on the right
             center: '',
-            end: '' // will normally be on the right. if RTL, will be on the left
+            end: 'prev,next today dayGridMonth,dayGridWeek,listWeek'
         },
         dateClick: async  function(info) {
             $("#addEventModalLabel").html('Agregar alumno para el '+info.dateStr+'');
