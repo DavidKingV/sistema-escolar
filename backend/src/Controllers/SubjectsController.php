@@ -1,8 +1,8 @@
 <?php
-require __DIR__.'/../vendor/autoload.php';
-require __DIR__.'/../models/subjectsModel.php';
+namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Models\SubjectsModel;
 
 class SubjectsController{
     private $connection;

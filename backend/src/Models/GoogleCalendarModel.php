@@ -1,5 +1,6 @@
 <?php
-require __DIR__.'/../vendor/autoload.php';
+namespace Vendor\Schoolarsystem\Models;
+
 
 use Google\Client;
 use Google\Service\Calendar;

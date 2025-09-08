@@ -1,8 +1,8 @@
 <?php
-require __DIR__.'/../vendor/autoload.php';
-require __DIR__.'/../models/practicalHoursModel.php';
+namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Models\PracticalHoursModel;
 
 class PracticalHoursController{
     private $connection;
