@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../../php/vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 require __DIR__.'/../models/studentsModel.php';
 
 use Vendor\Schoolarsystem\DBConnection;

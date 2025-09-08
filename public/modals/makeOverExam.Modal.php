@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
+require_once(__DIR__.'/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;

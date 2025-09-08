@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../php/vendor/autoload.php';
+require __DIR__.'/../backend/vendor/autoload.php';
 require __DIR__.'/../backend/controllers/studentsController.php';
 require __DIR__.'/../backend/controllers/subjectsController.php';
 require __DIR__.'/../backend/controllers/practicalHoursController.php';

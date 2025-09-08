@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
+require_once(__DIR__.'/../vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -30,7 +30,7 @@ if ($VerifySession['success']) {
         header('Location: index.php?sesion=no-started');
         exit();
     }else if($admin == NULL){
-        include('php/views/alerts.php');
+        include __DIR__.'/alerts.php';
         exit();
     }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
         $userDataInstance = new userData($connection);

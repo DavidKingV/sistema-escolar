@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
+require_once(__DIR__.'/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -39,7 +39,7 @@ if (!$VerifySession['success']) {
 </head>
 <body>
 
-    <?php include_once '../../backend/views/mainMenu.php'; ?>
+    <?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
       
     <section class="home" id="home">           
         <div class="text">Calendario</div>

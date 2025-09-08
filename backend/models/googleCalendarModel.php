@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../../php/vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 use Google\Client;
 use Google\Service\Calendar;
