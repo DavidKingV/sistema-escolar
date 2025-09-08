@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/php/vendor/autoload.php');
+require_once(__DIR__.'/../../php/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -61,139 +61,16 @@ if (!$VerifySession['success']) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/jquery-ui.css">
+    <link rel="stylesheet" href="../../assets/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/jquery-ui.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
-    <title>Grupos</title>
+    <title>Pagos</title>
 </head>
 <body>
 
-    <nav class="navbar bg-body-tertiary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            <img src="assets/img/escudo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-mid">
-            ESMEFIS Centro Universitario
-          </a>
-        </div>
-    </nav>
-
-    <nav class="sidebar" id="nav">
-
-        <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; min-height: calc(100vh);">
-            <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item py-1">
-                <a href="dashboard.php" class="btn btn-light d-flex align-items-center justify-content-start"><i class="bi bi-house-fill px-3"></i>Inicio</a>
-            </li>
-            <li class="py-1">                 
-                <button class="btn btn-primary w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayments" aria-expanded="false" aria-controls="collapsePayments">
-                <i class="bi bi-credit-card-fill px-3"></i>Pagos
-                </button>                
-                <div class="collapse" id="collapsePayments">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="pagos.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="pagos/fechas-pago.php" class="list-group-item list-group-item-action">Fechas de pago</a>
-                            <!--<a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>-->
-                        </div>                       
-                    </div>
-                </div>                                                    
-            </li>
-            <li class="py-1">                 
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
-                <i class="bi bi-person-badge-fill px-3"></i>Alumnos
-                </button>                
-                <div class="collapse" id="collapseStudents">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="alumnos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="alumnos.php" class="list-group-item list-group-item-action">Lista</a>
-                            <a href="alumnos/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
-                        </div>                       
-                    </div>
-                </div>                                                    
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTeachers" aria-expanded="false" aria-controls="collapseTeachers">
-                <i class="bi bi-person-workspace px-3"></i>Profesores
-                </button>                
-                <div class="collapse" id="collapseTeachers">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="profesores/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="profesores.php" class="list-group-item list-group-item-action">Lista</a>
-                            <a href="profesores/usuarios.php" class="list-group-item list-group-item-action">Usuarios</a>
-                        </div>                          
-                    </div>
-                </div> 
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroups" aria-expanded="false" aria-controls="collapseGroups">
-                <i class="bi bi-person-badge-fill px-3"></i>Grupos
-                </button>                
-                <div class="collapse" id="collapseGroups">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="grupos/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="grupos.php" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-            </li>
-            <li class="py-1">                    
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCarreers" aria-expanded="false" aria-controls="collapseCarreers">
-                <i class="bi bi-mortarboard-fill px-3"></i>Carreras
-                </button>                
-                <div class="collapse" id="collapseCarreers">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="carreras/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="carreras.php" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSubjects" aria-expanded="false" aria-controls="collapseSubjects">
-                <i class="bi bi-book-half px-3"></i>Materias
-                </button>                
-                <div class="collapse" id="collapseSubjects">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="materias/altas.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="materias.php" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-            </li>
-            <li class="py-1">
-                <button class="btn btn-light w-100 d-flex align-items-center justify-content-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUsers" aria-expanded="false" aria-controls="collapseUsers">
-                <i class="bi bi-person-lines-fill px-3"></i>Usuarios
-                </button>                
-                <div class="collapse" id="collapseUsers">
-                    <div class="card card-body">
-                        <div class="list-group">                            
-                            <a href="#" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="#" class="list-group-item list-group-item-action">Lista</a>
-                        </div>                          
-                    </div>
-                </div>  
-
-            </li>
-            </ul>
-            <hr>
-            <div class="dropdown">
-            <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="<?php echo $userPhoto ?>" alt="" width="32" height="32" class="rounded-circle me-2">
-                <strong><?php echo $userName ?></strong>
-            </a>
-            <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                <li><a class="dropdown-item" id="endSession" href="#">Cerrar Sesión</a></li>
-            </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include_once '../../backend/views/mainMenu.php'; ?>
       
     <section class="home" id="home">           
         <div class="text">Pagos</div>
@@ -347,7 +224,7 @@ if (!$VerifySession['success']) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="js/payments/index.js"></script>
-<script src="js/utils/validate.js"></script>
-<script type="module" src="js/utils/sessions.js"></script>
+<script type="module" src="../../js/payments/index.js"></script>
+<script src="../../js/utils/validate.js"></script>
+<script type="module" src="../../js/utils/sessions.js"></script>
 
