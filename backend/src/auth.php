@@ -44,4 +44,21 @@ class auth {
         }
     }
 
+    public static function check(){
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $jwt = $_COOKIE['auth'] ?? NULL;
+
+        $result = self::verify($jwt);
+
+        if(!$result['success']){
+            setcookie('auth', '', time() - 3600, '/');
+            session_unset();
+        }
+
+        return $result;
+    }
+
 }
