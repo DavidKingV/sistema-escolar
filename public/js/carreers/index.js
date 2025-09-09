@@ -12,7 +12,7 @@ $(function() {
 
     if (currentPath === specificPath) {
 
-        $.getJSON('../backend/carreers/areas.json', function(carreras) {
+        $.getJSON('/backend/carreers/areas.json', function(carreras) {
             let $select = $('#careerName');
             $.each(carreras, function(area, subareas) {
                 let $mainOptgroup = $('<optgroup>', { label: area.replace(/_/g, ' ') });
@@ -131,7 +131,7 @@ $("#carreersTable").on("click", ".deleteCarreer", function() {
 const DeleteCarreer = async (idCarreer) => {
     try {
         const response = await $.ajax({
-            url: 'backend/carreers/routes.php',
+            url: '/backend/carreers/routes.php',
             type: 'POST',
             data: {idCarreer: idCarreer, action: 'deleteCarreer'}
         });
@@ -165,7 +165,7 @@ const DeleteCarreer = async (idCarreer) => {
 const UpdateCarreer = async (carreerDataEdit) => {
     try {
         const response = await $.ajax({
-            url: 'backend/carreers/routes.php',
+            url: '/backend/carreers/routes.php',
             type: 'POST',
             data: {carreerDataEdit: carreerDataEdit, action: 'updateCarreer'}
         });
@@ -203,7 +203,7 @@ const GetCarreerData = async (idCarreer) => {
         // Función para obtener el valor predeterminado de la base de datos usando async/await
         const getDefaultCareer = async () => {
             const response = await $.ajax({
-                url: 'backend/carreers/routes.php', // Cambia esta URL a tu ruta real
+                url: '/backend/carreers/routes.php', // Cambia esta URL a tu ruta real
                 type: 'GET',
                 data: { idCarreer: idCarreer, action: 'getCareerData' }
             });
@@ -217,7 +217,7 @@ const GetCarreerData = async (idCarreer) => {
 
         // Función para cargar el JSON de carreras
         const loadCareers = async () => {
-            const response = await $.getJSON('backend/carreers/areas.json');
+            const response = await $.getJSON('/backend/carreers/areas.json');
             return response;
         };
 
@@ -284,7 +284,7 @@ const GetCarreerData = async (idCarreer) => {
 const AddCareer = async (carreerData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/carreers/routes.php',
+            url: '/backend/carreers/routes.php',
             type: 'POST',
             data: {carreerData: carreerData, action: 'addCareer'}
         });

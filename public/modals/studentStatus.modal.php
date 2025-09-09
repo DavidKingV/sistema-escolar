@@ -59,9 +59,9 @@ $studentStatus = $_POST['studentStatus'] ?? NULL;
 
 <script type="module">    
     import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/utils/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js';
+    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
 
-    let api = 'public/api.php';
+    let api = '/public/api.php';
 
     $('#addEvent').submit(function(e) {
         e.preventDefault();

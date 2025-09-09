@@ -1,7 +1,7 @@
 import { confirmCloseSession, loadingAlert, successAlert, errorAlert } from './alerts.js';
 import { enviarPeticionAjax } from './ajax.js';
 
-var phpPath = 'backend/login/routes.php';
+var phpPath = '/backend/login/routes.php';
 
 function openInNewWindow(url) {
     const newWindow = window.open(url, '_blank', 'width=800,height=600');

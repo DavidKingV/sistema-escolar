@@ -5,7 +5,7 @@ import { sendFetch } from './global/fetchCall.js';
 let urlParams = new URLSearchParams(window.location.search);
 let studentIdGroup = urlParams.get('student'); 
 
-let api = '../public/api.php';
+let api = '/public/api.php';
 
 let studentName;
 
@@ -48,7 +48,7 @@ $("#studentGradesTable").on('click', '.studentGrade', function () {
         'Recursamiento para ' + studentName + ' - ' + subjectName + '  ' + (subjectChildName ? subjectChildName : '')
       );
     $("#makeOverExamModal").modal('show');
-    $.post('../public/modals/makeOverExam.Modal.php', { studentId: studentIdGroup, subjectId: subjectId, subjectName : subjectName, subjectChildName: subjectChildName, subjectChildId: subjectChildId, gradeId: gradeId }, function (data) {
+    $.post('/public/modals/makeOverExam.Modal.php', { studentId: studentIdGroup, subjectId: subjectId, subjectName : subjectName, subjectChildName: subjectChildName, subjectChildId: subjectChildId, gradeId: gradeId }, function (data) {
         $('#makeOverExamModalBody').html(data);
     });
 });
@@ -66,7 +66,7 @@ $("#studentGradesTable").on('click', '.mekeOver', function () {
         'calificacion de Recursamiento para ' + studentName
       );
     $("#makeOverViewModal").modal('show');
-    $.post('../public/modals/viewMakeOver.Modal.php', { studentId: studentIdGroup, makeOverId: makeOverId }, function (data) {
+    $.post('/public/modals/viewMakeOver.Modal.php', { studentId: studentIdGroup, makeOverId: makeOverId }, function (data) {
         $('#makeOverViewModalBody').html(data);
     });
 });
@@ -84,7 +84,7 @@ $("#studentGradesTable").on('click', '.makeOverChild', function () {
         'calificacion de Recursamiento para ' + studentName
       );
     $("#makeOverViewModal").modal('show');
-    $.post('../public/modals/viewMakeOver.Modal.php', { studentId: studentIdGroup, makeOverChildId: makeOverChildId }, function (data) {
+    $.post('/public/modals/viewMakeOver.Modal.php', { studentId: studentIdGroup, makeOverChildId: makeOverChildId }, function (data) {
         $('#makeOverViewModalBody').html(data);
     });
 });

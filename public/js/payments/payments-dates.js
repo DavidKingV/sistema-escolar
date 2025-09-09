@@ -2,7 +2,7 @@ import { enviarPeticionAjaxAction } from "../utils/ajax.js"
 import { successAlert, errorAlert } from "../utils/alerts.js"
 import { initializeDataTable } from "../datatables/main.js"
 
-let phpPath = '../backend/payments/routes.php';
+let phpPath = '/backend/payments/routes.php';
 
 const SetCashFormat = (value) => {
     return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');

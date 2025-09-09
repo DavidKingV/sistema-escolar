@@ -224,6 +224,6 @@ if (!$VerifySession['success']) {
 
 <!-- Custom JS -->
 <script type="module" src="../js/students/notes.js"></script>
-<script type="module" src="../public/js/notes.js"></script>
+<script type="module" src="../js/notes.js"></script>
 <script src="../js/utils/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>

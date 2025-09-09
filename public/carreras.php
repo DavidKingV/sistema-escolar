@@ -218,7 +218,7 @@ if (!$VerifySession['success']) {
 <script type="module" src="js/carreers/index.js"></script>
 <script type="module" src="js/carreers/carreers.js"></script>
 
-<script type="module" src="public/js/careers.js"></script>
+<script type="module" src="js/careers.js"></script>
 
 <script src="js/utils/validate.js"></script>
 <script type="module" src="js/utils/sessions.js"></script>

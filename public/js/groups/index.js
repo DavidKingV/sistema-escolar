@@ -113,7 +113,7 @@ $(function () {
 const GetDataGroupDetails = async (groupId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '/backend/groups/routes.php',
             type: 'GET',
             data: {groupId: groupId, action: 'getGroupData'},
         });
@@ -193,7 +193,7 @@ $("#groupStudentsTable").on("click", ".deleteGroupStudent", function(){
 const DeleteStudentGroup = async (studentId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '/backend/groups/routes.php',
             type: 'POST',
             data: {studentId: studentId, action: 'deleteStudentGroup'}
         });
@@ -227,7 +227,7 @@ const DeleteStudentGroup = async (studentId) => {
 const AddStudentGroup = async (groupId, studentId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '/backend/groups/routes.php',
             type: 'POST',
             data: {groupId: groupId, studentId:studentId, action: 'addStudentGroup'},
             dataType: 'json'
@@ -264,7 +264,7 @@ const AddStudentGroup = async (groupId, studentId) => {
 const AddGroup = async (groupData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '/backend/groups/routes.php',
             type: 'POST',
             data: {groupData: groupData, action: 'addGroup'}
         });
@@ -294,7 +294,7 @@ const AddGroup = async (groupData) => {
 const DeleteGroup = async (groupId) => {
     try {
         const response = await $.ajax({
-            url: 'backend/groups/routes.php',
+            url: '/backend/groups/routes.php',
             type: 'POST',
             data: {groupId: groupId, action: 'deleteGroup'}
         });
@@ -328,7 +328,7 @@ const DeleteGroup = async (groupId) => {
 const UpdateGroup = async (groupDataEdit) => {
     try {
         const response = await $.ajax({
-            url: 'backend/groups/routes.php',
+            url: '/backend/groups/routes.php',
             type: 'POST',
             data: {groupDataEdit: groupDataEdit, action: 'updateGroup'}
         });
@@ -365,7 +365,7 @@ const GetStudentsNames = async () => {
     const GetStudentsSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../backend/groups/routes.php',
+                url: '/backend/groups/routes.php',
                 type: 'GET',
                 data: {action: 'getStudentsNames'},
                 dataType: 'json'
@@ -412,7 +412,7 @@ const GetDataGroupEdit = async (groupId) => {
         // Función para obtener el valor predeterminado de la base de datos usando async/await
         const getDefaultCareer = async () => {
             const response = await $.ajax({
-                url: 'backend/groups/routes.php',
+                url: '/backend/groups/routes.php',
                 type: 'GET',
                 data: {groupId: groupId, action: 'getGroupData'},
             });
@@ -427,7 +427,7 @@ const GetDataGroupEdit = async (groupId) => {
         // Función para cargar el JSON de carreras
         const loadCareers = async () => {
             const response = await $.ajax({
-                url: 'backend/groups/routes.php',
+                url: '/backend/groups/routes.php',
                 type: 'GET',
                 data: {action: 'getGroupsJson'}
             });
@@ -486,7 +486,7 @@ const GetCarreerName = async () => {
         // Función para cargar el JSON de carreras
         const loadCareers = async () => {
             const response = await $.ajax({
-                url: '../backend/groups/routes.php',
+                url: '/backend/groups/routes.php',
                 type: 'GET',
                 data: {action: 'getGroupsJson'}
             });

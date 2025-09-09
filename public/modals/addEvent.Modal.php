@@ -59,11 +59,11 @@ $date = $_POST['date'] ?? NULL;
 </form>
 
 <script type="module">    
-    import { errorAlert, successAlert, successAlertAuto, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js'
-    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fullcalendar/index.js';
+    import { errorAlert, successAlert, successAlertAuto, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
+    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js'
+    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
 
-    let api = '<?php echo $_ENV['BASE_URL']; ?>/public/api.php';
+    let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
 
     $(function() {
         configurarTimepickers();

@@ -204,6 +204,6 @@ if (!$VerifySession['success']) {
 
 <!-- Custom JS -->
 <script type="module" src="../js/groups/index.js"></script>
-<script type="module" src="../public/js/groupsDetails.js"></script>
+<script type="module" src="../js/groupsDetails.js"></script>
 <script src="../js/utils/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>

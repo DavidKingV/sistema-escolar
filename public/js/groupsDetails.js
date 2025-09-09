@@ -2,7 +2,7 @@ import { initializeDataTable } from './global/dataTables.js';
 import { confirmAlert, successAlertAuto, errorAlert, loadingSpinner } from './global/alerts.js';
 import { sendFetch } from './global/fetchCall.js';
 
-const callback = '../public/api.php';
+const callback = '/public/api.php';
 
 $(function() {
     getStudentsList($('#studentIdGroup'));

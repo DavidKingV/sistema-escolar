@@ -8,7 +8,7 @@ function initializeStudentDataTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "backend/students/routes.php", 
+            url: "/backend/students/routes.php", 
             type: "POST",
             data: { action: "getStudents" },
             dataSrc: function(data){
@@ -70,7 +70,7 @@ function initializeStudentsUsersTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/students/routes.php", 
+            url: "/backend/students/routes.php", 
             type: "POST",
             data: { action: "getStudentsUsers" },
             dataSrc: function(data){
@@ -136,7 +136,7 @@ function initializeStudentsMicrosoftUsersTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/students/routes.php", 
+            url: "/backend/students/routes.php", 
             type: "POST",
             data: { action: "getStudentsMicrosoftUsers" },
             dataSrc: function(data){
@@ -171,7 +171,7 @@ function InitializeStudentGrades(studentIdGroup) {
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/students/routes.php", 
+            url: "/backend/students/routes.php", 
             type: "POST",
             data: {studentId: studentIdGroup, action: "getStudentGrades" },
             dataSrc: function(data){
@@ -263,7 +263,7 @@ function initializeTeachersDataTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "backend/teachers/routes.php", 
+            url: "/backend/teachers/routes.php", 
             type: "POST",
             data: { action: "getTeachers" },
             dataSrc: function(data){
@@ -307,7 +307,7 @@ function initializeTeachersUsersTable(){
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/teachers/routes.php", 
+            url: "/backend/teachers/routes.php", 
             type: "POST",
             data: { action: "getTeachersUsers" },
             dataSrc: function(data){
@@ -357,7 +357,7 @@ function initializeCarreersDataTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "backend/carreers/routes.php", 
+            url: "/backend/carreers/routes.php", 
             type: "POST",
             data: { action: "getCareers" },
             dataSrc: function(data){
@@ -408,7 +408,7 @@ function initializeGroupsDataTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "backend/groups/routes.php", 
+            url: "/backend/groups/routes.php", 
             type: "POST",
             data: { action: "getGroups" },
             dataSrc: function(data){
@@ -454,7 +454,7 @@ function initializeGroupsStudentsDataTable(groupId) {
     paging: true,
     processing: true,
     ajax: {
-        url: "../backend/groups/routes.php", 
+        url: "/backend/groups/routes.php", 
         type: "POST",
         data: {groupId: groupId, action: "getGroupsStudents" },
         dataSrc: function(data){
@@ -495,7 +495,7 @@ function initializeSubjectsDataTable(){
         paging: true,
         processing: true,
         ajax: {
-            url: "backend/subjects/routes.php", 
+            url: "/backend/subjects/routes.php", 
             type: "POST",
             data: { action: "getSubjects" },
             dataSrc: function(data){

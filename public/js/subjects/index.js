@@ -211,7 +211,7 @@ $("#addSubjects").submit(function(e) {
 const AddSubject = async (subjectData) => {
     try {
         const response = await $.ajax({
-            url: "../backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "POST",
             data: {subjectData: subjectData, action: "addSubject"}
         });
@@ -243,7 +243,7 @@ const AddSubject = async (subjectData) => {
 const DeleteSubject = async (subjectId) => {
     try {
         const response = await $.ajax({
-            url: "backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "POST",
             data: {subjectId: subjectId, action: "deleteSubject"}
         });
@@ -274,7 +274,7 @@ const DeleteSubject = async (subjectId) => {
 const UpdateSubjectData = async (subjectDataEdit) => {
     try {
         const response = await $.ajax({
-            url: "backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "POST",
             data: {subjectDataEdit: subjectDataEdit, action: "updateSubjectData"}
         });
@@ -305,7 +305,7 @@ const UpdateSubjectData = async (subjectDataEdit) => {
 const GetSubjectData =  async (subjectId) => {
     try {
         const response = await $.ajax({
-            url: "backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "GET",
             data: {subjectId: subjectId, action: "getSubjectData"},
         });
@@ -335,7 +335,7 @@ const GetSubjectData =  async (subjectId) => {
 const UpdateSubjectChild = async (subjectUpdateChildData) => {
     try {
         const response = await $.ajax({
-            url: "backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "POST",
             data: {subjectUpdateChildData: subjectUpdateChildData, action: "updateSubjectChild"}
         });
@@ -368,7 +368,7 @@ const UpdateSubjectChild = async (subjectUpdateChildData) => {
 const AddSubjectChild = async (subjectChildData) => {
     try {
         const response = await $.ajax({
-            url: "backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "POST",
             data: {subjectChildData: subjectChildData, action: "addSubjectChild"}
         });
@@ -400,7 +400,7 @@ const AddSubjectChild = async (subjectChildData) => {
 const GetChildSubjectsData  = async (subjectFatherId, subjectChildId) => {
     try {
         const response = await $.ajax({
-            url: "backend/subjects/routes.php",
+            url: "/backend/subjects/routes.php",
             type: "GET",
             data: {subjectFatherId: subjectFatherId, subjectChildId: subjectChildId, action: "getChildSubjectsData"},
         });
