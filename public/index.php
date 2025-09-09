@@ -3,9 +3,7 @@ require_once(__DIR__.'/../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 
-session_start();
-
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $userId = $VerifySession['userId'] ?? NULL;
 
