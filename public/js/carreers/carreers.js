@@ -1,7 +1,7 @@
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { successAlert, errorAlert } from '../utils/alerts.js';
 
-let phpPath = '/backend/carreers/routes.php';
+let phpPath = '../backend/carreers/routes.php';
 
 const GetSubject = async (carreerId) => {
  

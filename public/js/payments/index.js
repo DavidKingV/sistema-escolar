@@ -1,14 +1,14 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
 import { successAlert, errorAlert, loadingAlert } from '../utils/alerts.js';
 
-let phpPath = '../../backend/payments/routes.php';
+let phpPath = '../backend/payments/routes.php';
 
 const GetStudentsNames = async () => {
 
     const GetStudentsSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../../backend/students/routes.php',
+                url: '../backend/students/routes.php',
                 type: 'POST',
                 data: {action: 'GetStudentsNames'},
                 dataType: 'json'

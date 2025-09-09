@@ -4,7 +4,7 @@ function openInNewWindow(url) {
 
 function login(data){
     $.ajax({
-        url: '/backend/login/routes.php',
+        url: '../backend/login/routes.php',
         type: 'POST',
         data: {data: data, action: 'login'},
     }).done(function(response){
@@ -32,7 +32,7 @@ function login(data){
 
 $("#openInNewWindow").on("click", function(event) {
     event.preventDefault();
-    openInNewWindow("/backend/login/MicrosoftLogin.php");
+    openInNewWindow("../backend/login/MicrosoftLogin.php");
 });
 
 window.addEventListener('message', function(event) {
