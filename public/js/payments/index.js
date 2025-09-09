@@ -155,6 +155,8 @@ $(document).ready(function() {
 
     CheckActive($("#todayDate"), $("#paymentDate"));
     CheckActive($("#paymentExtraCkeck"), $("#paymentExtra"));
+
+    $("#paymentTotal").val('0.00');
     
     $("#paymentInvoice").on('change', function() {
         let studentId = $("#studentName").val();
