@@ -44,7 +44,7 @@ class auth {
         }
     }
 
-    public static function check(){
+   public static function check(){
         $jwt = $_COOKIE['auth'] ?? NULL;
         $verification = self::verify($jwt);
         if(!$verification['success']){

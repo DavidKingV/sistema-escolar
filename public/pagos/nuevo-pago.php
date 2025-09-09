@@ -146,7 +146,7 @@ if (!$VerifySession['success']) {
                                         <label id="paymentTotal-error" class="error text-bg-danger" for="paymentTotal" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>                                        
                                         <div class="input-group">
                                             <span class="input-group-text">$</span>                                                                                        
-                                            <input type="text" class="form-control" id="paymentTotal" name="paymentTotal">
+                                            <input type="text" class="form-control" id="paymentTotal" name="paymentTotal" readonly>
                                         </div>
                                     </div>                                        
                                 </div> 
