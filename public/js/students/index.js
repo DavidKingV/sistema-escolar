@@ -61,7 +61,7 @@ $('#studentTable').on('click', '.badge', async function() {
     let studentName = $(this).data('name');
     let studentStatus = $(this).data('status');
 
-    await $.post('/public/modals/studentStatus.modal.php', { studentId: studentId,studentName: studentName, studentStatus: studentStatus }, function (data) {
+    await $.post('/modals/studentStatus.modal.php', { studentId: studentId,studentName: studentName, studentStatus: studentStatus }, function (data) {
         $("#statusModal").modal('show');
         $('#statusModalBody').html(data);
     });

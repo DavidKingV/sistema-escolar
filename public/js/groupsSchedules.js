@@ -2,7 +2,7 @@ import { initializeDataTable } from './global/dataTables.js';
 import { confirmAlert, successAlertAuto, errorAlert, loadingAlert } from './global/alerts.js';
 import { sendFetch } from './global/fetchCall.js';
 
-const callback = '/public/api.php';
+const callback = '/api.php';
 
 $(function () {
     var groupId = $('#groupId').val();
