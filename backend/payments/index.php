@@ -21,7 +21,7 @@ class PaymentsControl{
     }
 
     public function VerifyTaxData($studentId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -49,7 +49,7 @@ class PaymentsControl{
     }
 
     public function GetFacturApiData($clientId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -114,7 +114,7 @@ class PaymentsControl{
     }
 
     public function AddPayment($paymentDataArray){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
         return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -244,7 +244,7 @@ class PaymentsControl{
     }
 
     public function GetStudentsPayMount(){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -287,7 +287,7 @@ class PaymentsControl{
     }
 
     public function SetStudentPayMount($studentId, $amount){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -314,7 +314,7 @@ class PaymentsControl{
     }
 
     public function VerifyMonthlyPayment($studentId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{

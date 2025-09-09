@@ -15,7 +15,7 @@ class GroupsControl{
     }
     
         public function GetGroups(){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -48,7 +48,7 @@ class GroupsControl{
         }
 
         public function GetGroupsStudents($groupId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -79,7 +79,7 @@ class GroupsControl{
         }
 
         public function GetStudentsNames(){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -108,7 +108,7 @@ class GroupsControl{
         }
 
         public function GetGroupData($groupId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -143,7 +143,7 @@ class GroupsControl{
         }
 
         public function GetGroupsJson(){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -182,7 +182,7 @@ class GroupsControl{
         }
     
         public function AddGroup($groupDataArray){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -204,7 +204,7 @@ class GroupsControl{
         }
     
         public function UpdateGroup($groupDataEditArray){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -226,7 +226,7 @@ class GroupsControl{
         }
     
         public function DeleteGroup($groupId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -247,7 +247,7 @@ class GroupsControl{
         }
 
         public function AddStudentGroup($groupId, $studentId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -278,7 +278,7 @@ class GroupsControl{
         }
 
         public function DeleteStudentGroup($studentId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{

@@ -8,7 +8,7 @@ use Vendor\Schoolarsystem\MicrosoftActions;
 use Vendor\Schoolarsystem\loadEnv;
 
 loadEnv::cargar();
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();

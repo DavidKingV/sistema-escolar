@@ -10,7 +10,7 @@ use Vendor\Schoolarsystem\loadEnv;
 session_start();
 
 loadEnv::cargar();
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();

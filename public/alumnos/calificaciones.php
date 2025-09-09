@@ -9,7 +9,7 @@ use Vendor\Schoolarsystem\MicrosoftActions;
 
 session_start();
 
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();
