@@ -14,7 +14,7 @@ class CareersControl{
     }
 
     public function getCareers(){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
        if(!$VerifySession['success']){
            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -46,7 +46,7 @@ class CareersControl{
     }
 
     public function getCareer($idCarreer){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
        if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -77,7 +77,7 @@ class CareersControl{
     }
 
     public function addCarreer($carreerData){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
        if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -99,7 +99,7 @@ class CareersControl{
     }
 
     public function updateCarreer($carreerDataEditArray){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
        if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -121,7 +121,7 @@ class CareersControl{
     }
 
     public function deleteCarreer($idCarreer){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
        if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -143,7 +143,7 @@ class CareersControl{
     }
 
     public function getSubjects($carreerId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -175,7 +175,7 @@ class CareersControl{
     }
 
     public function getChildSubjects($subjectID){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -207,7 +207,7 @@ class CareersControl{
     }
 
     public function addSubjectsCarreer($subjectsCarreerArray){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{

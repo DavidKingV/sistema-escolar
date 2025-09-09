@@ -16,7 +16,7 @@ class SubjectsControl{
     }
     
     public function GetSubjects(){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -61,7 +61,7 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
     }
 
     public function GetSubjectData($subjectId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -90,7 +90,7 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
     }
 
     public function AddSubject($subjectDataArray){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -109,7 +109,7 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
     }
 
     public function UpdateSubjectData($subjectDataEditArray){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -128,7 +128,7 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
     }
 
     public function DeleteSubject($subjectId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -158,7 +158,7 @@ class SubjectsControlChild extends SubjectsControl{
 
     public function AddSubjectChild($subjectChildDataArray){
         
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -189,7 +189,7 @@ class SubjectsControlChild extends SubjectsControl{
     }
 
     public function GetSubjectChildData($subjectFatherId, $subjectChildId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -218,7 +218,7 @@ class SubjectsControlChild extends SubjectsControl{
     }
 
     public function UpdateSubjectChild ($subjectChildDataEditArray){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{

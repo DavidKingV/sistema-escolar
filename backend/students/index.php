@@ -20,7 +20,7 @@ class StudentsControl {
     }
     public function GetStudents(){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -66,7 +66,7 @@ class StudentsControl {
 
     function GetStudent($studentId){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -106,7 +106,7 @@ class StudentsControl {
 
     function AddStudent($studentDataArray){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -152,7 +152,7 @@ class StudentsControl {
 
     function UpdateStudent($studentDataArray){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -180,7 +180,7 @@ class StudentsControl {
 
     function UpdateStatus($statusDataArray){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -204,7 +204,7 @@ class StudentsControl {
 
     function DeleteStudent($studentId){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -227,7 +227,7 @@ class StudentsControl {
     }
 
     public function GetStudentsNames(){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -258,7 +258,7 @@ class StudentsControl {
 
     function GetStudentsUsers(){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -293,7 +293,7 @@ class StudentsControl {
 
     function GetMicrosoftStudentsUsers(){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -327,7 +327,7 @@ class StudentsControl {
 
     function VerifyStudentUser($studentUser){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -347,7 +347,7 @@ class StudentsControl {
 
     function AddStudentUser($studentDataArray){
                 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -371,7 +371,7 @@ class StudentsControl {
 
     function UpdateStudentUser($studentEditDataArray){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -394,7 +394,7 @@ class StudentsControl {
 
     function DesactivateStudentUser($studentId){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -418,7 +418,7 @@ class StudentsControl {
 
     function ReactivateStudentUser($studentId){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -442,7 +442,7 @@ class StudentsControl {
 
     public function GetSubjectsNames($carrerId){
             
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -479,7 +479,7 @@ class StudentsControl {
 
     public function GetChildSubjectsNames($idSubject){
             
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -515,7 +515,7 @@ class StudentsControl {
 
     public function VerifyGroupStudent($studentIdGroup){
             
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -534,7 +534,7 @@ class StudentsControl {
     }
 
     public function GetStudentGrades($studentId){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if (!$VerifySession['success']) :
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         endif;
@@ -626,7 +626,7 @@ class StudentsControl {
     }
 
     public function AddGradeStudent($gradeDataArray) {
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
         if (!$VerifySession['success']) :
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         endif;
@@ -722,7 +722,7 @@ class StudentsControl {
 
     public function GetGroupsNames(){
 
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -755,7 +755,7 @@ class StudentsControl {
 
     public function addStudentGroup($studentGroupDataArray){
             
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -777,7 +777,7 @@ class StudentsControl {
     }
     
     public function SearchMicrosoftUser($displayName){
-        $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+        $VerifySession = auth::check();
             if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{

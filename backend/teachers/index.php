@@ -16,7 +16,7 @@ class TeachersControl{
     }
     
         public function GetTeachers(){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -47,7 +47,7 @@ class TeachersControl{
         }
 
         public function GetTeacher($idTeacher){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -80,7 +80,7 @@ class TeachersControl{
         }
 
         public function AddTeacher($teacherData){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -102,7 +102,7 @@ class TeachersControl{
         }
 
         public function UpdateTeacherData($teacherData){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -125,7 +125,7 @@ class TeachersControl{
         }
 
         public function DeleteTeacher($teacherId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -147,7 +147,7 @@ class TeachersControl{
         }
 
         function GetTeachersUsers(){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -181,7 +181,7 @@ class TeachersControl{
         }
 
         function VerifyTeacherUser($teacherUserAdd){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -199,7 +199,7 @@ class TeachersControl{
         }
 
         function AddTeacherUser($teacherUserAddArray){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -222,7 +222,7 @@ class TeachersControl{
         }
 
         function DesactivateTeacherUser($teacherUserId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -245,7 +245,7 @@ class TeachersControl{
         }
 
         function ReactivateTeacherUser($teacherUserId){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
@@ -268,7 +268,7 @@ class TeachersControl{
         }
 
         function UpdateTeacherUserData($teacherUserDataArray){
-            $VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+            $VerifySession = auth::check();
             if(!$VerifySession['success']){
                 return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
             }else{
