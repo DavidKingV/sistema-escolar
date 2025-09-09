@@ -61,8 +61,8 @@ if (!$VerifySession['success']) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../../assets/css/all.min.css">
-    <link rel="stylesheet" href="../../assets/css/jquery-ui.css">
+    <link rel="stylesheet" href="../assets/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/jquery-ui.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
@@ -224,7 +224,7 @@ if (!$VerifySession['success']) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="../../js/payments/index.js"></script>
-<script src="../../js/utils/validate.js"></script>
-<script type="module" src="../../js/utils/sessions.js"></script>
+<script type="module" src="../js/payments/index.js"></script>
+<script src="../js/utils/validate.js"></script>
+<script type="module" src="../js/utils/sessions.js"></script>
 

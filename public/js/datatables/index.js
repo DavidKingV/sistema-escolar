@@ -171,7 +171,7 @@ function InitializeStudentGrades(studentIdGroup) {
         paging: true,
         processing: true,
         ajax: {
-            url: "/backend/students/routes.php", 
+            url: "../../backend/students/routes.php", 
             type: "POST",
             data: {studentId: studentIdGroup, action: "getStudentGrades" },
             dataSrc: function(data){

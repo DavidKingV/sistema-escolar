@@ -74,8 +74,8 @@ if ($VerifySession['success']) {
                 <div class="collapse" id="collapsePayments">
                     <div class="card card-body">
                         <div class="list-group">                            
-                            <a href="<?php echo $_ENV['BASE_URL']; ?>/public/pagos/nuevo-pago.php" class="list-group-item list-group-item-action">Agregar</a>
-                            <a href="<?php echo $_ENV['BASE_URL']; ?>/public/pagos.php" class="list-group-item list-group-item-action">Lista</a>
+                            <a href="<?php echo $_ENV['BASE_URL']; ?>/pagos/nuevo-pago.php" class="list-group-item list-group-item-action">Agregar</a>
+                            <a href="<?php echo $_ENV['BASE_URL']; ?>/pagos.php" class="list-group-item list-group-item-action">Lista</a>
                         </div>                       
                     </div>
                 </div>                                                    
@@ -101,8 +101,8 @@ if ($VerifySession['success']) {
                 <div class="collapse" id="collapseClinicalHours">
                     <div class="card card-body">
                         <div class="list-group">                            
-                            <a href="<?php echo $_ENV['BASE_URL']; ?>/public/practicas/calendario.php" class="list-group-item list-group-item-action">Calendario</a>
-                            <a href="<?php echo $_ENV['BASE_URL']; ?>/public/practicas/historial.php" class="list-group-item list-group-item-action">Historial</a>
+                            <a href="<?php echo $_ENV['BASE_URL']; ?>/practicas/calendario.php" class="list-group-item list-group-item-action">Calendario</a>
+                            <a href="<?php echo $_ENV['BASE_URL']; ?>/practicas/historial.php" class="list-group-item list-group-item-action">Historial</a>
                         </div>                       
                     </div>
                 </div>                                                    

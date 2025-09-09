@@ -5,7 +5,7 @@ import { sendFetch } from './global/fetchCall.js';
 let urlParams = new URLSearchParams(window.location.search);
 let studentIdGroup = urlParams.get('student'); 
 
-let api = '/api.php';
+let api = '../api.php';
 
 let studentName;
 
