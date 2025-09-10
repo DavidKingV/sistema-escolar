@@ -16,7 +16,7 @@ $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();
 
 if (!$VerifySession['success']) {
-    header('Location: index.php?sesion=expired');
+    header('Location: ../index.php?sesion=expired');
     exit();
 }else{
     $userId = $VerifySession['userId'] ?? NULL;

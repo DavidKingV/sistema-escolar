@@ -6,6 +6,7 @@ session_start();
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\loadEnv;
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\userData;
 
 use Facturapi\Facturapi;
 use Facturapi\Http\BaseClient;
@@ -121,110 +122,59 @@ class PaymentsControl{
 
             $date = $paymentDataArray['paymentDate'] ?? date('Y-m-d');
             $extra = $paymentDataArray['paymentExtra'] ?? 0;
-            $registredBy = 'Admin';
+            $registredBy = $_SESSION['userId'] ?? NULL;
             
             $dateArray = $this->ConvertDate($date);
 
-            switch($paymentDataArray['paymentInvoice']){
-                case '0':
-                    $isInvoice = 0;
+            $paymentInvoice = $paymentDataArray['paymentInvoice'] === '1';
+
+            switch($paymentInvoice){
+                case false:
+                    $isInvoice = false;
                     break;
-                case '1':
-                    $isInvoice = 1;
+                case true:
+                    $isInvoice = true; 
                     break;
             }
 
-            if($isInvoice != 0){
-                $verifyFacturapiData = $this->GetFacturApiData($paymentDataArray['fiscalId']);
-                $clientId = $verifyFacturapiData -> id;
-                $taxSystem = $verifyFacturapiData -> tax_system;
+            if($isInvoice === false){                
+                try {
 
-                if($clientId){
-                    $addInvoice = $this->AddFactuarapi($clientId, $taxSystem, $paymentDataArray);
-                    if($addInvoice['success']){
-                        try {                            
-
-                            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, invoice_id, concept, cost, extra, total, registred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                            $stmt = $this->connection->prepare($sql);
-                            $stmt->bind_param("ississiiis", $paymentDataArray['studentName'], $date, $paymentDataArray['paymentMethod'], $isInvoice, $addInvoice['id'], $paymentDataArray['paymentConcept'], $paymentDataArray['paymentPrice'], $extra, $paymentDataArray['paymentTotal'], $registredBy);
-                            $stmt->execute();
+                    $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = $this->connection->prepare($sql);
+                    $stmt->bind_param("ississiiiI", $paymentDataArray['studentName'], $date, $paymentDataArray['paymentMethod'], $isInvoice, $paymentDataArray['paymentConcept'], $paymentDataArray['paymentPrice'], $extra, $paymentDataArray['paymentTotal'], $registredBy);
+                    $stmt->execute();
 
                             
-                            if ($stmt->affected_rows > 0) {
-                                $payed = 1;
-                                try{
-                                    $monthQuery = "INSERT INTO monthly_payments (id_student, month, year, concept, payed, extra) VALUES (?, ?, ?, ?, ?, ?)";
-                                    $stmtMonth = $this->connection->prepare($monthQuery);
-                                    $stmtMonth->bind_param("iiisii", $paymentDataArray['studentName'], $dateArray['month'], $dateArray['year'], $paymentDataArray['paymentConcept'], $payed, $extra);
-                                    $stmtMonth->execute();
-
-                                    if ($stmtMonth->affected_rows > 0) {
-                                        $response = array("success" => true, "message" => "Pago registrado exitosamente");
-                                    } else {
-                                        $response = array("success" => false, "message" => "Error al guardar el pago");
-                                    }
-                                }catch(mysqli_sql_exception $e){
-                                    $response = array("success" => false, "message" => "Error al procesar la solicitud");
-                                }finally{
-                                    if (isset($stmtMonth)) {
-                                        $stmtMonth->close();
-                                    }
-                                }
-                            } else {
-                                $response = array("success" => false, "message" => "Error al procesar la solicitud");
-                            }
-
-                        } catch (mysqli_sql_exception $e) {
-                            $response = array("success" => false, "message" => "Error al procesar la solicitud");
-                        }finally {
-                            if (isset($stmt)) {
-                                $stmt->close();
-                            }
-                        }
-                    }else{
-                        $response = array("success" => false, "message" => $addInvoice['message']);
+                    if ($stmt->affected_rows > 0) {
+                        $response = array("success" => true, "message" => "Pago registrado exitosamente");
+                    } else {
+                        $response = array("success" => false, "message" => "Error al guardar el pago");
                     }
 
-                    return $response;
-                    
+                } catch (mysqli_sql_exception $e) {
+                            $response = array("success" => false, "message" => "Error al procesar la solicitud de pago");
+                }finally {
+                    if (isset($stmt)) {
+                        $stmt->close();
+                    }
                 }
+                  
             }else{
                 try {
 
                     $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $this->connection->prepare($sql);
-                    $stmt->bind_param("issisiiis", $paymentDataArray['studentName'], $date, $paymentDataArray['paymentMethod'], $isInvoice, $paymentDataArray['paymentConcept'], $paymentDataArray['paymentPrice'], $extra, $paymentDataArray['paymentTotal'], $registredBy);
+                    $stmt->bind_param("ississiiiI", $paymentDataArray['studentName'], $date, $paymentDataArray['paymentMethod'], $isInvoice, $paymentDataArray['paymentConcept'], $paymentDataArray['paymentPrice'], $extra, $paymentDataArray['paymentTotal'], $registredBy);
                     $stmt->execute();
                     
                     if ($stmt->affected_rows > 0) {
-                        $payed = 1;
-                        try{                            
-                            $monthQuery = "INSERT INTO monthly_payments (id_student, month, year, concept, payed, extra) VALUES (?, ?, ?, ?, ?, ?)";
-                            $stmtMonth = $this->connection->prepare($monthQuery);
-                            $stmtMonth->bind_param("iiisii", $paymentDataArray['studentName'], $dateArray['month'], $dateArray['year'], $paymentDataArray['paymentConcept'], $payed, $extra);
-                            $stmtMonth->execute();
-
-                            if ($stmtMonth->affected_rows > 0) {
-                                $response = array("success" => true, "message" => "Pago registrado exitosamente");
-                            } else {
-                                $response = array("success" => false, "message" => "Error al guardar el pago");
-                            }
-                        }catch(mysqli_sql_exception $e){
-                            if($e->getCode() == 1062){
-                                $response = array("success" => false, "message" => "El pago ya ha sido registrado, por favor verifique los datos");
-                            }else{
-                                $response = array("success" => false, "message" => "Error al procesar la solicitud");
-                            }
-                        }finally{
-                            if (isset($stmtMonth)) {
-                                $stmtMonth->close();
-                            }
-                        }
+                        $response = array("success" => true, "message" => "Pago registrado exitosamente");
                     } else {
                         $response = array("success" => false, "message" => "Error al registrar el pago");
                     }
                 } catch (mysqli_sql_exception $e) {
-                    $response = array("success" => false, "message" => "Error al procesar la solicitud");
+                    $response = array("success" => false, "message" => "Error al procesar la solicitud de pago");
                 }finally {
                     if (isset($stmt)) {
                         $stmt->close();

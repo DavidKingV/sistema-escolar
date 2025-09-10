@@ -1,14 +1,14 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
 import { successAlert, errorAlert, loadingAlert } from '../utils/alerts.js';
 
-let phpPath = '../backend/payments/routes.php';
+let phpPath = '../../backend/payments/routes.php';
 
 const GetStudentsNames = async () => {
 
     const GetStudentsSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../backend/students/routes.php',
+                url: '../../backend/students/routes.php',
                 type: 'POST',
                 data: {action: 'GetStudentsNames'},
                 dataType: 'json'
@@ -158,14 +158,14 @@ $(document).ready(function() {
 
     $("#paymentTotal").val('0.00');
     
-    $("#paymentInvoice").on('change', function() {
+    /*$("#paymentInvoice").on('change', function() {
         let studentId = $("#studentName").val();
         let invoice = $(this).val();
 
         if(invoice === '1'){
             VerifyTaxData(studentId);
         }
-    });
+    });*/
 
     $("#paymentDate").datepicker({
         dateFormat : 'yy-mm-dd',
