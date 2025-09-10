@@ -1,10 +1,12 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-include __DIR__.'/index.php';
+session_start();
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Controllers\CarreersController;
 
 $connection = new DBConnection();
+$carreers = new CarreersController($connection);
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
@@ -13,8 +15,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
     switch ($action){
 
         case 'getCareers':
-            $getCareers = new CareersControl($connection);
-            $careers = $getCareers->getCareers();
+            $careers = $carreers->getCareers();
 
             header('Content-Type: application/json');
             echo json_encode($careers);
@@ -25,8 +26,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $carreerData = $_POST['carreerData'];
             parse_str($carreerData, $carreerDataArray);
 
-            $addCarreer = new CareersControl($connection);
-            $add = $addCarreer->addCarreer($carreerDataArray);
+            $add = $carreers->addCarreer($carreerDataArray);
 
             header('Content-Type: application/json');
             echo json_encode($add);
@@ -37,8 +37,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $carreerDataEdit = $_POST['carreerDataEdit'];
             parse_str($carreerDataEdit, $carreerDataEditArray);
 
-            $updateCarreer = new CareersControl($connection);
-            $update = $updateCarreer->updateCarreer($carreerDataEditArray);
+            $update = $carreers->updateCarreer($carreerDataEditArray);
 
             header('Content-Type: application/json');
             echo json_encode($update);
@@ -48,8 +47,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'deleteCarreer':
             $idCarreer = $_POST['idCarreer'];
 
-            $deleteCarreer = new CareersControl($connection);
-            $delete = $deleteCarreer->deleteCarreer($idCarreer);
+            $delete = $carreers->deleteCarreer($idCarreer);
 
             header('Content-Type: application/json');
             echo json_encode($delete);
@@ -59,8 +57,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'getSubject':
             $carreerId = $_POST['carreerId'];
 
-            $getSubjects = new CareersControl($connection);
-            $subjects = $getSubjects->getSubjects($carreerId);
+            $subjects = $carreers->getSubjects($carreerId);
 
             header('Content-Type: application/json');
             echo json_encode($subjects);
@@ -70,8 +67,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'getChildSubject':
             $subjectID = $_POST['subjectId'];
 
-            $getSubjects = new CareersControl($connection);
-            $subjects = $getSubjects->getChildSubjects($subjectID);
+            $subjects = $carreers->getChildSubjects($subjectID);
     
             header('Content-Type: application/json');
             echo json_encode($subjects);
@@ -82,8 +78,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $subjectsCarreer = $_POST['subjectAddData'];
             parse_str($subjectsCarreer, $subjectsCarreerArray);
 
-            $addSubjectsCarreer = new CareersControl($connection);
-            $add = $addSubjectsCarreer->addSubjectsCarreer($subjectsCarreerArray);
+            $add = $carreers->addSubjectsCarreer($subjectsCarreerArray);
 
             header('Content-Type: application/json');
             echo json_encode($add);
@@ -102,14 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
         case 'getCareerData':
             $idCarreer = $_GET['idCarreer'];
 
-            $getCareer = new CareersControl($connection);
-            $career = $getCareer->getCareer($idCarreer);
+            $career = $carreers->getCareer($idCarreer);
 
             header('Content-Type: application/json');
             echo json_encode($career);
 
             break;
-    
+
     }
 
 }
