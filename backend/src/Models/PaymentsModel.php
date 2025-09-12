@@ -2,13 +2,20 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Models\FacturapiModel;
+use Vendor\Schoolarsystem\Models\StudentsModel;
+use Facturapi\Facturapi;
 use mysqli_sql_exception;
 
 class PaymentsModel{
     private $connection;
+    private $facturapiModel;
+    private $studentsModel;
 
     public function __construct(DBConnection $dbConnection) {
         $this->connection = $dbConnection->getConnection();
+        $this->facturapiModel = new FacturapiModel($dbConnection);
+        $this->studentsModel = new StudentsModel($dbConnection);
     }
 
     public function verifyTaxData($studentId){
@@ -36,11 +43,39 @@ class PaymentsModel{
         try {
             $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("ississiii", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy);
+            $stmt->bind_param("issisiiii", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
-                $response = array("success" => true, "message" => "Pago registrado exitosamente");
+                $paymentId = $stmt->insert_id;
+                $studentData = $this->studentsModel->getStudentById($studentId);
+                $studentMail = $studentData['studentData']['email'] ?? NULL;
+                //almacena todos los datos del pago en un array
+                $paymentData = [
+                    'date' => $date,
+                    'paymentForm' => $paymentMethod,
+                    'products' => [
+                        [
+                            'product' => $concept,
+                            'unitPrice' => $cost + $extra,
+                            'quantity' => 1,
+                            'subTotal' => $total,
+                        ],
+                        // puedes añadir más productos aquí
+                    ],
+                    'email' => $studentMail,
+                ];
+                
+                if($isInvoice){
+                    $invoiceResponse = $this->facturapiModel->createReceipt($paymentData, $paymentId);
+                    if($invoiceResponse['success']){
+                        $response = array("success" => true, "message" => "Pago e invoice registrados exitosamente", "invoiceId" => $invoiceResponse['receipt']);
+                    }else{
+                        $response = array("success" => false, "message" => "Pago registrado pero error al generar la factura: " . $invoiceResponse['message']);
+                    }
+                }else{
+                    $response = array("success" => true, "message" => "Pago registrado exitosamente");
+                }
             } else {
                 $response = array("success" => false, "message" => "Error al registrar el pago");
             }

@@ -41,6 +41,37 @@ class StudentsModel{
         }
     }
 
+    public function getStudentById($studentId){
+        try{
+            $sql = "SELECT * FROM students WHERE id = ?";
+            $stmt = $this->connection->prepare($sql);
+            
+            if (!$stmt) {
+                throw new Exception('Error al preparar la consulta SQL: ' . $this->connection->error);
+            }
+
+            $stmt->bind_param('i', $studentId);
+
+            if (!$stmt->execute()) {
+                throw new Exception('Error al ejecutar la consulta SQL: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            return [
+                'success' => true,
+                'studentData' => $result,
+            ];
+        }catch(Exception $e){
+            return [
+                'success' => false,
+                'message' => 'Error al obtener los datos del estudiante',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
     public function getStudentsListSelect($search = '', $page = 1, $limit = 30){
         try {
             // Query base
