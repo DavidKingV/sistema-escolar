@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
+session_start();
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Controllers\TeachersController;
