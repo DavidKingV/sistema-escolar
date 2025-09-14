@@ -1,139 +1,92 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-include __DIR__.'/index.php';
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Controllers\TeachersController;
 
 $connection = new DBConnection();
+$teachersController = new TeachersController($connection);
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
     $action = $_POST['action'];
 
     switch ($action){
-        
+
         case 'getTeachers':
-
-            $getTeachers = new TeachersControl($connection);
-            $teachers = $getTeachers->GetTeachers();
-
+            $teachers = $teachersController->getTeachers();
             header('Content-Type: application/json');
             echo json_encode($teachers);
-
             break;
 
         case 'addTeacher':
-
             $teacherData = $_POST['teacherData'];
             parse_str($teacherData, $teacher);
-
-            $addTeacher = new TeachersControl($connection);
-            $add = $addTeacher->AddTeacher($teacher);
-
+            $add = $teachersController->addTeacher($teacher);
             header('Content-Type: application/json');
             echo json_encode($add);
-
             break;
 
-        case 'updateTeacherData': 
-
+        case 'updateTeacherData':
             $teacherEditData = $_POST['teacherEditData'];
             parse_str($teacherEditData, $teacherData);
-
-            $updateTeacherData = new TeachersControl($connection);
-            $update = $updateTeacherData->UpdateTeacherData($teacherData);
-
+            $update = $teachersController->updateTeacherData($teacherData);
             header('Content-Type: application/json');
             echo json_encode($update);
-
             break;
 
         case 'deleteTeacher':
-                
             $teacherId = $_POST['teacherId'];
-    
-            $deleteTeacher = new TeachersControl($connection);
-            $delete = $deleteTeacher->DeleteTeacher($teacherId);
-    
+            $delete = $teachersController->deleteTeacher($teacherId);
             header('Content-Type: application/json');
             echo json_encode($delete);
-    
             break;
 
         case 'getTeachersUsers':
-
-            $getTeachersUsers = new TeachersControl($connection);
-            $teachers = $getTeachersUsers->GetTeachersUsers();
-
+            $teachers = $teachersController->getTeachersUsers();
             header('Content-Type: application/json');
             echo json_encode($teachers);
-
             break;
 
-        case'verifyTeacherUser':
-
+        case 'verifyTeacherUser':
             $teacherUserAdd = $_POST['teacherUserAdd'];
-
-            $verifyTeacherUser = new TeachersControl($connection);
-            $verify = $verifyTeacherUser->VerifyTeacherUser($teacherUserAdd);
-
+            $verify = $teachersController->verifyTeacherUser($teacherUserAdd);
             header('Content-Type: application/json');
             echo json_encode($verify);
-
             break;
 
         case 'addTeacherUser':
-                
             $teacherUserAdd = $_POST['teacherUserData'];
             parse_str($teacherUserAdd, $teacherUserAddArray);
-
-            $addTeacherUser = new TeachersControl($connection);
-            $add = $addTeacherUser->AddTeacherUser($teacherUserAddArray);
-    
+            $add = $teachersController->addTeacherUser($teacherUserAddArray);
             header('Content-Type: application/json');
             echo json_encode($add);
-    
             break;
 
         case 'desactivateTeacherUser':
-                
             $teacherUserId = $_POST['teacherUserId'];
-
-            $desactivateTeacherUser = new TeachersControl($connection);
-            $desactivate = $desactivateTeacherUser->DesactivateTeacherUser($teacherUserId);
-
+            $desactivate = $teachersController->desactivateTeacherUser($teacherUserId);
             header('Content-Type: application/json');
             echo json_encode($desactivate);
-
             break;
 
         case 'reactivateTeacherUser':
-                
             $teacherUserId = $_POST['teacherUserId'];
-
-            $reactivateTeacherUser = new TeachersControl($connection);
-            $reactivate = $reactivateTeacherUser->ReactivateTeacherUser($teacherUserId);
-
+            $reactivate = $teachersController->reactivateTeacherUser($teacherUserId);
             header('Content-Type: application/json');
             echo json_encode($reactivate);
-
             break;
 
         case 'UpdateTeacherUserData':
-
             $teacherUserEditData = $_POST['teacherUserEditData'];
             parse_str($teacherUserEditData, $teacherUserDataArray);
-
-            $updateTeacherUserData = new TeachersControl($connection);
-            $update = $updateTeacherUserData->UpdateTeacherUserData($teacherUserDataArray);
-
+            $update = $teachersController->updateTeacherUserData($teacherUserDataArray);
             header('Content-Type: application/json');
             echo json_encode($update);
-
             break;
 
         default:
-        echo json_encode(array("success" => false, "message" => "Acción no válida"));
+            echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
 }
 
@@ -142,20 +95,15 @@ if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
     $action = $_GET['action'];
 
     switch ($action){
-        
+
         case 'getTeacherData':
-
             $idTeacher = $_GET['teacherId'];
-
-            $getTeacher = new TeachersControl($connection);
-            $teacher = $getTeacher->GetTeacher($idTeacher);
-
+            $teacher = $teachersController->getTeacher($idTeacher);
             header('Content-Type: application/json');
             echo json_encode($teacher);
-
             break;
 
         default:
-        echo json_encode(array("success" => false, "message" => "Acción no válida"));
+            echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
 }
