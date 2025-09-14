@@ -307,7 +307,7 @@ function initializeTeachersUsersTable(){
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/teachers/routes.php", 
+            url: "../../backend/teachers/routes.php", 
             type: "POST",
             data: { action: "getTeachersUsers" },
             dataSrc: function(data){

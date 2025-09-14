@@ -156,7 +156,7 @@ $("#teacherUsersTable").on("click", ".editTeacherUser", function() {
 const AddTeacherUser = async (teacherUserData) => {
     try {
         const response = await $.ajax({
-            url: "../backend/teachers/routes.php",
+            url: "../../backend/teachers/routes.php",
             type: "POST",
             data: {teacherUserData: teacherUserData, action: "addTeacherUser"},
         });
@@ -190,7 +190,7 @@ const AddTeacherUser = async (teacherUserData) => {
 const VerifyTeacherUser = async (teacherUserAdd) => {
     try {
         const response = await $.ajax({
-            url: "../backend/teachers/routes.php",
+            url: "../../backend/teachers/routes.php",
             type: "POST",
             data: {teacherUserAdd: teacherUserAdd, action: "verifyTeacherUser"},
         });
@@ -221,7 +221,7 @@ const VerifyTeacherUser = async (teacherUserAdd) => {
 const DesactivateTeacherUser = async (teacherUserId) => {
     try {
         const response = await $.ajax({
-            url: "../backend/teachers/routes.php",
+            url: "../../backend/teachers/routes.php",
             type: "POST",
             data: {teacherUserId: teacherUserId, action: "desactivateTeacherUser"},
         });
@@ -251,7 +251,7 @@ const DesactivateTeacherUser = async (teacherUserId) => {
 const ReactivateTeacherUser = async (teacherUserId) => {
     try {
         const response = await $.ajax({
-            url: "../backend/teachers/routes.php",
+            url: "../../backend/teachers/routes.php",
             type: "POST",
             data: {teacherUserId: teacherUserId, action: "reactivateTeacherUser"},
         });
