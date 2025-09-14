@@ -45,14 +45,21 @@ class auth {
     }
 
    public static function check(){
+        if(session_status() === PHP_SESSION_NONE){
+            session_start();
+        }
+
         $jwt = $_COOKIE['auth'] ?? NULL;
         $verification = self::verify($jwt);
+
         if(!$verification['success']){
             if(isset($_COOKIE['auth'])){
                 setcookie('auth', '', time() - 3600, '/');
             }
-            session_unset();
-            session_destroy();
+            if(session_status() === PHP_SESSION_ACTIVE){
+                session_unset();
+                session_destroy();
+            }
         }
         return $verification;
     }
