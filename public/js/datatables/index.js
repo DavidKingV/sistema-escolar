@@ -70,7 +70,7 @@ function initializeStudentsUsersTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/students/routes.php", 
+            url: "../../backend/students/routes.php", 
             type: "POST",
             data: { action: "getStudentsUsers" },
             dataSrc: function(data){
@@ -136,7 +136,7 @@ function initializeStudentsMicrosoftUsersTable() {
         paging: true,
         processing: true,
         ajax: {
-            url: "../backend/students/routes.php", 
+            url: "../../backend/students/routes.php", 
             type: "POST",
             data: { action: "getStudentsMicrosoftUsers" },
             dataSrc: function(data){

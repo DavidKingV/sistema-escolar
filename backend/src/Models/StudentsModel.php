@@ -759,9 +759,9 @@ class StudentsModel{
             try {
                 $this->connection->begin_transaction();
 
-                $idStudent = $gradeDataArray['idStudent'];
-                $idSubject = $gradeDataArray['idSubject'];
-                $idChildSubject = $gradeDataArray['idChildSubject'] ?? null;
+                $idStudent = $gradeDataArray['studentId'];
+                $idSubject = $gradeDataArray['subject'];
+                $idChildSubject = $gradeDataArray['subjectChild'] ?? null;
 
                 if ($idChildSubject) {
                     $sql = "INSERT INTO student_grades_child (id_student, id_subject, id_subject_child, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?, ?)";
