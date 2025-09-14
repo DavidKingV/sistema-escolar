@@ -448,7 +448,7 @@ const GetTeacherData = async (teacherId) => {
 const addTeachers = async (teacherData) => {
     try {
         const response = await $.ajax({
-            url: "../backend/teachers/routes.php",
+            url: "../../backend/teachers/routes.php",
             type: "POST",
             data: {teacherData: teacherData, action: "addTeacher"},
         });
