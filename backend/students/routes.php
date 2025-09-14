@@ -1,282 +1,186 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-include __DIR__.'/index.php';
-include __DIR__.'/verify.php';
+require_once __DIR__.'/verify.php';
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Controllers\StudentsController;
+
+session_start();
 
 $connection = new DBConnection();
+$studentsController = new StudentsController($connection);
 
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
-
     $action = $_POST['action'];
 
     switch ($action){
-       case 'getStudents':
-
-            $getStudents = new StudentsControl($connection);
-            $students = $getStudents->GetStudents();
-
+        case 'getStudents':
+            $students = $studentsController->getStudents();
             header('Content-Type: application/json');
             echo json_encode($students);
-
             break;
 
         case 'GetStudentsNames':
-
-            $getStudentsNames = new StudentsControl($connection);
-            $studentsNames = $getStudentsNames->GetStudentsNames();
-
+            $studentsNames = $studentsController->getStudentsNames();
             header('Content-Type: application/json');
             echo json_encode($studentsNames);
-
             break;
 
         case 'addStudent':
             $studentData = $_POST['studentData'];
-            
             parse_str($studentData, $studentDataArray);
-
-            $addStudent = new StudentsControl($connection);
-            $add = $addStudent->addStudent($studentDataArray);
-
+            $add = $studentsController->addStudent($studentDataArray);
             header('Content-Type: application/json');
             echo json_encode($add);
-
             break;
 
         case 'deleteStudent':
-
             $studentId = $_POST['studentId'];
-
-            $deleteStudent = new StudentsControl($connection);
-            $delete = $deleteStudent->DeleteStudent($studentId);
-
+            $delete = $studentsController->deleteStudent($studentId);
             header('Content-Type: application/json');
             echo json_encode($delete);
-
             break;
 
         case 'updateStudent':
-                $studentData = $_POST['studentData'];
-                
-                parse_str($studentData, $studentDataArray);
-    
-                $updateStudent = new StudentsControl($connection);
-                $update = $updateStudent->UpdateStudent($studentDataArray);
-    
-                header('Content-Type: application/json');
-                echo json_encode($update);
-    
-                break;
+            $studentData = $_POST['studentData'];
+            parse_str($studentData, $studentDataArray);
+            $update = $studentsController->updateStudent($studentDataArray);
+            header('Content-Type: application/json');
+            echo json_encode($update);
+            break;
 
         case 'getStudentsUsers':
-
-            $getStudentsUsers = new StudentsControl($connection);
-            $students = $getStudentsUsers->GetStudentsUsers();
-
+            $students = $studentsController->getStudentsUsers();
             header('Content-Type: application/json');
             echo json_encode($students);
-
             break;
 
         case 'getStudentsMicrosoftUsers':
-
-            $getStudentsMicrosoftUsers = new StudentsControl($connection);
-            $studentsMicrosoftUsers = $getStudentsMicrosoftUsers->GetMicrosoftStudentsUsers();
-    
+            $studentsMicrosoftUsers = $studentsController->getMicrosoftStudentsUsers();
             header('Content-Type: application/json');
             echo json_encode($studentsMicrosoftUsers);
-    
             break;
 
         case 'verifyStudentUser':
-
             $studentUser = $_POST['studentUserAdd'];
-
-            $verifyStudent = new StudentsControl($connection);
-            $verify = $verifyStudent->VerifyStudentUser($studentUser);
-
+            $verify = $studentsController->verifyStudentUser($studentUser);
             header('Content-Type: application/json');
             echo json_encode($verify);
-
             break;
 
-            case 'addStudentUser':
-                    
-                    $studentUserData = $_POST['studentUserData'];
-                    parse_str($studentUserData, $studentDataArray);
-        
-                    $addStudentUser = new StudentsControl($connection);
-                    $add = $addStudentUser->AddStudentUser($studentDataArray);
-        
-                    header('Content-Type: application/json');
-                    echo json_encode($add);
-        
-                    break;
+        case 'addStudentUser':
+            $studentUserData = $_POST['studentUserData'];
+            parse_str($studentUserData, $studentDataArray);
+            $add = $studentsController->addStudentUser($studentDataArray);
+            header('Content-Type: application/json');
+            echo json_encode($add);
+            break;
 
-            case 'updateStudentUser': 
-                $studentEditUserData = $_POST['studentUserData'];
-                parse_str($studentEditUserData, $studentEditDataArray);
+        case 'updateStudentUser':
+            $studentEditUserData = $_POST['studentUserData'];
+            parse_str($studentEditUserData, $studentEditDataArray);
+            $update = $studentsController->updateStudentUser($studentEditDataArray);
+            header('Content-Type: application/json');
+            echo json_encode($update);
+            break;
 
-                $updateStudentUser = new StudentsControl($connection);
-                $update = $updateStudentUser->UpdateStudentUser($studentEditDataArray);
+        case 'desactivateStudentUser':
+            $studentId = $_POST['studentId'];
+            $desactivate = $studentsController->desactivateStudentUser($studentId);
+            header('Content-Type: application/json');
+            echo json_encode($desactivate);
+            break;
 
-                header('Content-Type: application/json');
-                echo json_encode($update);
+        case 'reactivateStudentUser':
+            $studentId = $_POST['studentId'];
+            $reactivate = $studentsController->reactivateStudentUser($studentId);
+            header('Content-Type: application/json');
+            echo json_encode($reactivate);
+            break;
 
-                break;
+        case 'getStudentGrades':
+            $studentId = $_POST['studentId'];
+            $grades = $studentsController->getStudentGrades($studentId);
+            header('Content-Type: application/json');
+            echo json_encode($grades);
+            break;
 
-            case 'desactivateStudentUser':
-                $studentId = $_POST['studentId'];
-
-                $desactivateStudent = new StudentsControl($connection);
-                $desactivate = $desactivateStudent->DesactivateStudentUser($studentId);
-
-                header('Content-Type: application/json');
-                echo json_encode($desactivate);
-
-                break;
-
-            case 'reactivateStudentUser':
-                $studentId = $_POST['studentId'];
-
-                $reactivateStudent = new StudentsControl($connection);
-                $reactivate = $reactivateStudent->ReactivateStudentUser($studentId);
-
-                header('Content-Type: application/json');
-                echo json_encode($reactivate);
-
-                break;
-
-            case 'getStudentGrades':
-                $studentId = $_POST['studentId'];
-
-                $getGrades = new StudentsControl($connection);
-                $grades = $getGrades->GetStudentGrades($studentId);
-
-                header('Content-Type: application/json');
-                echo json_encode($grades);
-
-                break;
-
-            case 'addGradeStudent':
-                $gradeData = $_POST['studentGradeData'];
-                parse_str($gradeData, $gradeDataArray);
-
-                $addGrade = new StudentsControl($connection);
-                $add = $addGrade->AddGradeStudent($gradeDataArray);
-
-                header('Content-Type: application/json');
-                echo json_encode($add);
-
-                break;
-
-        default:
+        case 'addGradeStudent':
+            $gradeData = $_POST['studentGradeData'];
+            parse_str($gradeData, $gradeDataArray);
+            $add = $studentsController->addGradeStudent($gradeDataArray);
+            header('Content-Type: application/json');
+            echo json_encode($add);
+            break;
 
         case 'addStudentGroup':
             $studentGroupData = $_POST['studentGroupData'] ?? NULL;
             parse_str($studentGroupData, $studentGroupDataArray);
-
-            $addStudentGroup = new StudentsControl($connection);
-            $add = $addStudentGroup->AddStudentGroup($studentGroupDataArray);
-
+            $add = $studentsController->addStudentGroup($studentGroupDataArray);
             header('Content-Type: application/json');
             echo json_encode($add);
-
             break;
 
-        echo json_encode(array("success" => false, "message" => "Acción no válida"));
+        default:
+            echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
-
 }
 
 if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])){
-
     $action = $_GET['action'];
 
     switch ($action){
-
         case 'getStudentData':
-                
             $studentId = $_GET['studentId'];
-
-            $getStudent = new StudentsControl($connection);
-            $student = $getStudent->GetStudent($studentId);
-
+            $student = $studentsController->getStudent($studentId);
             header('Content-Type: application/json');
             echo json_encode($student);
-
-        break;
+            break;
 
         case 'getSubjectsNames':
             $carrerId = $_GET['carrerId'];
-
-            $getSubjects = new StudentsControl($connection);
-            $subjects = $getSubjects->GetSubjectsNames($carrerId);
-
+            $subjects = $studentsController->getSubjectsNames($carrerId);
             header('Content-Type: application/json');
             echo json_encode($subjects);
-
             break;
 
         case 'getChildSubjectsNames':
             $idSubject = $_GET['idSubject'];
-
-            $getChildSubjects = new StudentsControl($connection);
-            $childSubjects = $getChildSubjects->GetChildSubjectsNames($idSubject);
-
+            $childSubjects = $studentsController->getChildSubjectsNames($idSubject);
             header('Content-Type: application/json');
             echo json_encode($childSubjects);
-
             break;
 
         case 'verifyToken':
             $studentId = $_GET['studentId'];
             $studentSecretKey = $_GET['token'];
-
             $verifyToken = new AdvancedStudentsControl();
             $verify = $verifyToken->VerifyIdStudentId($studentId, $studentSecretKey);
-
             header('Content-Type: application/json');
             echo json_encode($verify);
-
             break;
 
         case 'verifyGroupStudent':
             $studentIdGroup = $_GET['studentIdGroup'];
-
-            $verifyGroup = new StudentsControl($connection);
-            $verify = $verifyGroup->VerifyGroupStudent($studentIdGroup);
-
+            $verify = $studentsController->verifyGroupStudent($studentIdGroup);
             header('Content-Type: application/json');
             echo json_encode($verify);
-
             break;
 
         case 'getGroupsNames':
-
-            $getGroups = new StudentsControl($connection);
-            $groups = $getGroups->GetGroupsNames();
-
+            $groups = $studentsController->getGroupsNames();
             header('Content-Type: application/json');
             echo json_encode($groups);
-
             break;
 
         case 'searchMicrosoftUser':
             $displayName = $_GET['displayName'];
-
-            $searchUser = new StudentsControl($connection);
-            $search = $searchUser->SearchMicrosoftUser($displayName);
-
+            $search = $studentsController->searchMicrosoftUser($displayName);
             header('Content-Type: application/json');
             echo json_encode($search);
-
             break;
 
         default:
-        echo json_encode(array("success" => false, "message" => "Acción no válida"));
+            echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
-
 }

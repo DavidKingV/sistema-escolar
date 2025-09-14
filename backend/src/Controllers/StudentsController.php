@@ -59,4 +59,88 @@ class StudentsController{
         }
     }
 
+    public function getStudents(){
+        return $this->students->getStudents();
+    }
+
+    public function getStudent($studentId){
+        return $this->students->getStudent($studentId);
+    }
+
+    public function addStudent($studentData){
+        return $this->students->addStudent($studentData);
+    }
+
+    public function updateStudent($studentData){
+        return $this->students->updateStudent($studentData);
+    }
+
+    public function deleteStudent($studentId){
+        return $this->students->deleteStudent($studentId);
+    }
+
+    public function getStudentsNames(){
+        return $this->students->getStudentsNames();
+    }
+
+    public function getStudentsUsers(){
+        return $this->students->getStudentsUsers();
+    }
+
+    public function getMicrosoftStudentsUsers(){
+        return $this->students->getMicrosoftStudentsUsers();
+    }
+
+    public function verifyStudentUser($studentUser){
+        return $this->students->verifyStudentUser($studentUser);
+    }
+
+    public function addStudentUser($studentData){
+        return $this->students->addStudentUser($studentData);
+    }
+
+    public function updateStudentUser($studentData){
+        return $this->students->updateStudentUser($studentData);
+    }
+
+    public function desactivateStudentUser($studentId){
+        return $this->students->desactivateStudentUser($studentId);
+    }
+
+    public function reactivateStudentUser($studentId){
+        return $this->students->reactivateStudentUser($studentId);
+    }
+
+    public function getSubjectsNames($carrerId){
+        return $this->students->getSubjectsNames($carrerId);
+    }
+
+    public function getChildSubjectsNames($idSubject){
+        return $this->students->getChildSubjectsNames($idSubject);
+    }
+
+    public function verifyGroupStudent($studentIdGroup){
+        return $this->students->verifyGroupStudent($studentIdGroup);
+    }
+
+    public function getStudentGrades($studentId){
+        return $this->students->getStudentGrades($studentId);
+    }
+
+    public function addGradeStudent($gradeData){
+        return $this->students->addGradeStudent($gradeData);
+    }
+
+    public function getGroupsNames(){
+        return $this->students->getGroupsNames();
+    }
+
+    public function addStudentGroup($studentGroupData){
+        return $this->students->addStudentGroup($studentGroupData);
+    }
+
+    public function searchMicrosoftUser($displayName){
+        return $this->students->searchMicrosoftUser($displayName);
+    }
+
 }
