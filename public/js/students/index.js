@@ -61,7 +61,7 @@ $('#studentTable').on('click', '.badge', async function() {
     let studentName = $(this).data('name');
     let studentStatus = $(this).data('status');
 
-    await $.post('/modals/studentStatus.modal.php', { studentId: studentId,studentName: studentName, studentStatus: studentStatus }, function (data) {
+    await $.post('../modals/studentStatus.modal.php', { studentId: studentId,studentName: studentName, studentStatus: studentStatus }, function (data) {
         $("#statusModal").modal('show');
         $('#statusModalBody').html(data);
     });
@@ -130,7 +130,7 @@ $("#studentName").on("blur", function(){
    
     if(studentName){
         loadingSpinner(true, "#userList");
-        enviarPeticionAjax('../backend/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
+        enviarPeticionAjax('../../backend/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
         .done(function(data) {
             loadingSpinner(false, "#userList");
             $("#microsoftId, #microsoftEmail").val('');
@@ -426,7 +426,7 @@ $("#studentGroupDetailsForm").on("submit", function(event){
 const AddGradeStudent = async (studentGradeData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentGradeData: studentGradeData, action: 'addGradeStudent'}
         });
@@ -466,7 +466,7 @@ export const GetChildSubjectsNames = async (idSubject) => {
     const GetChildSubjectSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../backend/students/routes.php',
+                url: '../../backend/students/routes.php',
                 type: 'GET',
                 data: {idSubject: idSubject, action: 'getChildSubjectsNames'}
             });
@@ -512,7 +512,7 @@ export const GetChildSubjectsNames = async (idSubject) => {
 const UpdateStudentUser = async (studentUserData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentUserData: studentUserData, action: 'updateStudentUser'}
         });
@@ -545,7 +545,7 @@ const UpdateStudentUser = async (studentUserData) => {
 const DesactivateStudentUser = async (studentId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentId: studentId, action: 'desactivateStudentUser'}
         });
@@ -578,7 +578,7 @@ const DesactivateStudentUser = async (studentId) => {
 const ReactivateStudentUser = async (studentId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentId: studentId, action: 'reactivateStudentUser'}
         });
@@ -611,7 +611,7 @@ const ReactivateStudentUser = async (studentId) => {
 const AddStudentUser = async (studentUserData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentUserData: studentUserData, action: 'addStudentUser'}
         });
@@ -646,7 +646,7 @@ const AddStudentUser = async (studentUserData) => {
 const VerifyUser = async (studentUserAdd) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentUserAdd: studentUserAdd, action: 'verifyStudentUser'}
         });
@@ -720,7 +720,7 @@ const GetStudentsData = async (studentId) => {
 const AddStudent = async (studentData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentData: studentData, action: 'addStudent'}
         });
@@ -831,7 +831,7 @@ const GetGroupsNames = async () => {
     const GetGroupSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../backend/students/routes.php',
+                url: '../../backend/students/routes.php',
                 type: 'GET',
                 data: {action: 'getGroupsNames'}
             });
@@ -876,7 +876,7 @@ const GetGroupsNames = async () => {
 const AddStudentGroup = async (studentGroupData) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'POST',
             data: {studentGroupData: studentGroupData, action: 'addStudentGroup'}
         });

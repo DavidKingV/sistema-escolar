@@ -57,7 +57,7 @@ $(function () {
 const VerifyGroupStudent = async (studentIdGroup) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'GET',
             data: {studentIdGroup: studentIdGroup, action: 'verifyGroupStudent'}
         });
@@ -94,7 +94,7 @@ const VerifyGroupStudent = async (studentIdGroup) => {
 const VerifyToken = async (studentId, token) => {
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'GET',
             data: {studentId: studentId, token: token, action: 'verifyToken'}
         });
@@ -135,7 +135,7 @@ const GetSubjectsNames = async (carrerId) => {
     const GetSubjectSelect = async () => {
         try {
             const response = await $.ajax({
-                url: '../backend/students/routes.php',
+                url: '../../backend/students/routes.php',
                 type: 'GET',
                 data: {carrerId: carrerId, action: 'getSubjectsNames'}
             });
