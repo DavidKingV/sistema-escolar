@@ -91,8 +91,9 @@ $("#groupsTable").on("click", ".groupSchedules", function(){
 $(function () {
     let currentPath = window.location.pathname;
     let specificPath = "/grupos/detalles.php";
+    console.log("Current Path:", currentPath); // Debugging line
 
-    if (currentPath === specificPath) {
+    if (currentPath === '/CONTROL%20ESCOLAR%20BRANCH%20GPT/sistema-escolar/public' + specificPath) {
         //GetStudentsNames();
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');
@@ -113,7 +114,7 @@ $(function () {
 const GetDataGroupDetails = async (groupId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '../../backend/groups/routes.php',
             type: 'GET',
             data: {groupId: groupId, action: 'getGroupData'},
         });
@@ -193,7 +194,7 @@ $("#groupStudentsTable").on("click", ".deleteGroupStudent", function(){
 const DeleteStudentGroup = async (studentId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '../../backend/groups/routes.php',
             type: 'POST',
             data: {studentId: studentId, action: 'deleteStudentGroup'}
         });
@@ -227,7 +228,7 @@ const DeleteStudentGroup = async (studentId) => {
 const AddStudentGroup = async (groupId, studentId) => {
     try {
         const response = await $.ajax({
-            url: '../backend/groups/routes.php',
+            url: '../../backend/groups/routes.php',
             type: 'POST',
             data: {groupId: groupId, studentId:studentId, action: 'addStudentGroup'},
             dataType: 'json'
@@ -486,7 +487,7 @@ const GetCarreerName = async () => {
         // Función para cargar el JSON de carreras
         const loadCareers = async () => {
             const response = await $.ajax({
-                url: '../backend/groups/routes.php',
+                url: '../../backend/groups/routes.php',
                 type: 'GET',
                 data: {action: 'getGroupsJson'}
             });

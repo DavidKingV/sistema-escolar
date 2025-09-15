@@ -454,7 +454,7 @@ function initializeGroupsStudentsDataTable(groupId) {
     paging: true,
     processing: true,
     ajax: {
-        url: "../backend/groups/routes.php", 
+        url: "../../backend/groups/routes.php", 
         type: "POST",
         data: {groupId: groupId, action: "getGroupsStudents" },
         dataSrc: function(data){
