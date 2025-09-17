@@ -6,11 +6,15 @@ initializeCarreersDataTable();
 $(function() {
 
     let currentPath = window.location.pathname;
+    console.log("Current Path:", currentPath);
 
     // Define la ruta en la que deseas cargar el JSON
     let specificPath = "/carreras/altas.php";
 
-    if (currentPath === specificPath) {
+    console.log(currentPath + specificPath);
+
+    if (currentPath === '/CONTROL%20ESCOLAR%20BRANCH%20GPT/sistema-escolar/public' + specificPath) {
+        console.log("Cargando JSON de carreras...");
 
         $.getJSON('../../backend/carreers/areas.json', function(carreras) {
             let $select = $('#careerName');
@@ -131,7 +135,7 @@ $("#carreersTable").on("click", ".deleteCarreer", function() {
 const DeleteCarreer = async (idCarreer) => {
     try {
         const response = await $.ajax({
-            url: '../../backend/carreers/routes.php',
+            url: '../backend/carreers/routes.php',
             type: 'POST',
             data: {idCarreer: idCarreer, action: 'deleteCarreer'}
         });
@@ -165,7 +169,7 @@ const DeleteCarreer = async (idCarreer) => {
 const UpdateCarreer = async (carreerDataEdit) => {
     try {
         const response = await $.ajax({
-            url: '../../backend/carreers/routes.php',
+            url: '../backend/carreers/routes.php',
             type: 'POST',
             data: {carreerDataEdit: carreerDataEdit, action: 'updateCarreer'}
         });
@@ -203,7 +207,7 @@ const GetCarreerData = async (idCarreer) => {
         // Función para obtener el valor predeterminado de la base de datos usando async/await
         const getDefaultCareer = async () => {
             const response = await $.ajax({
-                url: '../../backend/carreers/routes.php', // Cambia esta URL a tu ruta real
+                url: '../backend/carreers/routes.php', // Cambia esta URL a tu ruta real
                 type: 'GET',
                 data: { idCarreer: idCarreer, action: 'getCareerData' }
             });
@@ -217,7 +221,7 @@ const GetCarreerData = async (idCarreer) => {
 
         // Función para cargar el JSON de carreras
         const loadCareers = async () => {
-            const response = await $.getJSON('../../backend/carreers/areas.json');
+            const response = await $.getJSON('../backend/carreers/areas.json');
             return response;
         };
 
