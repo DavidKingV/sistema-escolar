@@ -211,7 +211,7 @@ $("#addSubjects").submit(function(e) {
 const AddSubject = async (subjectData) => {
     try {
         const response = await $.ajax({
-            url: "../backend/subjects/routes.php",
+            url: "../../backend/subjects/routes.php",
             type: "POST",
             data: {subjectData: subjectData, action: "addSubject"}
         });
