@@ -226,17 +226,20 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
 
             $secondStmt->execute();
 
+            if ($secondStmt->errno) {
+                return array("success" => false, "message" => "Error en UPDATE: " . $secondStmt->error);
+            }
+
             $affectedRows = $secondStmt->affected_rows;
             $secondStmt->close();
 
-            if($affectedRows > 0){
+            // Si se ejecutó bien, aunque no haya cambiado nada
+            if($affectedRows >= 0){
                 return array("success" => true, "message" => "Materia y submateria agregadas correctamente");
             }
 
-            return array("success" => false, "message" => "Error al agregar la submateria a la carrera");
-
         } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al agregar la submateria a la carrera");
+            return array("success" => false, "message" => "Error al agregar la submateria a la carrera". $e->getMessage());
         }
     }
 
@@ -298,7 +301,7 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
                     $subjectChildDataEditArray['subjectChildNameInfo'],
                     $subjectChildDataEditArray['descriptionChildSubjectInfo'],
                     $subjectChildDataEditArray['idChildSubjectInfo'],
-                    $subjectChildDataEditArray['idMainSubjectInfo']
+                    $subjectChildDataEditArray['descriptionChildSubjectInfo']
                 );
             }else{
                 $query = "UPDATE subject_child SET nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
@@ -312,24 +315,55 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
                     "ssii",
                     $subjectChildDataEditArray['subjectChildNameInfo'],
                     $subjectChildDataEditArray['descriptionChildSubjectInfo'],
-                    $subjectChildDataEditArray['idChildSubjectInfo'],
-                    $subjectChildDataEditArray['idMainSubjectInfo']
+                    $subjectChildDataEditArray['idMainSubjectInfo'],
+                    $subjectChildDataEditArray['idChildSubjectInfo']
                 );
             }
 
+            $stmt->execute();
+
+            if ($stmt->errno) {
+                return array("success" => false, "message" => "Error en UPDATE: " . $stmt->error);
+            }
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+
+            // Si la query corrió sin error, aunque no cambió nada
+            if($affectedRows >= 0){
+                return array("success" => true, "message" => "Datos de la materia actualizados correctamente");
+            }
+
+            return array("success" => false, "message" => "Error desconocido al actualizar los datos de la materia");
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+        }
+    }
+
+    public function deleteSubjectChild($subjectChildId){
+        try {
+            $query = "DELETE FROM subject_child WHERE id = ?";
+            $stmt = $this->connection->prepare($query);
+            
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la eliminación de la submateria");
+            }
+
+            $stmt->bind_param("i", $subjectChildId);
             $stmt->execute();
 
             $affectedRows = $stmt->affected_rows;
             $stmt->close();
 
             if($affectedRows > 0){
-                return array("success" => true, "message" => "Datos de la materia actualizados correctamente");
+                return array("success" => true, "message" => "Submateria eliminada correctamente");
             }
 
-            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+            return array("success" => false, "message" => "Error al eliminar la submateria");
 
         } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+            return array("success" => false, "message" => "Error al eliminar la submateria");
         }
     }
 

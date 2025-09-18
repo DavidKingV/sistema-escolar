@@ -48,7 +48,7 @@ $("#updateSubjectChild").click(function() {
 
 $("#deleteSubjectChild").click(function() {
 
-    let subjectChildId = $("#idChildSubjectInfo").val();
+    let subjectChildId = $("#idMainSubjectInfo").val();
 
     Swal.fire({
         title: '¿Estás seguro de eliminar la materia hija?',
@@ -393,6 +393,38 @@ const AddSubjectChild = async (subjectChildData) => {
             icon: 'error',
             title: 'Error al agregar la materia hija',
             text: 'Ocurrió un error al agregar la materia hija, por favor intenta de nuevo más tarde.'
+        });
+    }
+}
+
+const DeleteSubjectChild = async (subjectChildId) => {
+    try {
+        const response = await $.ajax({
+            url: "../backend/subjects/routes.php",
+            type: "POST",
+            data: {subjectChildId: subjectChildId, action: "deleteSubjectChild"}
+        });
+        if(response.success){
+            Swal.fire({
+                icon: 'success',
+                title: 'Materia hija eliminada',
+                text: response.message
+            }).then(() => {
+                $('#subjectsTable').DataTable().ajax.reload();
+                $('#childSubjectsModal').modal('hide');
+            });
+        }else{
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al eliminar la materia hija',
+                text: response.message
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al eliminar la materia hija',
+            text: 'Ocurrió un error al eliminar la materia hija, por favor intenta de nuevo más tarde.'
         });
     }
 }

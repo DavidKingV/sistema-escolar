@@ -94,6 +94,16 @@ class SubjectsController{
         return $this->subjects->updateSubjectChild($subjectChildDataEditArray);
     }
 
+    public function DeleteSubjectChild($subjectChildId){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->deleteSubjectChild($subjectChildId);
+    }
+
     public function getSubjectsListSelect($careerId){
 
         $search = $_POST['search'] ?? '';

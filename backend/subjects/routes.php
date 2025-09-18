@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-include __DIR__.'/index.php';
+
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Controllers\SubjectsController;
@@ -75,6 +75,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
     
             header('Content-Type: application/json');
             echo json_encode($updateSubjectChild);
+            break;
+
+        case 'deleteSubjectChild':
+            $subjectChildId = $_POST['subjectChildId'];
+            $subjectsController = new SubjectsController($connection);
+            $deleteSubjectChild = $subjectsController->DeleteSubjectChild($subjectChildId);
+            header('Content-Type: application/json');
+            echo json_encode($deleteSubjectChild);
             break;
 
         default:
