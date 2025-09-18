@@ -10,6 +10,329 @@ class SubjectsModel{
         $this->connection = $dbConnection->getConnection();
     }
 
+    public function fetchSubjects(){
+        try {
+            $query = "SELECT DISTINCT
+    subjects.nombre,
+    subjects.descripcion,
+    subjects.id AS id_subject,
+    carreers_subjects.id_carreer AS id_carrera,
+    carreers.nombre AS nombre_carrera,
+    subject_child.nombre AS nombre_subject_child,
+    subject_child.id AS id_subjet_child
+FROM subjects
+LEFT JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject
+LEFT JOIN carreers ON carreers_subjects.id_carreer = carreers.id
+LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
+
+            $result = $this->connection->query($query);
+
+            if(!$result){
+                return array("success" => false, "message" => "Error al obtener las materias");
+            }
+
+            $subjects = array();
+
+            if($result->num_rows > 0){
+                while($row = $result->fetch_assoc()){
+                    $subjects[] = array(
+                        'success' => true,
+                        'id' => $row['id_subject'],
+                        'name' => $row['nombre'],
+                        'id_carrer' => $row['id_carrera'],
+                        'id_child' => $row['id_subjet_child'] ?? 'No asignado',
+                        'child' => $row['nombre_subject_child'] ?? 'No asignado',
+                        'career' => $row['nombre_carrera'],
+                        'description' => $row['descripcion']
+                    );
+                }
+            }else{
+                $subjects[] = array("success" => false, "message" => "No se encontraron materias");
+            }
+
+            $result->free();
+
+            return $subjects;
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al obtener las materias");
+        }
+    }
+
+    public function findSubjectById($subjectId){
+        try {
+            $query = "SELECT * FROM subjects WHERE id = ?";
+            $stmt = $this->connection->prepare($query);
+
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la consulta de materias");
+            }
+
+            $stmt->bind_param("i", $subjectId);
+            $stmt->execute();
+
+            $result = $stmt->get_result();
+
+            if(!$result){
+                $stmt->close();
+                return array("success" => false, "message" => "Error al obtener la materia");
+            }
+
+            if($result->num_rows === 0){
+                $stmt->close();
+                return array("success" => false, "message" => "Materia no encontrada");
+            }
+
+            $row = $result->fetch_assoc();
+            $stmt->close();
+
+            return array(
+                "success" => true,
+                "id" => $row['id'],
+                "key" => $row['clave'],
+                "name" => $row['nombre'],
+                "description" => $row['descripcion'],
+            );
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al obtener la materia");
+        }
+    }
+
+    public function createSubject($subjectDataArray){
+        try {
+            $query = "INSERT INTO subjects (clave, nombre, descripcion) VALUES (?, ?, ?)";
+            $stmt = $this->connection->prepare($query);
+
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la creación de la materia");
+            }
+
+            $stmt->bind_param("sss", $subjectDataArray['subjectKey'], $subjectDataArray['subjectName'], $subjectDataArray['subjectDes']);
+            $stmt->execute();
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+
+            if($affectedRows > 0){
+                return array("success" => true, "message" => "Materia agregada correctamente");
+            }
+
+            return array("success" => false, "message" => "Error al agregar la materia");
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al agregar la materia");
+        }
+    }
+
+    public function updateSubject($subjectDataEditArray){
+        try {
+            $query = "UPDATE subjects SET clave = ?, nombre = ?, descripcion = ? WHERE id = ?";
+            $stmt = $this->connection->prepare($query);
+
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la actualización de la materia");
+            }
+
+            $stmt->bind_param(
+                "sssi",
+                $subjectDataEditArray['subjectKeyEdit'],
+                $subjectDataEditArray['subjectNameEdit'],
+                $subjectDataEditArray['descriptionSubjectEdit'],
+                $subjectDataEditArray['idSubjectDB']
+            );
+
+            $stmt->execute();
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+
+            if($affectedRows > 0){
+                return array("success" => true, "message" => "Datos de la materia actualizados correctamente");
+            }
+
+            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+        }
+    }
+
+    public function deleteSubject($subjectId){
+        try {
+            $query = "DELETE FROM subjects WHERE id = ?";
+            $stmt = $this->connection->prepare($query);
+
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la eliminación de la materia");
+            }
+
+            $stmt->bind_param("i", $subjectId);
+            $stmt->execute();
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+
+            if($affectedRows > 0){
+                return array("success" => true, "message" => "Materia eliminada correctamente");
+            }
+
+            return array("success" => false, "message" => "Error al eliminar la materia");
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al eliminar la materia");
+        }
+    }
+
+    public function createSubjectChild($subjectChildDataArray){
+        try {
+            $query = "INSERT INTO subject_child (id_subject, clave, nombre, descripcion) VALUES (?, ?, ?, ?)";
+            $stmt = $this->connection->prepare($query);
+
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la creación de la submateria");
+            }
+
+            $stmt->bind_param(
+                "isss",
+                $subjectChildDataArray['idMainSubject'],
+                $subjectChildDataArray['subjectChildKey'],
+                $subjectChildDataArray['subjectChildName'],
+                $subjectChildDataArray['descriptionChildSubject']
+            );
+
+            $stmt->execute();
+
+            $newlyCreatedId = $this->connection->insert_id;
+            $stmt->close();
+
+            if($newlyCreatedId <= 0){
+                return array("success" => false, "message" => "Error al agregar la materia a la carrera");
+            }
+
+            $secondQuery = "UPDATE carreers_subjects SET id_child_subject = ? WHERE id_subject = ? AND id_carreer = ?";
+            $secondStmt = $this->connection->prepare($secondQuery);
+
+            if(!$secondStmt){
+                return array("success" => false, "message" => "Error al preparar la asignación de la submateria");
+            }
+
+            $secondStmt->bind_param(
+                "iii",
+                $newlyCreatedId,
+                $subjectChildDataArray['idMainSubject'],
+                $subjectChildDataArray['carrerId']
+            );
+
+            $secondStmt->execute();
+
+            $affectedRows = $secondStmt->affected_rows;
+            $secondStmt->close();
+
+            if($affectedRows > 0){
+                return array("success" => true, "message" => "Materia y submateria agregadas correctamente");
+            }
+
+            return array("success" => false, "message" => "Error al agregar la submateria a la carrera");
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al agregar la submateria a la carrera");
+        }
+    }
+
+    public function findSubjectChild($subjectFatherId, $subjectChildId){
+        try {
+            $query = "SELECT * FROM subject_child WHERE id = ? AND id_subject = ?";
+            $stmt = $this->connection->prepare($query);
+
+            if(!$stmt){
+                return array("success" => false, "message" => "Error al preparar la consulta de submateria");
+            }
+
+            $stmt->bind_param("ii", $subjectChildId , $subjectFatherId);
+            $stmt->execute();
+
+            $result = $stmt->get_result();
+
+            if(!$result){
+                $stmt->close();
+                return array("success" => false, "message" => "Error al obtener la materia");
+            }
+
+            if($result->num_rows === 0){
+                $stmt->close();
+                return array("success" => false, "message" => "Submateria no encontrada");
+            }
+
+            $row = $result->fetch_assoc();
+            $stmt->close();
+
+            return array(
+                "success" => true,
+                "id" => $row['id'],
+                "id_subject" => $row['id_subject'],
+                "name" => $row['nombre'],
+                "description" => $row['descripcion'],
+            );
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al obtener la materia");
+        }
+    }
+
+    public function updateSubjectChild($subjectChildDataEditArray){
+        try {
+            $key = $subjectChildDataEditArray['subjectChildKey'] ?? null;
+
+            if($key !== null && $key !== ''){
+                $query = "UPDATE subject_child SET clave = ?, nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
+                $stmt = $this->connection->prepare($query);
+
+                if(!$stmt){
+                    return array("success" => false, "message" => "Error al preparar la actualización de la submateria");
+                }
+
+                $stmt->bind_param(
+                    "sssii",
+                    $key,
+                    $subjectChildDataEditArray['subjectChildNameInfo'],
+                    $subjectChildDataEditArray['descriptionChildSubjectInfo'],
+                    $subjectChildDataEditArray['idChildSubjectInfo'],
+                    $subjectChildDataEditArray['idMainSubjectInfo']
+                );
+            }else{
+                $query = "UPDATE subject_child SET nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
+                $stmt = $this->connection->prepare($query);
+
+                if(!$stmt){
+                    return array("success" => false, "message" => "Error al preparar la actualización de la submateria");
+                }
+
+                $stmt->bind_param(
+                    "ssii",
+                    $subjectChildDataEditArray['subjectChildNameInfo'],
+                    $subjectChildDataEditArray['descriptionChildSubjectInfo'],
+                    $subjectChildDataEditArray['idChildSubjectInfo'],
+                    $subjectChildDataEditArray['idMainSubjectInfo']
+                );
+            }
+
+            $stmt->execute();
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+
+            if($affectedRows > 0){
+                return array("success" => true, "message" => "Datos de la materia actualizados correctamente");
+            }
+
+            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+
+        } catch (Exception $e) {
+            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+        }
+    }
+
     public function getChildSubject($subjectId) {
         try {
             $sql = "SELECT id, clave, nombre FROM subject_child WHERE id_subject = ?";

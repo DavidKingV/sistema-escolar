@@ -3,6 +3,7 @@ namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Models\SubjectsModel;
+use Vendor\Schoolarsystem\auth;
 
 class SubjectsController{
     private $connection;
@@ -11,7 +12,87 @@ class SubjectsController{
     public function __construct(DBConnection $dbConnection) {
         $this->connection = $dbConnection;
         $this->subjects = new SubjectsModel($dbConnection);
-    }    
+    }
+
+    public function GetSubjects(){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->fetchSubjects();
+    }
+
+    public function GetSubjectData($subjectId){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->findSubjectById($subjectId);
+    }
+
+    public function AddSubject($subjectDataArray){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->createSubject($subjectDataArray);
+    }
+
+    public function UpdateSubjectData($subjectDataEditArray){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->updateSubject($subjectDataEditArray);
+    }
+
+    public function DeleteSubject($subjectId){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->deleteSubject($subjectId);
+    }
+
+    public function AddSubjectChild($subjectChildDataArray){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->createSubjectChild($subjectChildDataArray);
+    }
+
+    public function GetSubjectChildData($subjectFatherId, $subjectChildId){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->findSubjectChild($subjectFatherId, $subjectChildId);
+    }
+
+    public function UpdateSubjectChild($subjectChildDataEditArray){
+        $verifySession = auth::check();
+
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        return $this->subjects->updateSubjectChild($subjectChildDataEditArray);
+    }
 
     public function getSubjectsListSelect($careerId){
 
