@@ -44,7 +44,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             break;
 
         case 'VerifyMonthlyPayment':
-            $studentId = $_POST['data'];
+            $studentId = $_POST['studentId'];
             $verify = $payments->verifyMonthlyPayment($studentId);
             header('Content-Type: application/json');
             echo json_encode($verify);

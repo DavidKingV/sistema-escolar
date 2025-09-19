@@ -145,7 +145,7 @@ class PaymentsModel{
 
     public function verifyMonthlyPayment($studentId){
         try {
-            $sql = "SELECT * FROM students_payments_amounts WHERE id_student = ?";
+            $sql = "SELECT * FROM payments_dates WHERE id_student = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("i", $studentId);
             $stmt->execute();

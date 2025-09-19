@@ -1,5 +1,5 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
-import { successAlert, errorAlert, loadingAlert } from '../utils/alerts.js';
+import { successAlert, errorAlert, loadingAlert, infoAlert } from '../utils/alerts.js';
 
 let phpPath = '../../backend/payments/routes.php';
 
@@ -42,11 +42,48 @@ const GetStudentsNames = async () => {
         $select.select2({
             theme: "bootstrap-5"
         });
+
+        //cuando se elija un alumno, verificar si tiene datos fiscales
+        $select.on('change', async function() {
+            let studentId = $(this).val();
+            try {
+            let response = await $.ajax({
+                url: phpPath,
+                type: 'POST',
+                data: { action: 'VerifyMonthlyPayment', studentId : studentId },
+                dataType: 'json'
+            });
+
+            $("#paymentDaysCard").prop('hidden', false);
+
+            if (response.success) {
+                $("#savePaymentDays").text('Actualizar');
+            } else {
+                infoAlert('El alumno no tiene definido un día de pago. Por favor, defínalo.');
+            }
+            } catch (error) {
+            console.error('Error al obtener los datos:', error);
+            }
+        });
     } catch (error) {
         console.error('Error al procesar los datos:', error.message);
     } 
    
 };
+
+const AddPaymentDays = async (data) => {
+    enviarPeticionAjaxAction(phpPath, 'POST', 'AddPaymentDays', data)
+    .done(function (response) {
+        if (response.success) {
+            successAlert(response.message);
+            $("#studentPaymentDate")[0].reset();
+            $("#paymentDaysCard").prop('hidden', true);
+            $("#studentName").val('0').trigger('change');
+        }else{
+            errorAlert(response.message);
+        }
+    })
+}
 
 const AddPayment = async (data) => {
     enviarPeticionAjaxAction(phpPath, 'POST', 'AddPayment', data)
@@ -233,4 +270,6 @@ $(document).ready(function() {
             CalculateTotal();
         }
     });
+
+    $("#paymentDaysCard").prop('hidden', true);
 });

@@ -56,7 +56,7 @@ $(function() {
         dateClick: async  function(info) {
             $("#addEventModalLabel").html('Agregar alumno para el '+info.dateStr+'');
             $("#addEventModal").modal('show');
-            $.post('/modals/addEvent.Modal.php', { date: info.dateStr }, function (data) {
+            $.post('../modals/addEvent.Modal.php', { date: info.dateStr }, function (data) {
                 $('#addEventModalBody').html(data);
             });
         },
@@ -67,7 +67,7 @@ $(function() {
             loadingSpinner(true, '#eventDetailsBody');
             $('#eventDetails').modal('show');
             $("#eventDetailsLabel").html(info.event.title);
-            await $.post('/modals/eventDetails.Modal.php', { eventId: info.event._def.publicId, eventData: info.event._def, dateTime : info.event._instance.range }, function (data) {
+            await $.post('../modals/eventDetails.Modal.php', { eventId: info.event._def.publicId, eventData: info.event._def, dateTime : info.event._instance.range }, function (data) {
                 $('#eventDetailsBody').html(data);
             });
         },

@@ -81,6 +81,34 @@ if (!$VerifySession['success']) {
             <div class="col-lg-12">
 
                 <!-- Overflow Hidden -->
+                <div class="card mb-4" id="paymentDaysCard">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Días de pago del alumno</h6>
+                    </div>
+                    <div class="card-body">                        
+                        <form id="studentPaymentDate">
+                            <input type="text" class="form-control" id="studentId" name="studentId" hidden>
+
+                            <div class="col-md">
+                                <div class="mb-3">
+                                    <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Cada mes los días</span>                                            
+                                        <input type="number" class="form-control" id="paymentDay" name="paymentDay">
+                                    </div>
+                                </div>                                    
+                            </div> 
+                            <div class="row g-2 py-4">
+                                <div class="col-md">
+                                    <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
+                                    <button type="button" class="btn btn-primary" id="cancelPayment">Actualizar</button>
+                                </div>                                
+                            </div>
+
+                        </form>
+                    </div>
+                </div>    
+                
                 <div class="card mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Registrar nuevo cobro</h6>
@@ -194,7 +222,7 @@ if (!$VerifySession['success']) {
 
 
                     </div>
-                </div>                        
+                </div>    
 
             </div>
 
