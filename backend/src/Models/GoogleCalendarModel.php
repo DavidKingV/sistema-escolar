@@ -2,7 +2,7 @@
 namespace Vendor\Schoolarsystem\Models;
 
 
-use Google\Client;
+use Google\Client as GoogleClient;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event;
 use Vendor\Schoolarsystem\loadEnv;
@@ -18,27 +18,27 @@ class GoogleCalendarModel{
     public function addEventCalendar($tittle, $date, $startEvent, $endEvent){
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/calendario-alumnos.json');
 
-        $client = new Google_Client();
+        $client = new \Google\Client();
         $client->useApplicationDefaultCredentials();
         $client->setScopes(['https://www.googleapis.com/auth/calendar']);
-        $calendarService = new Google_Service_Calendar($client); 
+        $calendarService = new \Google\Service\Calendar($client);
 
-        $datetimeStart = new DateTime($date . ' ' . $startEvent);
-        $datetimeEnd = new DateTime($date . ' ' . $endEvent);
+        $datetimeStart = new \DateTime($date . ' ' . $startEvent);
+        $datetimeEnd = new \DateTime($date . ' ' . $endEvent);
 
         $timeStartFormat =$datetimeStart->format(\DateTime::RFC3339);
         $timeEndFormat = $datetimeEnd->format(\DateTime::RFC3339);
 
-       $event = new Google_Service_Calendar_Event();
+       $event = new \Google\Service\Calendar\Event();
         $event->setSummary($tittle);
         $event->setDescription('Alumno '.$tittle. ' se registra para practicas clinicas');
 
-        $start = new Google_Service_Calendar_EventDateTime();
+        $start = new \Google\Service\Calendar\EventDateTime();
         $start->setDateTime($timeStartFormat);
 
         $event->setStart($start);
 
-        $end = new Google_Service_Calendar_EventDateTime();
+        $end = new \Google\Service\Calendar\EventDateTime();
         $end->setDateTime($timeEndFormat);
 
         $event->setEnd($end);

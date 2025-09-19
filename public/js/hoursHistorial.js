@@ -2,7 +2,7 @@ import { initializeDataTable } from './global/dataTables.js';
 import { confirmAlert, successAlertAuto, errorAlert, loadingSpinner } from './global/alerts.js';
 import { sendFetch } from './global/fetchCall.js';
 
-const callback = '/api.php';
+const callback = '../api.php';
 
 $(function() {
     
@@ -32,13 +32,13 @@ $(function() {
 
 const modalTotal = async (id, total) => {
     loadingSpinner('#seeTotalModalBody');
-    await $.post('/modals/seeTotal.Modal.php', { id: id, total: total}, function (data) {
+    await $.post('../modals/seeTotal.Modal.php', { id: id, total: total}, function (data) {
         $('#seeTotalModalBody').html(data);
     });
 }
 
 const addHours = async (id) => {
-    await $.post('/modals/addHours.Modal.php', { id: id }, function (data) {
+    await $.post('../modals/addHours.Modal.php', { id: id }, function (data) {
         $('#addHoursModalBody').html(data);
     });
 }

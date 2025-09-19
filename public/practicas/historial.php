@@ -27,8 +27,8 @@ if (!$VerifySession['success']) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../../assets/css/all.min.css">
-    <link rel="stylesheet" href="../../assets/css/alumnos.css">
+    <link rel="stylesheet" href="../assets/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/alumnos.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <!-- timepicker -->
     <link href="https://cdn.jsdelivr.net/npm/timepicker@1.14.1/jquery.timepicker.min.css" rel="stylesheet">
