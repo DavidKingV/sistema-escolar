@@ -128,6 +128,14 @@ class PaymentsController{
         return $this->payments->getStudentsPayMount();
     }
 
+    public function savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount){
+        $verifySession = auth::check();
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount);
+    }
+
     public function setStudentPayMount($studentId, $amount){
         $verifySession = auth::check();
         if(!$verifySession['success']){

@@ -151,11 +151,39 @@ class PaymentsModel{
             $stmt->execute();
             $result = $stmt->get_result();
 
-            $response = ($result->num_rows > 0)
-                ? array("success" => true, "monthly_amount" => $result->fetch_assoc()['monthly_amount'])
-                : array("success" => false, "message" => "No se encontraron pagos pendientes");
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $response = array(
+                    "success" => true,
+                    "monthly_amount" => $row['amount'],
+                    "payment_day" => $row['payment_day'],
+                    "concept" => $row['concept']
+                );
+            } else {
+                $response = array("success" => false, "message" => "No se encontraron pagos pendientes");
+            }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud");
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+        return $response;
+    }
+
+    public function savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount){
+        try {
+            $sql = "INSERT INTO payments_dates (id_student, payment_day, concept, amount) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE payment_day = ?, concept = ?, amount = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("iisdiss", $studentId, $paymentDay, $paymentConcept, $paymentAmount, $paymentDay, $paymentConcept, $paymentAmount);
+            $stmt->execute();
+
+            $response = ($stmt->affected_rows > 0)
+                ? array("success" => true, "message" => "Día de pago guardado/actualizado exitosamente")
+                : array("success" => false, "message" => "Error al actualizar el día de pago");
+        } catch (mysqli_sql_exception $e) {
+            $response = array("success" => false, "message" => $e->getMessage());
         } finally {
             if (isset($stmt)) {
                 $stmt->close();

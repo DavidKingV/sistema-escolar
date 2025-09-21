@@ -1,4 +1,5 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
+import { sendFetch } from '../utils/fetch.js';
 import { successAlert, errorAlert, loadingAlert, infoAlert } from '../utils/alerts.js';
 
 let phpPath = '../../backend/payments/routes.php';
@@ -46,24 +47,7 @@ const GetStudentsNames = async () => {
         //cuando se elija un alumno, verificar si tiene datos fiscales
         $select.on('change', async function() {
             let studentId = $(this).val();
-            try {
-            let response = await $.ajax({
-                url: phpPath,
-                type: 'POST',
-                data: { action: 'VerifyMonthlyPayment', studentId : studentId },
-                dataType: 'json'
-            });
-
-            $("#paymentDaysCard").prop('hidden', false);
-
-            if (response.success) {
-                $("#savePaymentDays").text('Actualizar');
-            } else {
-                infoAlert('El alumno no tiene definido un día de pago. Por favor, defínalo.');
-            }
-            } catch (error) {
-            console.error('Error al obtener los datos:', error);
-            }
+            await VerifyMonthlyPayment(studentId);
         });
     } catch (error) {
         console.error('Error al procesar los datos:', error.message);
@@ -135,22 +119,46 @@ const VerifyTaxData = async (studentId) => {
 }
 
 const VerifyMonthlyPayment = async (studentId) => {
-    enviarPeticionAjaxAction(phpPath, 'POST', 'VerifyMonthlyPayment', studentId)
-    .done(function (response) {
+    sendFetch(phpPath, 'POST', { action: 'VerifyMonthlyPayment', studentId: studentId })
+    .then(res => res.json())
+    .then(function (response) {
+        console.log(response);
         if (response.success) {
-            let monthlyPayment = response.monthly_amount;
+            $("#studentId").val(studentId);
+            $("#paymentDaysCard").prop('hidden', false);
 
-            $("#paymentPrice").val(monthlyPayment);
-            $("#paymentPrice").prop('readonly', true);
+            $("#savePaymentDays").prop('disabled', true);
+            $("#updatePaymentDays").prop('disabled', false);
 
-            CalculateTotal();
+            $("#paymentDay").val(response.payment_day);
+            $("#paymentConceptDay").val(response.concept).trigger('change');
+            $("#paymentAmountDay").val(response.monthly_amount);
 
+            // Establece el mes actual en el select "paymentMonth"
+            const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+            const capitalizedMonth = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
+            $("#paymentMonth").val(capitalizedMonth).trigger('change');
+
+            const isLate = SurchargeForLatePayment(response.payment_day);
+            if(isLate){
+                infoAlert('El día de pago ha pasado. Se aplicará un recargo por pago tardío.');
+                $("#paymentExtraCkeck").prop('checked', false);
+                $("#paymentExtra").prop('disabled', false);
+                $("#paymentExtra").val(200.00);
+            }
+            
+        }else{
+            infoAlert(response.message);
+            $("#paymentDay").val('');
+            $("#paymentConceptDay").val('Mensualidad').trigger('change');
+            $("#paymentAmountDay").val('');
+            $("#savePaymentDays").prop('disabled', false);
+            $("#updatePaymentDays").prop('disabled', true);
         }
     })
-    .fail(function (error) {
+    .catch(function (error) {
         console.error('Error al verificar los datos:', error);
     });
-
 }
 
 const CheckActive = (check, input) => {
@@ -185,7 +193,13 @@ const CalculateTotal = () => {
     $("#paymentTotal").val(total.toFixed(2));
 }
 
-
+const SurchargeForLatePayment = (paymentDay) => {
+    const currentDay = new Date().getDate();
+    if(paymentDay < currentDay){
+        return true;
+    }
+    return false;
+}
 
 $(document).ready(function() {
     GetStudentsNames();
@@ -272,4 +286,61 @@ $(document).ready(function() {
     });
 
     $("#paymentDaysCard").prop('hidden', true);
+
+
+    $("#savePaymentDays").on('click', async function() {
+        const payload = {
+            studentId: $("#studentId").val(),
+            paymentDay: $("#paymentDay").val(),
+            paymentConcept: $("#paymentConceptDay").val(),
+            paymentAmount: $("#paymentAmountDay").val()
+        }
+
+        if(payload.paymentDay === '' || payload.paymentDay < 1 || payload.paymentDay > 31){
+            errorAlert('Por favor, ingrese un día válido (1-31).');
+            return;
+        }
+
+        loadingAlert();
+        await sendFetch(phpPath, 'POST', { action: 'savePaymentDays', data: payload })
+        .then(res => res.json())
+            .then(resp => {
+                if (resp.success) {
+                    successAlert(resp.message);
+                } else {
+                    errorAlert(resp.message || 'Error al reservar');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                errorAlert('Error de red');
+            });
+    });
+
+    $("#updatePaymentDays").on('click', async function() {
+        let studentId = $("#studentId").val();
+        let paymentDay = $("#paymentDay").val();
+        let paymentConcept = $("#paymentConceptDay").val();
+        let paymentAmount = $("#paymentAmountDay").val();
+        let data = { studentId: studentId, paymentDay: paymentDay, paymentConcept: paymentConcept, paymentAmount: paymentAmount };
+        if(paymentDay === '' || paymentDay < 1 || paymentDay > 31){
+            errorAlert('Por favor, ingrese un día válido (1-31).');
+            return;
+        }
+        loadingAlert();
+        await sendFetch(phpPath, 'POST', { action: 'savePaymentDays', data: data })
+        .then(res => res.json())
+            .then(resp => {
+                if (resp.success) {
+                    successAlert(resp.message);
+                } else {
+                    errorAlert(resp.message || 'Error al actualizar');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                errorAlert('Error de red');
+            });
+
+    });
 });

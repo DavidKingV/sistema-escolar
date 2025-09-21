@@ -8,49 +8,66 @@ use Vendor\Schoolarsystem\Controllers\PaymentsController;
 $connection = new DBConnection();
 $payments = new PaymentsController($connection);
 
-if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
+$data = json_decode(file_get_contents('php://input'), true);
 
-    $action = $_POST['action'];
+function responseJson($data) {
+    header('Content-Type: application/json');
+    echo json_encode($data);
+}
 
-    switch ($action) {
+if ($data === null) {
+    $data = $_POST;
+}
+
+if(!isset($data['action'])){
+    responseJson(['error' => 'Action not specified']);
+    exit;
+}else{
+    switch ($data['action']) {
         case 'AddPayment':
-            $paymentData = $_POST['data'];
+            $paymentData = $data['data'];
             parse_str($paymentData, $paymentDataArray);
             $add = $payments->addPayment($paymentDataArray);
-            header('Content-Type: application/json');
-            echo json_encode($add);
+            responseJson($add);
             break;
 
         case 'VerifyTaxData':
-            $studentId = $_POST['data'];
+            $studentId = $data['data'];
             $verify = $payments->verifyTaxData($studentId);
-            header('Content-Type: application/json');
-            echo json_encode($verify);
+            responseJson($verify);
             break;
 
         case 'getStudentsPayMount':
             $get = $payments->getStudentsPayMount();
-            header('Content-Type: application/json');
-            echo json_encode($get);
+            responseJson($get);
             break;
 
         case 'setStudentPayMount':
-            $data = $_POST['data'];
-            $studentId = $data['studentId'];
-            $amount = $data['amount'];
+            $studentId = $data['data']['studentId'];
+            $amount = $data['data']['amount'];
             $set = $payments->setStudentPayMount($studentId, $amount);
-            header('Content-Type: application/json');
-            echo json_encode($set);
+            responseJson($set);
+            break;
+
+        case 'savePaymentDays':
+            $studentId = $data['data']['studentId'];
+            $paymentDay = $data['data']['paymentDay'];
+            $paymentConcept = $data['data']['paymentConcept'];
+            $paymentAmount = $data['data']['paymentAmount'];
+            $save = $payments->savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount);
+            responseJson($save);
             break;
 
         case 'VerifyMonthlyPayment':
-            $studentId = $_POST['studentId'];
+            $studentId = $data['studentId'];
             $verify = $payments->verifyMonthlyPayment($studentId);
-            header('Content-Type: application/json');
-            echo json_encode($verify);
+            responseJson($verify);
             break;
 
         default:
+            responseJson(['error' => 'Unknown action']);
             break;
     }
 }
+
+?>

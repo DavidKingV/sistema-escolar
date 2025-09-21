@@ -92,16 +92,27 @@ if (!$VerifySession['success']) {
                             <div class="col-md">
                                 <div class="mb-3">
                                     <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <div class="input-group">
+                                    <div class="input-group py-3">
                                         <span class="input-group-text">Cada mes los días</span>                                            
                                         <input type="number" class="form-control" id="paymentDay" name="paymentDay">
                                     </div>
+                                    <div class="input-group py-3">
+                                        <span class="input-group-text">Concepto</span>                                            
+                                        <select class="form-select" id="paymentConceptDay" name="paymentConceptDay"  aria-label="Floating label select example" readonly>
+                                            <option selected value="Mensualidad">Mensualidad</option>   
+                                            <!--<option value="Inscripción">Inscripción</option>-->
+                                        </select>
+                                    </div>
+                                    <div class="input-group py-3">
+                                        <span class="input-group-text">$</span>                                            
+                                        <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay">
+                                    </div>
                                 </div>                                    
                             </div> 
-                            <div class="row g-2 py-4">
+                            <div class="row g-2 py-3">
                                 <div class="col-md">
                                     <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
-                                    <button type="button" class="btn btn-primary" id="cancelPayment">Actualizar</button>
+                                    <button type="button" class="btn btn-primary" id="updatePaymentDays" disabled>Actualizar</button>
                                 </div>                                
                             </div>
 
@@ -136,21 +147,42 @@ if (!$VerifySession['success']) {
                                     <input type="text" class="form-control" id="paymentDate" name="paymentDate">   
                                     </div>                      
                                 </div>
-                            </div>
 
-                            <div class="row g-2">
                                 <div class="col-md">            
-                                    <label for="floatingSelect">Selecciona</label>
+                                    <label for="floatingSelect">Concepto</label>
                                     <label id="paymentConcept-error" class="error text-bg-danger" for="paymentConcept" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                                     <select class="form-select" id="paymentConcept" name="paymentConcept"  aria-label="Floating label select example">
                                         <option selected value="0">Concepto</option>   
                                         <option value="Inscripción">Inscripción</option>
                                         <option value="Mensualidad">Mensualidad</option>
                                     </select>                                   
-                                </div>                                                            
+                                </div>     
+                                
+                                <div class="col-md">            
+                                    <label for="floatingSelect">Mes</label>
+                                    <label id="paymentMonth-error" class="error text-bg-danger" for="paymentMonth" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                    <select class="form-select" id="paymentMonth" name="paymentMonth"  aria-label="Floating label select example">
+                                        <option selected value="0">Mes</option>   
+                                        <option value="Enero">Enero</option>
+                                        <option value="Febrero">Febrero</option>
+                                        <option value="Marzo">Marzo</option>
+                                        <option value="Abril">Abril</option>
+                                        <option value="Mayo">Mayo</option>
+                                        <option value="Junio">Junio</option>
+                                        <option value="Julio">Julio</option>
+                                        <option value="Agosto">Agosto</option>
+                                        <option value="Septiembre">Septiembre</option>
+                                        <option value="Octubre">Octubre</option>
+                                        <option value="Noviembre">Noviembre</option>
+                                        <option value="Diciembre">Diciembre</option>
+                                    </select>                                   
+                                </div>         
+                            </div>
+
+                            <div class="row g-2">                                                                                   
                                 <div class="col-md">
                                     <div class="mb-3">
-                                        <label for="">Precio</label>
+                                        <label for="">Monto</label>
                                         <label id="paymentPrice-error" class="error text-bg-danger" for="paymentPrice" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                                         <div class="input-group">
                                             <span class="input-group-text">$</span>                                            
