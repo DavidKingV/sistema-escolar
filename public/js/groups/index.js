@@ -90,10 +90,8 @@ $("#groupsTable").on("click", ".groupSchedules", function(){
 
 $(function () {
     let currentPath = window.location.pathname;
-    let specificPath = "/grupos/detalles.php";
-    console.log("Current Path:", currentPath); // Debugging line
 
-    if (currentPath === '/CONTROL%20ESCOLAR%20BRANCH%20GPT/sistema-escolar/public' + specificPath) {
+    if (currentPath.endsWith("/grupos/detalles.php")) {
         //GetStudentsNames();
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');

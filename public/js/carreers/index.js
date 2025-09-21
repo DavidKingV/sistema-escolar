@@ -8,12 +8,7 @@ $(function() {
     let currentPath = window.location.pathname;
     console.log("Current Path:", currentPath);
 
-    // Define la ruta en la que deseas cargar el JSON
-    let specificPath = "/carreras/altas.php";
-
-    console.log(currentPath + specificPath);
-
-    if (currentPath === '/CONTROL%20ESCOLAR%20BRANCH%20GPT/sistema-escolar/public' + specificPath) {
+    if (currentPath.endsWith("/carreras/altas.php")) {
         console.log("Cargando JSON de carreras...");
 
         $.getJSON('../../backend/carreers/areas.json', function(carreras) {
