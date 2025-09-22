@@ -27,57 +27,52 @@ if (!$VerifySession['success']) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/allMain.min.css">
     <link rel="stylesheet" href="assets/css/alumnos.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <title>Alumnos</title>
 </head>
 <body>
 
-    <?php include __DIR__.'/../backend/views/mainMenu.php'; ?>
-      
-    <section class="home" id="home">           
-        <div class="text">Alumnos</div>
-        <hr class="border-top border-2 border-dark mx-auto w-25">
-
-        <div class="row">
-
-            <div class="col-lg-12">
-
-                <!-- Overflow Hidden -->
-                <div class="card mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Lista completa</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table" id="studentTable">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">No. Control</th>
-                                        <th class="text-center">Nombre</th>
-                                        <th class="text-center">Teléfono</th>
-                                        <th class="text-center">Email</th>
-                                        <th class="text-center">Grupo</th>
-                                        <th class="text-center">Calificaciones</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    
-                                </tbody>    
-                            </table>
-                        </div>
-                    </div>
-                </div>                        
-
-            </div>
-
+<?php include __DIR__.'/../backend/views/mainMenu.php'; ?>
+<!-- Content -->
+<div id="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Lista de Estudiantes</h2>
+            <a href="alumnos/altas.php" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Agregar Estudiante
+            </a>
         </div>
-    </section>
-
-</body>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-users"></i> Estudiantes Registrados
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="studentTable">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Nombre</th>
+                                <th class="text-center">No. Control</th>
+                                <th class="text-center">Programa</th>
+                                <th class="text-center">Teléfono</th>
+                                <th class="text-center">Email</th>
+                                <th class="text-center">Estatus</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se llenarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </html>
 
 <!-- Modal -->
@@ -253,8 +248,7 @@ if (!$VerifySession['success']) {
 </div>
 
 <!-- Boostrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -267,6 +261,8 @@ if (!$VerifySession['success']) {
 <!-- datables -->
 <script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
 
+<!-- globaljs -->
+<script src="js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
 <script type="module" src="js/students/index.js"></script>

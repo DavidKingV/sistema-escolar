@@ -3,13 +3,127 @@ import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStu
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { sendFetch } from '../global/fetchCall.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
+import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
 initializeStudentsMicrosoftUsersTable();
 
 $(function () {
-    
+    $("#studentName, #studentNation").on("input", function() {
+        this.value = capitalizeAllWords(this.value);
+    });
+
+    $("#studentCurp").on("input", function() {
+        this.value = capitalizeAll(this.value);
+    });
+
+    validateForm('#addStudents', {
+        studentName: {
+            required: true,
+            minlength: 3,
+        },
+        controlNumber: {
+            required: true,
+            minlength: 3,
+        },
+        controlSepNumber: {
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
+        },
+        studentGender: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        studentBirthday: {
+            required: true,
+            date: true
+        },
+        studentState: {
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
+            valueNotEquals: "0"
+        },
+        studentNation: {
+            required: {
+                depends: function() {
+                    // El campo es requerido solo si no está activado el switch
+                    return !$("#noExtraData").is(":checked");
+                }
+            },
+        },
+        studentCurp: {
+            required: true,
+            minlength: 18,
+            noSpace: true
+        },
+        countryCode: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        studentPhone: {
+            required: true,
+            minlength: 10,
+            maxlength: 10
+        },
+        studentEmail: {
+            required: true,
+            email: true
+        }
+    },
+    {
+        studentName: {
+            required: "Por favor, ingresa el nombre del estudiante.",
+            minlength: "El nombre del estudiante debe tener al menos 3 caracteres."
+        },
+        controlNumber: {
+            required: "Por favor, ingresa el número de control.",
+            minlength: "El número de control debe tener al menos 3 caracteres."
+        },
+        controlSepNumber: {
+            required: "Por favor, ingresa el número de control SEP."
+        },
+        studentGender: {
+            required: "Por favor, selecciona el género del estudiante.",
+            valueNotEquals: "Por favor, selecciona el género del estudiante."
+        },
+        studentBirthday: {
+            required: "Por favor, ingresa la fecha de nacimiento del estudiante.",
+            date: "Por favor, ingresa una fecha válida."
+        },
+        studentState: {
+            required: "Por favor, selecciona el estado civil del estudiante.",
+            valueNotEquals: "Por favor, selecciona el estado civil del estudiante."
+        },
+        studentNation: {
+            required: "Por favor, ingresa la nacionalidad del estudiante."
+        },
+        studentCurp: {
+            required: "Por favor, ingresa la CURP del estudiante.",
+            minlength: "La CURP debe tener al menos 18 caracteres."
+        },
+        countryCode: {
+            required: "Por favor, selecciona el código de país.",
+            valueNotEquals: "Por favor, selecciona el código de país."
+        },
+        studentPhone: {
+            required: "Por favor, ingresa el número de teléfono del estudiante.",
+            minlength: "El número de teléfono debe tener al menos 10 caracteres.",
+            maxlength: "El número de teléfono no debe exceder los 10 caracteres."
+        },
+        studentEmail: {
+            required: "Por favor, ingresa el correo electrónico del estudiante.",
+            email: "Por favor, ingresa un correo electrónico válido."
+        }
+    });
 });
 
 $('#studentTable').on('click', '.editStudent', function() {
@@ -101,28 +215,33 @@ $("#updateStudent").on( "submit", function( event ) {
 $("#addStudents").on( "submit", function( event ) {
     event.preventDefault();
     const studentData = $(this).serialize();
-    Swal.fire({
-        title: '¿Estás seguro de agregar el estudiante?',
-        text: 'Esta acción no se puede deshacer',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
-        confirmButtonText: 'Sí, agregar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if(result.isConfirmed){
-            if($(this).valid()){
-                AddStudent(studentData);
-            }else{
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error en la validación',
-                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
-                });
+
+    if($(this).valid()){
+        Swal.fire({
+            title: '¿Estás seguro de agregar el estudiante?',
+            text: 'Esta acción no se puede deshacer',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(48, 133, 214)',
+            cancelButtonColor: 'rgb(221, 51, 51);',
+            confirmButtonText: 'Sí, agregar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                if($(this).valid()){
+                    AddStudent(studentData);
+                }else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la validación',
+                        text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                    });
+                }
             }
-        }
-    });
+        });
+    }else{
+        infoAlert('Por favor, verifica que todos los campos estén llenos y sean correctos.');
+    }
 });
 
 $("#studentName").on("blur", function(){

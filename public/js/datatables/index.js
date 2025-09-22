@@ -24,34 +24,49 @@ function initializeStudentDataTable() {
             }
         },
         "columns": [
-            // Define las columnas
+            { "data": "name", "className": "text-center py-2" },
             { "data": "no_control", "className": "text-center" },
-            { data: 'patientName', render: function(data, type, row) {
-                var html = `<div class=""><div class="ps-3"><div class="fw-600 pb-1"><strong>`+row.name+`</strong></div>`;
-                if (row.academicalStatus === '1') html += `<span class="badge text-bg-success" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Activo</span>`;
-                else if (row.academicalStatus === '2') html += `<span class="badge text-bg-warning" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Baja Temporal</span>`;
-                else if (row.academicalStatus === '3') html += `<span class="badge text-bg-danger" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Inactivo/Baja</span>`;
-                else if (row.academicalStatus === '4') html += `<span class="badge text-bg-primary" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">Egresado</span>`;
-                else html += `<span class="badge text-bg-secondary" data-id="`+row.studentId+`" data-name="`+row.name+`" data-status="`+row.academicalStatus+`">`+row.academicalStatus+`</span>`;
-                html += `</div></div>`;                
-                return html;
-            }, 'className': 'text-center py-2'},
+            { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},
             { "data": "phone", "className": "text-center" },
             { "data": "email", "className": "text-center" },
-            { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},
-            {
-                "data": null,
+            { 
+                "data": "academicalStatus",
+                "className": "text-center",
                 "render": function(data, type, row) {
-                    return '<button data-encode="'+row.encodeJWT+'" data-student="'+row.studentId+'" class="btn btn-primary btn-circle GradeStudent"><i class="bi bi-journal-check"></i></button>';
-                
-                },
-                "className": "text-center"
+                    if (data === '1') return `<span class="badge text-bg-success" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Activo</span>`;
+                    else if (data === '2') return `<span class="badge text-bg-warning" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Baja Temporal</span>`;
+                    else if (data === '3') return `<span class="badge text-bg-danger" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Inactivo/Baja</span>`;
+                    else if (data === '4') return `<span class="badge text-bg-primary" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Egresado</span>`;
+                    else return `<span class="badge text-bg-secondary" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">${data}</span>`;
+                }
             },
             {
                 "data": null,
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.studentId+'" class="btn btn-primary btn-circle editStudent" data-bs-toggle="modal" data-bs-target="#StutentEditModal"><i class="bi bi-pencil-square"></i></button><button id="deleteStudent" data-id="'+row.studentId+'" class="btn btn-danger btn-circle"><i class="bi bi-trash-fill"></i></button>';
-                
+                    return `
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item GradeStudent" href="#" data-encode="'${row.encodeJWT}'" data-student="${row.studentId}">
+                                        <i class="bi bi-pencil-square"></i> Añadir Calificaciones
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item editStudent" href="#" data-id="${row.studentId}" data-bs-toggle="modal" data-bs-target="#StutentEditModal">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item deleteStudent" href="#" id="deleteStudent" data-id="${row.studentId}">
+                                        <i class="bi bi-trash-fill"></i> Eliminar
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    `;
                 },
                 "className": "text-center"
             }
