@@ -1,6 +1,7 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
 import { sendFetch } from '../utils/fetch.js';
 import { successAlert, errorAlert, loadingAlert, infoAlert } from '../utils/alerts.js';
+import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
 
 let phpPath = '../../backend/payments/routes.php';
 
@@ -202,6 +203,73 @@ const SurchargeForLatePayment = (paymentDay) => {
 }
 
 $(document).ready(function() {
+
+    validateForm("#paymentsForm", {
+        studentName: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentConcept: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentMonth: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentPrice: {
+            required: true,
+            number: true,
+            min: 0.01
+        },
+        paymentTotal: {
+            required: true,
+            number: true,
+            min: 0.01
+        },
+        paymentMethod: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentInvoice: {
+            required: true,
+            valueNotEquals: " "
+        }
+    },{
+        studentName: {
+            required: "Por favor, seleccione un estudiante.",
+            valueNotEquals: "Por favor, seleccione un estudiante."
+        },
+        paymentConcept: {
+            required: "Por favor, seleccione un concepto.",
+            valueNotEquals: "Por favor, seleccione un concepto."
+        },
+        paymentMonth: {
+            required: "Por favor, seleccione un mes.",
+            valueNotEquals: "Por favor, seleccione un mes."
+        },
+        paymentPrice: {
+            required: "Por favor, ingrese un monto.",
+            number: "Por favor, ingrese un número válido.",
+            min: "El monto debe ser mayor a 0."
+        },
+        paymentTotal: {
+            required: "Por favor, ingrese un total.",
+            number: "Por favor, ingrese un número válido.",
+            min: "El total debe ser mayor a 0."
+        },
+        paymentMethod: {
+            required: "Por favor, seleccione un método de pago.",
+            valueNotEquals: "Por favor, seleccione un método de pago."
+        },
+        paymentInvoice: {
+            required: "Por favor, seleccione un tipo de comprobante.",
+            valueNotEquals: "Por favor, seleccione un tipo de comprobante."
+        }
+    });
+
+
+
     GetStudentsNames();
 
     CheckActive($("#todayDate"), $("#paymentDate"));
@@ -256,7 +324,10 @@ $(document).ready(function() {
         
         if($(this).valid()){
             AddPayment(data);
+        }else{
+            infoAlert('Por favor, complete todos los campos requeridos.');
         }
+
     });
 
     $("#studentName").on('change', async function() {

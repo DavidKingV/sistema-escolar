@@ -1,265 +1,179 @@
-<?php
-require_once(__DIR__.'/../../backend/vendor/autoload.php');
-
-use Vendor\Schoolarsystem\auth;
-use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\userData;
-use Vendor\Schoolarsystem\MicrosoftActions;
-use Vendor\Schoolarsystem\loadEnv;
-
-session_start();
-
-loadEnv::cargar();
-$VerifySession = auth::check();
-
-$dbConnection = new DBConnection();
-$connection = $dbConnection->getConnection();
-
-if (!$VerifySession['success']) {
-    header('Location: ../index.php?sesion=expired');
-    exit();
-}else{
-    $userId = $VerifySession['userId'] ?? NULL;
-    $accessToken = $VerifySession['accessToken']?? NULL;
-    $admin = $VerifySession['admin'];
-
-    $userName='';
-    $userPhoto='';
-
-    if($userId !== NULL && $accessToken != NULL && $admin == true){
-        
-        $userName = MicrosoftActions::getUserName($accessToken);
-        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
-
-    }else if($userId == NULL && $accessToken == NULL){
-        header('Location: index.php?sesion=no-started');
-        exit();
-    }else if($admin == NULL){
-        include __DIR__.'/../../backend/views/alerts.php';
-        exit();
-    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
-        $userDataInstance = new userData($connection);
-        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
-
-        if (!$GetCurrentUserData['success']) {
-            echo 'Error al obtener los datos del usuario';
-            $userName = 'Usuario';
-            $userPhoto = $_ENV['NO_PHOTO'];
-        }else{            
-            $userName = $GetCurrentUserData['userName'];
-            $userEmail = $GetCurrentUserData['email'];
-            $userPhone = $GetCurrentUserData['phone'];
-            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
-        }
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../assets/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/allMain.min.css">
     <link rel="stylesheet" href="../assets/css/jquery-ui.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
-    <title>Pagos</title>
+    <title>Registrar pago</title>
 </head>
 <body>
 
     <?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
       
-    <section class="home" id="home">           
-        <div class="text">Pagos</div>
-        <hr class="border-top border-2 border-dark mx-auto w-25">
-
-        <div class="row">
-
-            <div class="col-lg-12">
-
-                <!-- Overflow Hidden -->
-                <div class="card mb-4" id="paymentDaysCard">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Días de pago del alumno</h6>
-                    </div>
-                    <div class="card-body">                        
-                        <form id="studentPaymentDate">
-                            <input type="text" class="form-control" id="studentId" name="studentId" hidden>
-
-                            <div class="col-md">
-                                <div class="mb-3">
-                                    <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <div class="input-group py-3">
-                                        <span class="input-group-text">Cada mes los días</span>                                            
-                                        <input type="number" class="form-control" id="paymentDay" name="paymentDay">
-                                    </div>
-                                    <div class="input-group py-3">
-                                        <span class="input-group-text">Concepto</span>                                            
-                                        <select class="form-select" id="paymentConceptDay" name="paymentConceptDay"  aria-label="Floating label select example" readonly>
-                                            <option selected value="Mensualidad">Mensualidad</option>   
-                                            <!--<option value="Inscripción">Inscripción</option>-->
-                                        </select>
-                                    </div>
-                                    <div class="input-group py-3">
-                                        <span class="input-group-text">$</span>                                            
-                                        <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay">
-                                    </div>
-                                </div>                                    
-                            </div> 
-                            <div class="row g-2 py-3">
-                                <div class="col-md">
-                                    <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
-                                    <button type="button" class="btn btn-primary" id="updatePaymentDays" disabled>Actualizar</button>
-                                </div>                                
-                            </div>
-
-                        </form>
-                    </div>
-                </div>    
-                
-                <div class="card mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Registrar nuevo cobro</h6>
-                    </div>
-                    <div class="card-body">
-                        
-                        <form id="paymentsForm">
-                            <div class="row g-2 py-3">
-                                <div class="col-md">
-                                    <div class="col-md ">  
-                                        <label for="floatingSelect">Selecciona</label>
-                                        <label id="studentName-error" class="error text-bg-danger" for="studentName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                        <select class="form-select" id="studentName" name="studentName"  aria-label="Floating label select example">
-                                            <option selected value="0">Nombre del estudiante</option> 
-                                        </select>                                    
-                                    </div>    
-                                </div>    
-                                
-                                <div class="col-md">                                                
-                                    <label for="floatingSelect">Fecha actual</label>
-                                    <input class="form-check-input" type="checkbox" id="todayDate" name="todayDate" checked>
-                                    
-                                    <label id="todayDate-error" class="error text-bg-danger" for="todayDate" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <div class="input-group mb-3">                                                                    
-                                    <input type="text" class="form-control" id="paymentDate" name="paymentDate">   
-                                    </div>                      
-                                </div>
-
-                                <div class="col-md">            
-                                    <label for="floatingSelect">Concepto</label>
-                                    <label id="paymentConcept-error" class="error text-bg-danger" for="paymentConcept" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <select class="form-select" id="paymentConcept" name="paymentConcept"  aria-label="Floating label select example">
-                                        <option selected value="0">Concepto</option>   
-                                        <option value="Inscripción">Inscripción</option>
-                                        <option value="Mensualidad">Mensualidad</option>
-                                    </select>                                   
-                                </div>     
-                                
-                                <div class="col-md">            
-                                    <label for="floatingSelect">Mes</label>
-                                    <label id="paymentMonth-error" class="error text-bg-danger" for="paymentMonth" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <select class="form-select" id="paymentMonth" name="paymentMonth"  aria-label="Floating label select example">
-                                        <option selected value="0">Mes</option>   
-                                        <option value="Enero">Enero</option>
-                                        <option value="Febrero">Febrero</option>
-                                        <option value="Marzo">Marzo</option>
-                                        <option value="Abril">Abril</option>
-                                        <option value="Mayo">Mayo</option>
-                                        <option value="Junio">Junio</option>
-                                        <option value="Julio">Julio</option>
-                                        <option value="Agosto">Agosto</option>
-                                        <option value="Septiembre">Septiembre</option>
-                                        <option value="Octubre">Octubre</option>
-                                        <option value="Noviembre">Noviembre</option>
-                                        <option value="Diciembre">Diciembre</option>
-                                    </select>                                   
-                                </div>         
-                            </div>
-
-                            <div class="row g-2">                                                                                   
-                                <div class="col-md">
-                                    <div class="mb-3">
-                                        <label for="">Monto</label>
-                                        <label id="paymentPrice-error" class="error text-bg-danger" for="paymentPrice" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>                                            
-                                            <input type="text" class="form-control" id="paymentPrice" name="paymentPrice">
-                                        </div>
-                                    </div>                                    
-                                </div> 
-                                <div class="col-md">                                                
-                                    <label for="floatingSelect">Recargo</label>
-                                    <input class="form-check-input" type="checkbox" id="paymentExtraCkeck" name="paymentExtraCkeck" checked>
-                                    
-                                    <label id="paymentExtra-error" class="error text-bg-danger" for="paymentExtra" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <div class="input-group mb-3">   
-                                    <span class="input-group-text">$</span>                                                                  
-                                    <input type="text" class="form-control" id="paymentExtra" name="paymentExtra">   
-                                    </div>                      
-                                </div>
-                                <div class="col-md">
-                                    <div class="mb-3">
-                                        <label for="">Total</label>
-                                        <label id="paymentTotal-error" class="error text-bg-danger" for="paymentTotal" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>                                        
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>                                                                                        
-                                            <input type="text" class="form-control" id="paymentTotal" name="paymentTotal" readonly>
-                                        </div>
-                                    </div>                                        
-                                </div> 
-                            </div>
-
-                            <div class="row g-2 py-2">
-                                <div class="col-md">            
-                                    <label for="floatingSelect">Selecciona</label>                                    
-                                    <label id="paymentMethod-error" class="error text-bg-danger" for="paymentMethod" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <select class="form-select" id="paymentMethod" name="paymentMethod"  aria-label="Floating label select example">
-                                        <option selected value="0">Método de pago</option>   
-                                        <option value="01">Efectivo</option>
-                                        <option value="03">Transferencia bancaria</option>
-                                        <option value="04">Tarjeta de crédito</option>
-                                        <option value="28">Tarjeta de débito</option>
-                                    </select>                                
-                                </div>                                                                    
-                                <div class="col-md">            
-                                    <label for="floatingSelect">Selecciona</label>                                                                        
-                                    <label id="paymentInvoice-error" class="error text-bg-danger" for="paymentInvoice" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                    <select class="form-select" id="paymentInvoice" name="paymentInvoice"  aria-label="Floating label select example">
-                                        <option selected value=" ">Tipo de comprobante</option>   
-                                        <option value="0" data-id="0">Recibo simple</option>
-                                        <option value="1" data-id="1">Factura</option>
-                                    </select>                            
-                                </div>     
-                            </div>
-
-                            <div class="row g-2 py-4" id="invoiceInfoDiv" hidden>
-                                <div class="col-md">
-                                    <div class="form-floating">                   
-                                        <input type="text" class="form-control" id="fiscalId" name="fiscalId" readonly disabled>
-                                        <label for="floatingInput">ID Fiscal</label>
-                                    </div>                                    
-                                </div>                                
-                            </div>
-
-                            <div class="row g-2 py-4">
-                                <div class="col-md">
-                                    <button type="submit" class="btn btn-primary">Registrar pago</button>
-                                </div>                                
-                            </div>
-
-                        </form>
-
-
-                    </div>
-                </div>    
-
+    <div id="content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Agregar nuevo pago</h2>
+                <a href="#" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la lista
+                </a>
             </div>
 
+            <!-- Días de pago del alumno -->
+            <div class="card border-primary shadow mt-4" id="paymentDaysCard">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Días de pago del alumno</h6>
+                </div>
+                <div class="card-body">
+                    <form id="studentPaymentDate">
+                        <input type="text" class="form-control" id="studentId" name="studentId" hidden>
+                        <div class="col-md">
+                            <div class="mb-3">
+                                <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <div class="input-group py-3">
+                                    <span class="input-group-text">Cada mes los días</span>
+                                    <input type="number" class="form-control" id="paymentDay" name="paymentDay">
+                                </div>
+                                <div class="input-group py-3">
+                                    <span class="input-group-text">Concepto</span>
+                                    <select class="form-select" id="paymentConceptDay" name="paymentConceptDay" aria-label="Floating label select example" readonly>
+                                        <option selected value="Mensualidad">Mensualidad</option>
+                                    </select>
+                                </div>
+                                <div class="input-group py-3">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-2 py-3">
+                            <div class="col-md">
+                                <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
+                                <button type="button" class="btn btn-primary" id="updatePaymentDays" disabled>Actualizar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Registrar pago -->
+            <div class="card border-primary shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Registrar</h6>
+                </div>
+                <div class="card-body">
+                    <form id="paymentsForm">
+                        <div class="row g-2 py-3">
+                            <div class="col-md">
+                                <div class="mb-3">
+                                    <label for="studentName">Selecciona</label>                                    
+                                    <select class="form-select" id="studentName" name="studentName" aria-label="Floating label select example">
+                                        <option selected value="0">Nombre del estudiante</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <label for="todayDate">Fecha actual</label>
+                                <input class="form-check-input" type="checkbox" id="todayDate" name="todayDate" checked>                                
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="paymentDate" name="paymentDate">
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <label for="paymentConcept">Concepto</label>
+                                <label id="paymentConcept-error" class="error text-bg-danger" for="paymentConcept" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <select class="form-select" id="paymentConcept" name="paymentConcept" aria-label="Floating label select example">
+                                    <option selected value="0">Concepto</option>
+                                    <option value="Inscripción">Inscripción</option>
+                                    <option value="Mensualidad">Mensualidad</option>
+                                </select>
+                            </div>
+                            <div class="col-md">
+                                <label for="paymentMonth">Mes</label>                                
+                                <select class="form-select" id="paymentMonth" name="paymentMonth" aria-label="Floating label select example">
+                                    <option selected value="0">Mes</option>
+                                    <option value="Enero">Enero</option>
+                                    <option value="Febrero">Febrero</option>
+                                    <option value="Marzo">Marzo</option>
+                                    <option value="Abril">Abril</option>
+                                    <option value="Mayo">Mayo</option>
+                                    <option value="Junio">Junio</option>
+                                    <option value="Julio">Julio</option>
+                                    <option value="Agosto">Agosto</option>
+                                    <option value="Septiembre">Septiembre</option>
+                                    <option value="Octubre">Octubre</option>
+                                    <option value="Noviembre">Noviembre</option>
+                                    <option value="Diciembre">Diciembre</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md">
+                                <div class="mb-3">
+                                    <label for="paymentPrice">Monto</label>                                    
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="text" class="form-control" id="paymentPrice" name="paymentPrice">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <label for="paymentExtraCkeck">Recargo</label>
+                                <input class="form-check-input" type="checkbox" id="paymentExtraCkeck" name="paymentExtraCkeck" checked>                                
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">$</span>
+                                    <input type="text" class="form-control" id="paymentExtra" name="paymentExtra">
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="mb-3">
+                                    <label for="paymentTotal">Total</label>                                    
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="text" class="form-control" id="paymentTotal" name="paymentTotal" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 py-2">
+                            <div class="col-md">
+                                <label for="paymentMethod">Selecciona</label>                                
+                                <select class="form-select" id="paymentMethod" name="paymentMethod" aria-label="Floating label select example">
+                                    <option selected value="0">Método de pago</option>
+                                    <option value="01">Efectivo</option>
+                                    <option value="03">Transferencia bancaria</option>
+                                    <option value="04">Tarjeta de crédito</option>
+                                    <option value="28">Tarjeta de débito</option>
+                                </select>
+                            </div>
+                            <div class="col-md">
+                                <label for="paymentInvoice">Selecciona</label>                                
+                                <select class="form-select" id="paymentInvoice" name="paymentInvoice" aria-label="Floating label select example">
+                                    <option selected value=" ">Tipo de comprobante</option>
+                                    <option value="0" data-id="0">Recibo simple</option>
+                                    <option value="1" data-id="1">Factura</option>
+                                </select>
+                            </div>
+                        </div>                        
+                        <div class="row g-2 py-4">
+                            <div class="col-md">
+                                <button type="submit" class="btn btn-primary">Registrar pago</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
 </body>
 </html>
@@ -283,8 +197,10 @@ if (!$VerifySession['success']) {
 <!-- select2 -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<!-- globaljs -->
+<script src="js/global/mainMenu.js"></script>
+
 <!-- Custom JS -->
 <script type="module" src="../js/payments/index.js"></script>
-<script src="../js/utils/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>
 

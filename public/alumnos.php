@@ -267,5 +267,4 @@ if (!$VerifySession['success']) {
 <!-- Custom JS -->
 <script type="module" src="js/students/index.js"></script>
 <!--<script type="module" src="public/js/students.js"></script>-->
-<script src="js/utils/validate.js"></script>
 <script type="module" src="js/utils/sessions.js"></script>
