@@ -1,5 +1,7 @@
 import { initializeTeachersDataTable, initializeTeachersUsersTable } from './../datatables/index.js';
 import { FillTable, ClearInputsEditTeacher, ClearInputsUserTeacher } from '../teachers/forms.js';
+import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
+import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
 
 initializeTeachersDataTable();
 initializeTeachersUsersTable();
@@ -278,30 +280,95 @@ const ReactivateTeacherUser = async (teacherUserId) => {
     }
 }
 
+validateForm('#addTeachers', {
+    teacherName: {
+        required: true,
+        minlength: 2,
+        maxlength: 50,
+        lettersonly: true
+    }, 
+    teacherGender: {
+        required: true,
+        valueNotEquals: "0"
+    },
+    teacherBirthday: {
+        required: true,
+        dateISO: true
+    },
+    teacherState: {
+        required: true,
+        valueNotEquals: "0"
+    },
+    teacherPhone: {
+        required: true,
+        maxlength: 15,
+        number: true
+    },
+    teacherEmail: {
+        required: true,
+        email: true,
+        maxlength: 100
+    }
+},{
+    teacherName: {
+        required: "Por favor, ingresa el nombre del profesor.",
+        minlength: "El nombre debe tener al menos 2 caracteres.",
+        maxlength: "El nombre no debe exceder los 50 caracteres.",
+        lettersonly: "El nombre solo debe contener letras y espacios."
+    },
+    teacherGender: {
+        required: "Por favor, selecciona el género del profesor.",
+        valueNotEquals: "Por favor, selecciona una opción válida."
+    },
+    teacherBirthday: {
+        required: "Por favor, ingresa la fecha de nacimiento del profesor.",
+        dateISO: "Por favor, ingresa una fecha válida (AAAA-MM-DD)."
+    },
+    teacherState: {
+        required: "Por favor, selecciona el estado del profesor.",
+        valueNotEquals: "Por favor, selecciona una opción válida."
+    },
+    teacherPhone: {
+        required: "Por favor, ingresa el teléfono del profesor.",
+        maxlength: "El teléfono no debe exceder los 15 caracteres.",
+        number: "El teléfono solo debe contener números."
+    },
+    teacherEmail: {
+        required: "Por favor, ingresa el correo electrónico del profesor.",
+        email: "Por favor, ingresa un correo electrónico válido.",
+        maxlength: "El correo electrónico no debe exceder los 100 caracteres."
+    }
+});
+
 $("#addTeachers").submit(function(e) {
     e.preventDefault();
     const teacherData = $(this).serialize();
-    Swal.fire({
-        title: '¿Estás seguro de agregar al profesor?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
-        confirmButtonText: 'Sí, agregar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if(result.isConfirmed){
-            if($(this).valid()){
-                addTeachers(teacherData);
-            }else{
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error en la validación',
-                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
-                });
+
+    if($(this).valid()){
+        Swal.fire({
+            title: '¿Estás seguro de agregar al profesor?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(48, 133, 214)',
+            cancelButtonColor: 'rgb(221, 51, 51);',
+            confirmButtonText: 'Sí, agregar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                if($(this).valid()){
+                    addTeachers(teacherData);
+                }else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la validación',
+                        text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                    });
+                }
             }
-        }
-    });
+        });
+    }else{
+        infoAlert('Error en la validación. Por favor, verifica que todos los campos estén llenos y sean correctos.');
+    }
 });
 
 $("#editTeacherForm").submit(function(e) {
