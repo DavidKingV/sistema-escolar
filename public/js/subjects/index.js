@@ -1,6 +1,8 @@
 import { FillTable, FillChildInfo, ClearSubjectChildInputs, onChangeInputs } from '../subjects/forms.js';
 import { initializeSubjectsDataTable } from '../datatables/index.js';
 import { observeDOMChanges } from '../utils/mutationObserver.js';
+import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
+import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
 
 initializeSubjectsDataTable();
 
@@ -182,30 +184,65 @@ $("#subjectsTable").on('click', '.deleteSubject', function() {
     });
 });
 
+validateForm('#addSubjects', {
+    subjectKey: {
+        required: true,
+        minlength: 2,
+        maxlength: 10,
+    },
+    subjectName: {
+        required: true,
+        minlength: 2,
+        maxlength: 100,
+    },
+    subjectDes: {
+        maxlength: 250,
+    }
+}, {
+    subjectKey: {
+        required: "La clave de la materia es obligatoria.",
+        minlength: "La clave de la materia debe tener al menos 2 caracteres.",
+        maxlength: "La clave de la materia no debe exceder los 10 caracteres.",
+    },
+    subjectName: {
+        required: "El nombre de la materia es obligatorio.",
+        minlength: "El nombre de la materia debe tener al menos 2 caracteres.",
+        maxlength: "El nombre de la materia no debe exceder los 100 caracteres.",
+    },
+    subjectDes: {
+        maxlength: "Los comentarios no deben exceder los 250 caracteres.",
+    }
+});
+
 $("#addSubjects").submit(function(e) {
     e.preventDefault();
     let subjectData = $(this).serialize();
-    Swal.fire({
-        title: '¿Estás seguro de agregar la materia?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
-        confirmButtonText: 'Sí, agregar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if(result.isConfirmed){
-            if($(this).valid()){
-                AddSubject(subjectData);
-            }else{
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error en la validación',
-                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
-                });
+
+    if($(this).valid()){
+        Swal.fire({
+            title: '¿Estás seguro de agregar la materia?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(48, 133, 214)',
+            cancelButtonColor: 'rgb(221, 51, 51);',
+            confirmButtonText: 'Sí, agregar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                if($(this).valid()){
+                    AddSubject(subjectData);
+                }else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la validación',
+                        text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                    });
+                }
             }
-        }
-    });
+        });
+    }else{
+        infoAlert('Error en la validación.Por favor, verifica que todos los campos estén llenos y sean correctos.');
+    }
 });
 
 const AddSubject = async (subjectData) => {
