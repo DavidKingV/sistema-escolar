@@ -1,5 +1,7 @@
 import { initializeCarreersDataTable } from '../datatables/index.js';
 import { FillTable, ClearInputsEditTeachers } from '../carreers/forms.js';
+import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
+import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
 
 initializeCarreersDataTable();
 
@@ -45,6 +47,38 @@ $(function() {
         });
     }
    
+    validateForm("#addCareers", {
+        careerName: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        careerArea: {
+            required: true,
+        },
+        careerSubarea: {
+            required: true,
+        },
+        careerDes: {
+            required: true,
+            minlength: 1,
+        }
+    }, {
+        careerName: {
+            required: "Por favor selecciona una carrera",
+            valueNotEquals: "Por favor selecciona una carrera"
+        },
+        careerArea: {
+            required: "El área de la carrera es obligatoria",
+        },
+        careerSubarea: {
+            required: "El subárea de la carrera es obligatoria",
+        },
+        careerDes: {
+            required: "La descripción de la carrera es obligatoria",
+            minlength: "La descripción debe tener al menos 1 carácter",
+        }
+    });
+
 });
 
 $("#carreersTable").on("click", ".editCarreer", function(e) {
@@ -66,28 +100,33 @@ $("#carreersTable").on("click", ".editCarreer", function(e) {
 $("#addCareers").on( "submit", function( event ) {
     event.preventDefault();
     const carreerData = $(this).serialize();
-    Swal.fire({
-        title: '¿Estás seguro de agregar la carrera?', 
-        text: 'Esta acción no se puede deshacer',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
-        confirmButtonText: 'Sí, agregar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if(result.isConfirmed){
-            if($(this).valid()){
-                AddCareer(carreerData);
-            }else{
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error en la validación',
-                    text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
-                });
+
+    if($(this).valid()){
+        Swal.fire({
+            title: '¿Estás seguro de agregar la carrera?', 
+            text: 'Esta acción no se puede deshacer',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(48, 133, 214)',
+            cancelButtonColor: 'rgb(221, 51, 51);',
+            confirmButtonText: 'Sí, agregar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                if($(this).valid()){
+                    AddCareer(carreerData);
+                }else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la validación',
+                        text: 'Por favor, verifica que todos los campos estén llenos y sean correctos.'
+                    });
+                }
             }
-        }
-    });
+        });
+    }else{
+        infoAlert('Por favor, verifica que todos los campos estén llenos y sean correctos.');
+    }
 });
 
 $("#updateCareer").on("submit", function(event) {

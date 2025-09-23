@@ -189,7 +189,7 @@ if ($admin === true && $userId && $accessToken) {
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?php echo $_ENV['BASE_URL']; ?>/carreras/altas.php" class="list-group-item list-group-item-action" class="sidebar-link">
+                    <a href="<?php echo $_ENV['BASE_URL']; ?>/carreras/altas.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-file-alt"></i> Agregar Carrera
                     </a>
                 </li>
