@@ -1,68 +1,12 @@
-<?php
-require_once(__DIR__.'/../backend/vendor/autoload.php');
-
-use Vendor\Schoolarsystem\auth;
-use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\userData;
-use Vendor\Schoolarsystem\MicrosoftActions;
-use Vendor\Schoolarsystem\loadEnv;
-
-session_start();
-
-loadEnv::cargar();
-$VerifySession = auth::check();
-
-$dbConnection = new DBConnection();
-$connection = $dbConnection->getConnection();
-
-if (!$VerifySession['success']) {
-    header('Location: index.php?sesion=expired');
-    exit();
-}else{
-    $userId = $VerifySession['userId'] ?? NULL;
-    $accessToken = $VerifySession['accessToken']?? NULL;
-    $admin = $VerifySession['admin'];
-
-    $userName='';
-    $userPhoto='';
-
-    if($userId !== NULL && $accessToken != NULL && $admin == true){
-        
-        $userName = MicrosoftActions::getUserName($accessToken);
-        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
-
-    }else if($userId == NULL && $accessToken == NULL){
-        header('Location: index.php?sesion=no-started');
-        exit();
-    }else if($admin == NULL){
-        include __DIR__.'/../backend/views/alerts.php';
-        exit();
-    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
-        $userDataInstance = new userData($connection);
-        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
-
-        if (!$GetCurrentUserData['success']) {
-            echo 'Error al obtener los datos del usuario';
-            $userName = 'Usuario';
-            $userPhoto = $_ENV['NO_PHOTO'];
-        }else{            
-            $userName = $GetCurrentUserData['userName'];
-            $userEmail = $GetCurrentUserData['email'];
-            $userPhone = $GetCurrentUserData['phone'];
-            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
-        }
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/allMain.min.css">
     <link rel="stylesheet" href="assets/css/groups.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -73,45 +17,41 @@ if (!$VerifySession['success']) {
 
     <?php include_once __DIR__.'/../backend/views/mainMenu.php'; ?>
       
-    <section class="home" id="home">           
-        <div class="text">Grupos</div>
-        <hr class="border-top border-2 border-dark mx-auto w-25">
-
-        <div class="row">
-
-            <div class="col-lg-12">
-
-                <!-- Overflow Hidden -->
-                <div class="card mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Lista completa</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table" id="groupsTable">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">ID</th>
-                                        <th class="text-center">Carrera</th>
-                                        <th class="text-center">Clave</th>
-                                        <th class="text-center">Nombre</th>
-                                        <th class="text-center">Fecha inicio</th>
-                                        <th class="text-center">Fecha termino</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    
-                                </tbody>    
-                            </table>
-                        </div>
-                    </div>
-                </div>                        
-
+    <div id="content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Lista de Estudiantes</h2>
+                <a href="alumnos/altas.php" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Agregar Estudiante
+                </a>
             </div>
-
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-list-task"></i> Lista de grupos
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table" id="groupsTable">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">ID</th>
+                                    <th class="text-center">Carrera</th>
+                                    <th class="text-center">Clave</th>
+                                    <th class="text-center">Nombre</th>
+                                    <th class="text-center">Fecha inicio</th>
+                                    <th class="text-center">Fecha termino</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Datos de grupos se llenarán aquí dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
 </body>
 </html>
@@ -194,8 +134,7 @@ if (!$VerifySession['success']) {
 </div>
 
 <!-- Boostrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -211,7 +150,9 @@ if (!$VerifySession['success']) {
 <!-- select2 -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<!-- globaljs -->
+<script src="js/global/mainMenu.js"></script>
+
 <!-- Custom JS -->
 <script type="module" src="js/groups/index.js"></script>
-<script src="js/utils/validate.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>
