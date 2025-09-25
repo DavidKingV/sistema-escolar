@@ -67,7 +67,7 @@ if ($authSource === 'microsoft' && $accessToken) {
         $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
     } else {
         $userPhoto = $_ENV['NO_PHOTO'];
-        echo 'Error al obtener los datos del usuario';
+        //echo 'Error al obtener los datos del usuario';
     }
 
 } elseif ($accessToken) {
@@ -86,7 +86,7 @@ if ($authSource === 'microsoft' && $accessToken) {
         $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
     } else {
         $userPhoto = $_ENV['NO_PHOTO'];
-        echo 'Error al obtener los datos del usuario';
+        //echo 'Error al obtener los datos del usuario';
     }
 
 } else {
@@ -287,7 +287,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
     </button>
 
     <div class="user-info">
-        <div class=""><img src="<?php echo $_ENV['BASE_URL']; ?>/assets/img/escudo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-mid"></div>
+        <div class=""><img src="<?php echo $userPhoto ?>" alt="Logo" width="30" height="30" class="d-inline-block align-text-mid"></div>
         <span><?php echo $userName ?></span>
     </div>
 </header>
