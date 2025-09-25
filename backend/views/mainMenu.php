@@ -18,21 +18,44 @@ if (!$VerifySession['success']) {
 $dbConnection = new DBConnection();
 $connection   = $dbConnection->getConnection();
 
-$userId      = $VerifySession['userId']      ?? null;
-$accessToken = $VerifySession['accessToken'] ?? null;
-$admin       = $VerifySession['admin']       ?? null;
+$userId        = $VerifySession['userId']        ?? null;
+$accessToken   = $VerifySession['accessToken']   ?? null;
+$authSource    = $VerifySession['authSource']    ?? null;
+$userRole      = $VerifySession['role']          ?? null;
+$roleName      = $VerifySession['roleName']      ?? null;
+$isAdmin       = $VerifySession['isAdmin']       ?? false;
+$userPerms     = $VerifySession['permissions']   ?? [];
+
+// Normalizar valores por defecto
+if($isAdmin && !$userRole){
+    $userRole = 'admin';
+}
+
+if(!$roleName && $isAdmin){
+    $roleName = 'Administrador';
+}
+
+if(!$authSource){
+    $authSource = $accessToken ? 'microsoft' : 'local';
+}
 
 // Valores por defecto
 $userName  = 'Usuario';
 $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
 
+// 🔹 Validar permisos básicos antes de continuar
+if(!$isAdmin && empty($userRole)){
+    include __DIR__.'/alerts.php';
+    exit();
+}
+
 // 🔹 Flujo según tipo de sesión
-if ($admin === true && $userId && $accessToken) {
+if ($authSource === 'microsoft' && $accessToken) {
     // Caso: Microsoft login
     $userName  = MicrosoftActions::getUserName($accessToken);
     $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
 
-} elseif ($admin === 'Local' && $userId && !$accessToken) {
+} elseif ($authSource === 'local' && $userId) {
     // Caso: Usuario local
     $userDataInstance   = new userData($connection);
     $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
@@ -47,15 +70,40 @@ if ($admin === true && $userId && $accessToken) {
         echo 'Error al obtener los datos del usuario';
     }
 
-} elseif ($admin === null) {
+} elseif ($accessToken) {
+    // Fallback para usuarios de Microsoft sin fuente definida
+    $userName  = MicrosoftActions::getUserName($accessToken);
+    $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
+
+} elseif ($userId) {
+    $userDataInstance   = new userData($connection);
+    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+    if ($GetCurrentUserData['success']) {
+        $userName  = $GetCurrentUserData['userName'];
+        $userEmail = $GetCurrentUserData['email'];
+        $userPhone = $GetCurrentUserData['phone'];
+        $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
+    } else {
+        $userPhoto = $_ENV['NO_PHOTO'];
+        echo 'Error al obtener los datos del usuario';
+    }
+
+} else {
     // Caso: No tiene permisos
     include __DIR__.'/alerts.php';
     exit();
 }
 
+$sidebarRole         = htmlspecialchars($userRole ?? '', ENT_QUOTES, 'UTF-8');
+$sidebarRoleName     = htmlspecialchars($roleName ?? '', ENT_QUOTES, 'UTF-8');
+$sidebarAuthSource   = htmlspecialchars($authSource ?? '', ENT_QUOTES, 'UTF-8');
+$sidebarIsAdmin      = $isAdmin ? 'true' : 'false';
+$sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_UNICODE) ?: '[]', ENT_QUOTES, 'UTF-8');
+
 ?>
 
-<div id="sidebar">
+<div id="sidebar" data-role="<?php echo $sidebarRole; ?>" data-role-name="<?php echo $sidebarRoleName; ?>" data-auth-source="<?php echo $sidebarAuthSource; ?>" data-is-admin="<?php echo $sidebarIsAdmin; ?>" data-permissions="<?php echo $sidebarPermissions; ?>">
     <div class="sidebar-header d-flex justify-content-between align-items-center">
         <h3 class="mb-0">ESMEFIS</h3>
     </div>

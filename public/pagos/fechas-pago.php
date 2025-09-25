@@ -19,38 +19,65 @@ if (!$VerifySession['success']) {
     header('Location: ../index.php?sesion=expired');
     exit();
 }else{
-    $userId = $VerifySession['userId'] ?? NULL;
-    $accessToken = $VerifySession['accessToken']?? NULL;
-    $admin = $VerifySession['admin'];
+    $userId        = $VerifySession['userId']        ?? null;
+    $accessToken   = $VerifySession['accessToken']   ?? null;
+    $authSource    = $VerifySession['authSource']    ?? null;
+    $userRole      = $VerifySession['role']          ?? null;
+    $isAdmin       = $VerifySession['isAdmin']       ?? false;
+    $permissions   = $VerifySession['permissions']   ?? [];
 
-    $userName='';
-    $userPhoto='';
+    if(!$authSource){
+        $authSource = $accessToken ? 'microsoft' : 'local';
+    }
 
-    if($userId !== NULL && $accessToken != NULL && $admin == true){
-        
-        $userName = MicrosoftActions::getUserName($accessToken);
-        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
+    $requiredRoles = array('admin', 'payments-manager', 'payments-viewer');
+    $requiredPermissions = array('payments.view', 'payments.manage', 'payments.read');
 
-    }else if($userId == NULL && $accessToken == NULL){
-        header('Location: ../index.php?sesion=no-started');
-        exit();
-    }else if($admin == NULL){
+    if(!auth::userHasAccess($VerifySession, $requiredRoles, $requiredPermissions)){
         include __DIR__.'/../../backend/views/alerts.php';
         exit();
-    }else if($userId != NULL && $accessToken == NULL && $admin == 'Local'){
-        $userDataInstance = new userData($connection);
+    }
+
+    $userName  = '';
+    $userPhoto = '';
+
+    if($authSource === 'microsoft' && $accessToken){
+        $userName  = MicrosoftActions::getUserName($accessToken);
+        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
+    }elseif($authSource === 'local' && $userId){
+        $userDataInstance   = new userData($connection);
         $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
 
         if (!$GetCurrentUserData['success']) {
             echo 'Error al obtener los datos del usuario';
-            $userName = 'Usuario';
+            $userName  = 'Usuario';
             $userPhoto = $_ENV['NO_PHOTO'];
-        }else{            
-            $userName = $GetCurrentUserData['userName'];
+        }else{
+            $userName  = $GetCurrentUserData['userName'];
             $userEmail = $GetCurrentUserData['email'];
             $userPhone = $GetCurrentUserData['phone'];
             $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
         }
+    }elseif($accessToken){
+        $userName  = MicrosoftActions::getUserName($accessToken);
+        $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
+    }elseif($userId){
+        $userDataInstance   = new userData($connection);
+        $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+        if ($GetCurrentUserData['success']) {
+            $userName  = $GetCurrentUserData['userName'];
+            $userEmail = $GetCurrentUserData['email'];
+            $userPhone = $GetCurrentUserData['phone'];
+            $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
+        }else{
+            echo 'Error al obtener los datos del usuario';
+            $userName  = 'Usuario';
+            $userPhoto = $_ENV['NO_PHOTO'];
+        }
+    }else{
+        header('Location: ../index.php?sesion=no-started');
+        exit();
     }
 }
 ?>
