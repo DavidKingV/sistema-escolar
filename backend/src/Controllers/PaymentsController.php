@@ -151,4 +151,22 @@ class PaymentsController{
         }
         return $this->payments->verifyMonthlyPayment($studentId);
     }
+
+    public function getPaymentHistory($studentId){
+        $verifySession = auth::check();
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->getPaymentHistory($studentId);
+    }
+
+    public function checkIfPaymentMade($studentId, $paymentDay)
+    {
+        $verifySession = auth::check();
+        if (!$verifySession['success']) {
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->checkIfPaymentMade($studentId, $paymentDay);
+    
+    }
 }

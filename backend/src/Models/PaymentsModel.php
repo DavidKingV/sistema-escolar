@@ -191,4 +191,85 @@ class PaymentsModel{
         }
         return $response;
     }
+
+    public function getPaymentHistory($studentId){
+        try {
+            $sql = "SELECT concept, total, payment_date FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("i", $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $response = [];
+            
+            while($row = $result->fetch_assoc()){
+                $response[] = [
+                    "concept" => $row['concept'],
+                    "amount" => $row['total'],
+                    "payment_date" => $row['payment_date']
+                ];
+            }
+              
+            return !empty($response)
+            ? ['success' => true, 'data' => $response]
+            : ['success' => false, 'message' => 'No se encontraron pagos'];
+
+        } catch (mysqli_sql_exception $e) {
+            $response = ["success" => false, "message" => "Error al procesar la solicitud"];
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+        return $response;
+    
+    }
+
+    public function checkIfPaymentMade($studentId, $paymentDay){
+        try {
+            $sql = "SELECT 
+    id_student,
+    payment_date,
+    total,
+    CASE 
+        WHEN DAY(payment_date) <= ? THEN 'ON_TIME'
+        ELSE 'EXTEMPORANEO'
+    END AS status,
+    extra
+FROM students_payments
+WHERE id_student = ?
+  AND YEAR(payment_date) = YEAR(CURDATE())
+  AND MONTH(payment_date) = MONTH(CURDATE())
+ORDER BY payment_date ASC
+LIMIT 1;";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("si", $paymentDay, $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if($result->num_rows > 0){
+                $row = $result->fetch_assoc();
+                $response = array(
+                    "success" => true,
+                    "message" => "El pago ya ha sido realizado este mes",
+                    "data" => array(
+                        "payment_date" => $row['payment_date'],
+                        "total" => $row['total'],
+                        "status" => $row['status'],
+                        "extra" => $row['extra']
+                    )
+                );
+            }else{
+                $response = array("success" => false, "message" => "No se han encontrado pagos para este mes");
+            }
+        } catch (mysqli_sql_exception $e) {
+            $response = array("success" => false, "message" => "Error al procesar la solicitud");
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+        return $response;
+    }
 }
+?>

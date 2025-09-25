@@ -2,6 +2,7 @@ import { enviarPeticionAjaxAction } from '../utils/ajax.js';
 import { sendFetch } from '../utils/fetch.js';
 import { successAlert, errorAlert, loadingAlert, infoAlert } from '../utils/alerts.js';
 import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
+import  { initializeDataTable } from '../global/dataTables.js';
 
 let phpPath = '../../backend/payments/routes.php';
 
@@ -119,7 +120,28 @@ const VerifyTaxData = async (studentId) => {
     
 }
 
+function showLoadedContent() {
+    // Ocultar placeholders
+    $("#paymentDaysPlaceholder").addClass("d-none");
+    $("#paymentHistoryPlaceholder").addClass("d-none");
+
+    // Mostrar contenido real
+    $("#paymentDaysContent").removeClass("d-none");
+    $("#paymentHistoryTable").removeClass("d-none"); // 👈 ahora muestra la tabla
+}
+
+function hideLoadedContent() {
+    // Mostrar placeholders
+    $("#paymentDaysPlaceholder").removeClass("d-none");
+    $("#paymentHistoryPlaceholder").removeClass("d-none");
+
+    // Ocultar contenido real
+    $("#paymentDaysContent").addClass("d-none");
+    $("#paymentHistoryTable").addClass("d-none"); // 👈 ocultamos la tabla completa
+}
+
 const VerifyMonthlyPayment = async (studentId) => {
+    loadingAlert();
     sendFetch(phpPath, 'POST', { action: 'VerifyMonthlyPayment', studentId: studentId })
     .then(res => res.json())
     .then(function (response) {
@@ -140,13 +162,19 @@ const VerifyMonthlyPayment = async (studentId) => {
             const capitalizedMonth = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
             $("#paymentMonth").val(capitalizedMonth).trigger('change');
 
-            const isLate = SurchargeForLatePayment(response.payment_day);
-            if(isLate){
-                infoAlert('El día de pago ha pasado. Se aplicará un recargo por pago tardío.');
-                $("#paymentExtraCkeck").prop('checked', false);
-                $("#paymentExtra").prop('disabled', false);
-                $("#paymentExtra").val(200.00);
-            }
+            $("#paymentPrice").val(response.monthly_amount);
+
+            CalculateTotal();
+
+            initializeDataTable('#paymentHistoryTable', phpPath, { action: 'GetPaymentHistory', studentId: studentId }, [
+                { data: 'concept', 'className': 'text-center' },
+                { data: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '$' ), 'className': 'text-center' },
+                { data: 'payment_date', 'className': 'text-center' }
+            ]);
+
+            showLoadedContent();
+
+            SurchargeForLatePayment(response.payment_day, studentId);                       
             
         }else{
             infoAlert(response.message);
@@ -178,8 +206,8 @@ const CalculateTotal = () => {
     let paymentAmount = parseFloat($("#paymentPrice").val()) || 0;
 
     // Inicializa paymentExtra en 0
-    let paymentExtra = 0;
     let $paymentExtraInput = $("#paymentExtra");
+    let paymentExtra = parseFloat($paymentExtraInput.val()) || 0;
 
     // Verifica si el input "paymentExtra" existe y no está deshabilitado
     if ($paymentExtraInput.length && !$paymentExtraInput.prop('disabled')) {
@@ -194,12 +222,39 @@ const CalculateTotal = () => {
     $("#paymentTotal").val(total.toFixed(2));
 }
 
-const SurchargeForLatePayment = (paymentDay) => {
-    const currentDay = new Date().getDate();
-    if(paymentDay < currentDay){
-        return true;
-    }
-    return false;
+const SurchargeForLatePayment = (paymentDay, studentId) => {
+
+    const limitDate = new Date();
+    limitDate.setDate(paymentDay);
+
+    // Formatear a 'YYYY-MM-DD' para MySQL
+    const yyyy = limitDate.getFullYear();
+    const mm = String(limitDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(limitDate.getDate()).padStart(2, '0');
+    const mysqlDate = `${yyyy}-${mm}-${dd}`;
+
+    const payload = { studentId: studentId, paymentDay: mysqlDate };    
+
+    sendFetch(phpPath, 'POST', { action: 'CheckIfPaymentMade', data: payload })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                switch (response.data.status) {
+                    case 'ON_TIME':
+                        infoAlert('El pago de este mes ya ha sido realizado a tiempo.');
+                        $("#paymentExtraCkeck").prop('checked', true);
+                        $("#paymentExtra").prop('disabled', true);
+                        break;
+                    case 'EXTEMPORANEO':
+                        infoAlert('El pago de este mes ya ha sido realizado, pero fue tarde. Se aplicó un recargo por pago tardío.');
+                        $("#paymentExtraCkeck").prop('checked', true);
+                        $("#paymentExtra").prop('disabled', true);
+                        break;
+                }
+            }else{
+                infoAlert(response.message);
+            }
+        });    
 }
 
 $(document).ready(function() {
@@ -343,7 +398,7 @@ $(document).ready(function() {
         }
     });
 
-    $("#paymentConcept").on('change', async function() {
+    /*$("#paymentConcept").on('change', async function() {
         let studentId = $("#studentName").val();
         if($("#paymentConcept").val() === 'Mensualidad'){
             loadingAlert();
@@ -354,9 +409,10 @@ $(document).ready(function() {
             $("#paymentPrice").val('');
             CalculateTotal();
         }
-    });
+    });*/
 
-    $("#paymentDaysCard").prop('hidden', true);
+    //$("#paymentDaysCard").prop('hidden', true);
+
 
 
     $("#savePaymentDays").on('click', async function() {
@@ -378,6 +434,9 @@ $(document).ready(function() {
             .then(resp => {
                 if (resp.success) {
                     successAlert(resp.message);
+                    $("#studentPaymentDate")[0].reset();
+                    hideLoadedContent();
+                    
                 } else {
                     errorAlert(resp.message || 'Error al reservar');
                 }

@@ -64,6 +64,19 @@ if(!isset($data['action'])){
             responseJson($verify);
             break;
 
+        case 'GetPaymentHistory':
+            $studentId = $data['studentId'];
+            $history = $payments->getPaymentHistory($studentId);
+            responseJson($history);
+            break;
+
+        case 'CheckIfPaymentMade':
+            $studentId = $data['data']['studentId'];
+            $paymentDay = $data['data']['paymentDay'];
+            $check = $payments->checkIfPaymentMade($studentId, $paymentDay);
+            responseJson($check);
+            break;
+
         default:
             responseJson(['error' => 'Unknown action']);
             break;

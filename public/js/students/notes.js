@@ -6,7 +6,11 @@ import { errorAlert, successAlert, infoAlert, loadingSpinner } from '../utils/al
 $(function () {
     let urlParams = new URLSearchParams(window.location.search);
     let studentIdGroup = urlParams.get('student'); 
-    let token = urlParams.get('encode');       
+    let token = urlParams.get('encode');
+    if (token && (token.startsWith("'") || token.startsWith('"'))) {
+        token = token.slice(1, -1);
+    }
+   
 
     if (studentIdGroup) {
         VerifyToken(studentIdGroup, token)

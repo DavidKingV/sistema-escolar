@@ -8,16 +8,17 @@ export function initializeDataTable(element, url, data, columns) {
         ordering: false,
         paging: true,
         processing: true,
+        destroy: true,
         ajax: {
             url: url, 
             type: "POST",
-            data: data,
+            data: data,            
             dataSrc: function(data){
-                if(!data[0].success){
-                    errorAlert(data[0].message);
+                if(!data.success){
+                    errorAlert(data.message);
                     return [];
                 }
-                return data;
+                return data.data;
             }
         },
         "columns": columns

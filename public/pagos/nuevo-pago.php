@@ -26,40 +26,87 @@
                 </a>
             </div>
 
-            <!-- Días de pago del alumno -->
-            <div class="card border-primary shadow mt-4" id="paymentDaysCard">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Días de pago del alumno</h6>
+            <!-- Fila con dos cards agrupadas -->
+            <div class="row mt-4">
+                <!-- Días de pago del alumno -->
+                <div class="col-md-6">
+                    <div class="card border-primary shadow h-100" id="paymentDaysCard">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Días de pago del alumno</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="studentPaymentDate">
+                                <input type="text" class="form-control" id="studentId" name="studentId" hidden>
+
+                                <!-- PLACEHOLDER de carga -->
+                                <div id="paymentDaysPlaceholder" class="placeholder-glow">
+                                    <span class="placeholder col-8 mb-3"></span>
+                                    <span class="placeholder col-6 mb-3"></span>
+                                    <span class="placeholder col-4 mb-3"></span>
+                                </div>
+
+                                <!-- Contenido real (oculto al inicio) -->
+                                <div id="paymentDaysContent" class="d-none">
+                                    <div class="col-md">
+                                        <div class="mb-3">
+                                            <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                            <div class="input-group py-3">
+                                                <span class="input-group-text">Cada mes los días</span>
+                                                <input type="number" class="form-control" id="paymentDay" name="paymentDay">
+                                            </div>
+                                            <div class="input-group py-3">
+                                                <span class="input-group-text">Concepto</span>
+                                                <select class="form-select" id="paymentConceptDay" name="paymentConceptDay" readonly>
+                                                    <option selected value="Mensualidad">Mensualidad</option>
+                                                </select>
+                                            </div>
+                                            <div class="input-group py-3">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 py-3">
+                                        <div class="col-md">
+                                            <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
+                                            <button type="button" class="btn btn-primary" id="updatePaymentDays" disabled>Actualizar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form id="studentPaymentDate">
-                        <input type="text" class="form-control" id="studentId" name="studentId" hidden>
-                        <div class="col-md">
-                            <div class="mb-3">
-                                <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                <div class="input-group py-3">
-                                    <span class="input-group-text">Cada mes los días</span>
-                                    <input type="number" class="form-control" id="paymentDay" name="paymentDay">
+                
+                <!-- Historial de días de pago -->
+                <div class="col-md-6">
+                    <div class="card border-primary shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Historial de pago</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <!-- Placeholder separado -->
+                                <div id="paymentHistoryPlaceholder" class="placeholder-glow">
+                                    <p><span class="placeholder col-8"></span></p>
+                                    <p><span class="placeholder col-4"></span></p>
+                                    <p><span class="placeholder col-6"></span></p>
                                 </div>
-                                <div class="input-group py-3">
-                                    <span class="input-group-text">Concepto</span>
-                                    <select class="form-select" id="paymentConceptDay" name="paymentConceptDay" aria-label="Floating label select example" readonly>
-                                        <option selected value="Mensualidad">Mensualidad</option>
-                                    </select>
-                                </div>
-                                <div class="input-group py-3">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay">
-                                </div>
+
+                                <!-- Tabla que DataTables va a manejar -->
+                                <table class="table table-bordered table-striped d-none" id="paymentHistoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Concepto</th>
+                                            <th>Monto</th>
+                                            <th>Fecha de registro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="row g-2 py-3">
-                            <div class="col-md">
-                                <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
-                                <button type="button" class="btn btn-primary" id="updatePaymentDays" disabled>Actualizar</button>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 
@@ -198,7 +245,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- globaljs -->
-<script src="js/global/mainMenu.js"></script>
+<script src="../js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
 <script type="module" src="../js/payments/index.js"></script>
