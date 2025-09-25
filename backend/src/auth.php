@@ -164,15 +164,42 @@ class auth {
             }
         }
 
-        // Fallback para obtener el rol directamente desde data_users si existe la columna
-        if(!$profile['role'] && self::columnExists($connection, 'data_users', 'role')){
-            if($stmt = $connection->prepare('SELECT role FROM data_users WHERE id = ? LIMIT 1')){
+        // Fallback para obtener información directamente desde data_users si existe la tabla
+        if(self::tableExists($connection, 'data_users')){
+            if($stmt = $connection->prepare('SELECT * FROM data_users WHERE id = ? LIMIT 1')){
                 $stmt->bind_param('s', $userIdentifier);
                 if($stmt->execute()){
                     $result = $stmt->get_result();
                     if($result && $result->num_rows > 0){
                         $row = $result->fetch_assoc();
-                        $profile['role'] = $row['role'] ?? $profile['role'];
+
+                        if(!$profile['role']){
+                            if(isset($row['role']) && $row['role'] !== ''){
+                                $profile['role'] = $row['role'];
+                            }elseif(isset($row['role_key']) && $row['role_key'] !== ''){
+                                $profile['role'] = $row['role_key'];
+                            }elseif(isset($row['rol']) && $row['rol'] !== ''){
+                                $profile['role'] = $row['rol'];
+                            }
+                        }
+
+                        if(!$profile['roleName']){
+                            if(isset($row['role_name']) && $row['role_name'] !== ''){
+                                $profile['roleName'] = $row['role_name'];
+                            }elseif(isset($row['roleName']) && $row['roleName'] !== ''){
+                                $profile['roleName'] = $row['roleName'];
+                            }elseif(isset($row['rol_nombre']) && $row['rol_nombre'] !== ''){
+                                $profile['roleName'] = $row['rol_nombre'];
+                            }
+                        }
+
+                        if(!$profile['isAdmin']){
+                            if(isset($row['is_admin'])){
+                                $profile['isAdmin'] = (bool)$row['is_admin'];
+                            }elseif(isset($row['isAdmin'])){
+                                $profile['isAdmin'] = (bool)$row['isAdmin'];
+                            }
+                        }
                     }
                     if($result){
                         $result->free();
