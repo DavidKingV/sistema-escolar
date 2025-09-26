@@ -287,7 +287,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
     </button>
 
     <div class="user-info">
-        <div class=""><img src="<?php echo $userPhoto ?>" alt="Logo" width="30" height="30" class="d-inline-block align-text-mid"></div>
+        <div class=""><img src="<?php echo htmlspecialchars(trim($userPhoto)); ?>" alt="Logo" width="30" height="30" class="d-inline-block align-text-mid"></div>
         <span><?php echo $userName ?></span>
     </div>
 </header>
