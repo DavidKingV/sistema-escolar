@@ -4,6 +4,7 @@ namespace Vendor\Schoolarsystem\Models;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\MicrosoftActions;
+use Vendor\Schoolarsystem\PermissionHelper;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use mysqli_sql_exception;
@@ -188,6 +189,9 @@ class StudentsModel{
 
     public function getStudents(){
         $VerifySession = auth::check();
+        $isAdmin       = $VerifySession['isAdmin'] ?? false;
+        $userPerms     = $VerifySession['permissions'] ?? [];
+
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
@@ -206,18 +210,26 @@ class StudentsModel{
                         ];
                         $encodeJWT = JWT::encode($payload, $secretKey, 'HS256');
 
-                        $students[] = array(
-                            'success' => true,
-                            'encodeJWT' => $encodeJWT,
-                            'studentId' => $row['id'],
-                            'no_control' => $row['no_control'],
-                            'noControlSep' => $row['noControlSEP'],
-                            'name' => $row['nombre'],
-                            'phone' => $row['telefono'],
-                            'email' => $row['email'],
-                            'group_name' => $row['nombre_grupo'],
-                            'academicalStatus' => $row['academical_status']
-                        );
+                        $studentRow = [
+                            'success'         => true,
+                            'encodeJWT'       => $encodeJWT,
+                            'studentId'       => $row['id'],
+                            'no_control'      => $row['no_control'],
+                            'noControlSep'    => $row['noControlSEP'],
+                            'name'            => $row['nombre'],
+                            'phone'           => $row['telefono'],
+                            'email'           => $row['email'],
+                            'group_name'      => $row['nombre_grupo'],
+                            'academicalStatus'=> $row['academical_status']
+                        ];
+
+                        if (PermissionHelper::canAccess(['edit_students', 'delete_students'], $userPerms, $isAdmin)) {
+                            $studentRow['actions'] = true; // luego DataTable renderiza
+                        } else {
+                            $studentRow['actions'] = false; // DataTable oculta
+                        }
+
+                        $students[] = $studentRow;
                     }
                 }else{
                     $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");

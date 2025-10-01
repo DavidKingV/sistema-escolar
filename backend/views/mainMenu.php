@@ -6,6 +6,7 @@ use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
 use Vendor\Schoolarsystem\MicrosoftActions;
 use Vendor\Schoolarsystem\loadEnv;
+use Vendor\Schoolarsystem\PermissionHelper;
 
 loadEnv::cargar();
 $VerifySession = auth::check();
@@ -18,21 +19,44 @@ if (!$VerifySession['success']) {
 $dbConnection = new DBConnection();
 $connection   = $dbConnection->getConnection();
 
-$userId      = $VerifySession['userId']      ?? null;
-$accessToken = $VerifySession['accessToken'] ?? null;
-$admin       = $VerifySession['admin']       ?? null;
+$userId        = $VerifySession['userId']        ?? null;
+$accessToken   = $VerifySession['accessToken']   ?? null;
+$authSource    = $VerifySession['authSource']    ?? null;
+$userRole      = $VerifySession['role']          ?? null;
+$roleName      = $VerifySession['roleName']      ?? null;
+$isAdmin       = $VerifySession['isAdmin']       ?? false;
+$userPerms     = $VerifySession['permissions']   ?? [];
+
+// Normalizar valores por defecto
+if($isAdmin && !$userRole){
+    $userRole = 'admin';
+}
+
+if(!$roleName && $isAdmin){
+    $roleName = 'Administrador';
+}
+
+if(!$authSource){
+    $authSource = $accessToken ? 'microsoft' : 'local';
+}
 
 // Valores por defecto
 $userName  = 'Usuario';
 $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
 
+// 🔹 Validar permisos básicos antes de continuar
+if(!$isAdmin && empty($userRole)){
+    include __DIR__.'/alerts.php';
+    exit();
+}
+
 // 🔹 Flujo según tipo de sesión
-if ($admin === true && $userId && $accessToken) {
+if ($authSource === 'microsoft' && $accessToken) {
     // Caso: Microsoft login
     $userName  = MicrosoftActions::getUserName($accessToken);
     $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
 
-} elseif ($admin === 'Local' && $userId && !$accessToken) {
+} elseif ($authSource === 'local' && $userId) {
     // Caso: Usuario local
     $userDataInstance   = new userData($connection);
     $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
@@ -44,22 +68,46 @@ if ($admin === true && $userId && $accessToken) {
         $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
     } else {
         $userPhoto = $_ENV['NO_PHOTO'];
-        echo 'Error al obtener los datos del usuario';
+        //echo 'Error al obtener los datos del usuario';
     }
 
-} elseif ($admin === null) {
+} elseif ($accessToken) {
+    // Fallback para usuarios de Microsoft sin fuente definida
+    $userName  = MicrosoftActions::getUserName($accessToken);
+    $userPhoto = MicrosoftActions::getProfilePhoto($accessToken) ?? $_ENV['DEFAULT_PROFILE_PHOTO'];
+
+} elseif ($userId) {
+    $userDataInstance   = new userData($connection);
+    $GetCurrentUserData = $userDataInstance->GetCurrentUserData($userId);
+
+    if ($GetCurrentUserData['success']) {
+        $userName  = $GetCurrentUserData['userName'];
+        $userEmail = $GetCurrentUserData['email'];
+        $userPhone = $GetCurrentUserData['phone'];
+        $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
+    } else {
+        $userPhoto = $_ENV['NO_PHOTO'];
+        //echo 'Error al obtener los datos del usuario';
+    }
+
+} else {
     // Caso: No tiene permisos
     include __DIR__.'/alerts.php';
     exit();
 }
 
+$sidebarRole         = htmlspecialchars($userRole ?? '', ENT_QUOTES, 'UTF-8');
+$sidebarRoleName     = htmlspecialchars($roleName ?? '', ENT_QUOTES, 'UTF-8');
+$sidebarAuthSource   = htmlspecialchars($authSource ?? '', ENT_QUOTES, 'UTF-8');
+$sidebarIsAdmin      = $isAdmin ? 'true' : 'false';
+$sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_UNICODE) ?: '[]', ENT_QUOTES, 'UTF-8');
+
 ?>
 
-<div id="sidebar">
+<div id="sidebar" data-role="<?php echo $sidebarRole; ?>" data-role-name="<?php echo $sidebarRoleName; ?>" data-auth-source="<?php echo $sidebarAuthSource; ?>" data-is-admin="<?php echo $sidebarIsAdmin; ?>" data-permissions="<?php echo $sidebarPermissions; ?>">
     <div class="sidebar-header d-flex justify-content-between align-items-center">
         <h3 class="mb-0">ESMEFIS</h3>
     </div>
-
     <ul class="nav flex-column">
         <li class="nav-item">
             <a href="<?php echo $_ENV['BASE_URL']; ?>/dashboard.php" class="sidebar-link">
@@ -85,11 +133,13 @@ if ($admin === true && $userId && $accessToken) {
                         <i class="fas fa-plus-circle"></i> Agregar Alumno
                     </a>
                 </li>
+                <?php if (PermissionHelper::canAccess(['manage_students_users'], $userPerms, $isAdmin)): ?>
                 <li class="nav-item">
                     <a href="<?php echo $_ENV['BASE_URL']; ?>/alumnos/usuarios.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-chart-bar"></i> Usuarios
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
         </li>
 
@@ -131,6 +181,7 @@ if ($admin === true && $userId && $accessToken) {
             </ul>
         </li>
 
+        <?php if (PermissionHelper::canAccess(['manage_teachers'], $userPerms, $isAdmin)): ?>
         <!-- Profesores -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#teachersMenu" role="button" aria-expanded="false" aria-controls="teachersMenu">
@@ -155,6 +206,7 @@ if ($admin === true && $userId && $accessToken) {
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
 
         <!-- Grupos -->
         <li class="nav-item">
@@ -168,14 +220,17 @@ if ($admin === true && $userId && $accessToken) {
                         <i class="fas fa-list"></i> Lista de Grupos
                     </a>
                 </li>
+                <?php if (PermissionHelper::canAccess(['manage_groups'], $userPerms, $isAdmin)): ?>
                 <li class="nav-item">
                     <a href="<?php echo $_ENV['BASE_URL']; ?>/grupos/altas.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-plus-circle"></i> Agregar Grupo
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
         </li>
 
+        <?php if (PermissionHelper::canAccess(['manage_carrers'], $userPerms, $isAdmin)): ?>
         <!-- Carreras -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#carrersMenu" role="button" aria-expanded="false" aria-controls="carrersMenu">
@@ -195,7 +250,9 @@ if ($admin === true && $userId && $accessToken) {
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
 
+        <?php if (PermissionHelper::canAccess(['manage_subjects'], $userPerms, $isAdmin)): ?>
         <!-- Materias -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#subjectsMenu" role="button" aria-expanded="false" aria-controls="subjectsMenu">
@@ -215,6 +272,7 @@ if ($admin === true && $userId && $accessToken) {
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
 
         <!-- Otras opciones 
         <li class="nav-item">
@@ -239,7 +297,7 @@ if ($admin === true && $userId && $accessToken) {
     </button>
 
     <div class="user-info">
-        <div class=""><img src="<?php echo $_ENV['BASE_URL']; ?>/assets/img/escudo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-mid"></div>
+        <div class=""><img src="<?php echo htmlspecialchars(trim($userPhoto)); ?>" alt="Logo" width="30" height="30" class="d-inline-block align-text-mid"></div>
         <span><?php echo $userName ?></span>
     </div>
 </header>
