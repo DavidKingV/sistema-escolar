@@ -20,9 +20,9 @@
     <div id="content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">Lista de Estudiantes</h2>
-                <a href="alumnos/altas.php" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Agregar Estudiante
+                <h2 class="mb-0">Lista de grupos</h2>
+                <a href="grupos/altas.php" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Agregar Grupo
                 </a>
             </div>
             <div class="card mb-4">

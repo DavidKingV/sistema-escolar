@@ -6,6 +6,7 @@ use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\userData;
 use Vendor\Schoolarsystem\MicrosoftActions;
 use Vendor\Schoolarsystem\loadEnv;
+use Vendor\Schoolarsystem\PermissionHelper;
 
 loadEnv::cargar();
 $VerifySession = auth::check();
@@ -107,7 +108,6 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
     <div class="sidebar-header d-flex justify-content-between align-items-center">
         <h3 class="mb-0">ESMEFIS</h3>
     </div>
-
     <ul class="nav flex-column">
         <li class="nav-item">
             <a href="<?php echo $_ENV['BASE_URL']; ?>/dashboard.php" class="sidebar-link">
@@ -133,11 +133,13 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                         <i class="fas fa-plus-circle"></i> Agregar Alumno
                     </a>
                 </li>
+                <?php if (PermissionHelper::canAccess(['manage_students_users'], $userPerms, $isAdmin)): ?>
                 <li class="nav-item">
                     <a href="<?php echo $_ENV['BASE_URL']; ?>/alumnos/usuarios.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-chart-bar"></i> Usuarios
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
         </li>
 
@@ -179,6 +181,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
             </ul>
         </li>
 
+        <?php if (PermissionHelper::canAccess(['manage_teachers'], $userPerms, $isAdmin)): ?>
         <!-- Profesores -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#teachersMenu" role="button" aria-expanded="false" aria-controls="teachersMenu">
@@ -203,6 +206,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
 
         <!-- Grupos -->
         <li class="nav-item">
@@ -216,14 +220,17 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                         <i class="fas fa-list"></i> Lista de Grupos
                     </a>
                 </li>
+                <?php if (PermissionHelper::canAccess(['manage_groups'], $userPerms, $isAdmin)): ?>
                 <li class="nav-item">
                     <a href="<?php echo $_ENV['BASE_URL']; ?>/grupos/altas.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-plus-circle"></i> Agregar Grupo
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
         </li>
 
+        <?php if (PermissionHelper::canAccess(['manage_carrers'], $userPerms, $isAdmin)): ?>
         <!-- Carreras -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#carrersMenu" role="button" aria-expanded="false" aria-controls="carrersMenu">
@@ -243,7 +250,9 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
 
+        <?php if (PermissionHelper::canAccess(['manage_subjects'], $userPerms, $isAdmin)): ?>
         <!-- Materias -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#subjectsMenu" role="button" aria-expanded="false" aria-controls="subjectsMenu">
@@ -263,6 +272,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
 
         <!-- Otras opciones 
         <li class="nav-item">

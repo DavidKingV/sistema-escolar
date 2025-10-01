@@ -2,6 +2,7 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\PermissionHelper;
 use Vendor\Schoolarsystem\auth;
 
 class GroupsModel{
@@ -141,6 +142,9 @@ class GroupsModel{
 
     public function getGroups(){
         $VerifySession = auth::check();
+        $isAdmin       = $VerifySession['isAdmin'] ?? false;
+        $userPerms     = $VerifySession['permissions'] ?? [];
+
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
@@ -156,7 +160,7 @@ class GroupsModel{
         $groups = array();
         if($result->num_rows > 0){
             while($row = $result->fetch_assoc()){
-                $groups[] = array(
+                $groupsRow = [
                     "success" => true,
                     "id" => $row['id'],
                     "id_carreer" => $row['nombre_carrera'],
@@ -164,7 +168,15 @@ class GroupsModel{
                     "name" => $row['nombre'],
                     "startDate" => $row['fecha_inicio'],
                     "endDate" => $row['fecha_termino']
-                );
+                ];
+
+                if (PermissionHelper::canAccess(['edit_groups', 'delete_groups'], $userPerms, $isAdmin)) {
+                    $groupsRow['actions'] = true; // luego DataTable renderiza
+                } else {
+                    $groupsRow['actions'] = false; // DataTable oculta
+                }
+
+                $groups[] = $groupsRow;
             }
         }else{
             $groups[] = array("success" => false, "message" => "No se encontraron grupos");

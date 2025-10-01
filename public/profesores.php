@@ -1,3 +1,21 @@
+<?php
+require __DIR__.'/../backend/vendor/autoload.php';
+
+use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\PermissionHelper;
+
+session_start();
+
+$VerifySession = auth::check();
+
+$isAdmin       = $VerifySession['isAdmin']       ?? false;
+$userPerms     = $VerifySession['permissions']   ?? [];
+
+if (!PermissionHelper::canAccess('manage_teachers', $userPerms, $isAdmin)) {
+    header('Location: dashboard.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

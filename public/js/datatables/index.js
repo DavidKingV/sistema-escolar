@@ -41,16 +41,17 @@ function initializeStudentDataTable() {
                 }
             },
             {
-                "data": null,
+                "data": "actions",
                 "render": function(data, type, row) {
+                    if (!data) return ""; // si no hay permiso, celda vacía
                     return `
                         <div class="dropdown">
-                            <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-list"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <a class="dropdown-item GradeStudent" href="#" data-encode="'${row.encodeJWT}'" data-student="${row.studentId}">
+                                    <a class="dropdown-item GradeStudent" href="#" data-encode="${row.encodeJWT}" data-student="${row.studentId}">
                                         <i class="bi bi-pencil-square"></i> Añadir Calificaciones
                                     </a>
                                 </li>
@@ -60,7 +61,7 @@ function initializeStudentDataTable() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item deleteStudent" href="#" id="deleteStudent" data-id="${row.studentId}">
+                                    <a class="dropdown-item deleteStudent" href="#" data-id="${row.studentId}">
                                         <i class="bi bi-trash-fill"></i> Eliminar
                                     </a>
                                 </li>
@@ -448,10 +449,38 @@ function initializeGroupsDataTable() {
             { "data": "startDate", "className": "text-center" },
             { "data": "endDate", "className": "text-center" },
             {
-                "data": null,
+                "data": "actions",
                 "render": function(data, type, row) {
-                    return '<button data-id="'+row.id+'" class="btn btn-primary btn-circle groupSchedules"><i class="bi bi-calendar-date-fill"></i></button> <button data-id="'+row.id+'" class="btn btn-primary btn-circle groupDetails"><i class="bi bi-eye-fill"></i></button> <button data-id="'+row.id+'" class="btn btn-primary btn-circle editGroup" data-bs-toggle="modal" data-bs-target="#GroupsEditModal"><i class="bi bi-pencil-square"></i></button> <button data-id="'+row.id+'" class="btn btn-danger btn-circle deleteGroup"><i class="bi bi-trash-fill"></i></button>';
-                        
+                    if (!data) return ""; // si no hay permiso, celda vacía
+                    return `
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item groupSchedules" href="#" data-id="${row.id}">
+                                        <i class="bi bi-calendar-date-fill"></i> Horarios
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item groupDetails" href="#" data-id="${row.id}">
+                                        <i class="bi bi-eye-fill"></i> Detalles
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item editGroup" href="#" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#GroupsEditModal">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item deleteGroup" href="#" data-id="${row.id}">
+                                        <i class="bi bi-trash-fill"></i> Eliminar
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    `;
                 },
                 "className": "text-center"
             }
