@@ -4,6 +4,8 @@ namespace Vendor\Schoolarsystem\Models;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Models\FacturapiModel;
 use Vendor\Schoolarsystem\Models\StudentsModel;
+use Vendor\Schoolarsystem\Models\EmailsModel;
+use Vendor\Schoolarsystem\Helpers\RandomPasswords;
 use Facturapi\Facturapi;
 use mysqli_sql_exception;
 
@@ -11,11 +13,15 @@ class PaymentsModel{
     private $connection;
     private $facturapiModel;
     private $studentsModel;
+    private $emailModel;
+    private $passwordsHelper;
 
     public function __construct(DBConnection $dbConnection) {
         $this->connection = $dbConnection->getConnection();
         $this->facturapiModel = new FacturapiModel($dbConnection);
         $this->studentsModel = new StudentsModel($dbConnection);
+        $this->emailModel = new EmailsModel();
+        $this->passwordsHelper = new RandomPasswords();
     }
 
     public function verifyTaxData($studentId){
@@ -74,7 +80,7 @@ class PaymentsModel{
                         $response = array("success" => false, "message" => "Pago registrado pero error al generar la factura: " . $invoiceResponse['message']);
                     }
                 }else{
-                    $response = array("success" => true, "message" => "Pago registrado exitosamente");
+                    $response = array("success" => true, "message" => "Pago registrado exitosamente", "paymentId" => $paymentId);
                 }
             } else {
                 $response = array("success" => false, "message" => "Error al registrar el pago");
@@ -160,7 +166,7 @@ class PaymentsModel{
                     "concept" => $row['concept']
                 );
             } else {
-                $response = array("success" => false, "message" => "No se encontraron pagos pendientes");
+                $response = array("success" => true, "message" => "No se encontraron pagos");
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud");
@@ -260,7 +266,7 @@ LIMIT 1;";
                     )
                 );
             }else{
-                $response = array("success" => false, "message" => "No se han encontrado pagos para este mes");
+                $response = array("success" => true, "message" => "No se han encontrado pagos para este mes, se podrian aplicar recargos.", "data" => ["status" => "PENDING"] );
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud");
@@ -271,5 +277,53 @@ LIMIT 1;";
         }
         return $response;
     }
+
+
+
+    public function sendPaymentReceipt($studentId, $paymentId){
+        $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
+        try {
+            // Obtener datos del pago
+            $sql = "SELECT sp.*, sd.email, sd.nombre AS student_name
+                    FROM students_payments sp
+                    JOIN students sd ON sp.id_student = sd.id
+                    WHERE sp.id = ? AND sp.id_student = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("ii", $paymentId, $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                return array("success" => false, "message" => "Pago no encontrado");
+            }
+
+            $paymentData = $result->fetch_assoc();
+
+            $sendReceiptEmail = $this->emailModel->SendPaymentEmail(
+                $paymentData['id'],
+                $paymentData,
+                "https://controlescolar.esmefis.edu.mx/my-receipt.php?id={$paymentData['id']}",
+                $randomPassword,
+                $paymentData['email']
+            );
+
+            if ($sendReceiptEmail['success']) {
+                return array("success" => true, "message" => "Comprobante enviado exitosamente");
+            } else {
+                return array("success" => false, "message" => "Error al enviar el comprobante: " . $sendReceiptEmail['message']);
+            }
+
+
+        } catch (mysqli_sql_exception $e) {
+            return array("success" => false, "message" => "Error al procesar la solicitud");
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
+
+
+
 }
 ?>

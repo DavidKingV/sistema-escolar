@@ -26,6 +26,9 @@
         "guzzlehttp/guzzle": "^7.8",
         "facturapi/facturapi-php": "^3.0",
         "google/apiclient": "^2.18",
-        "google/apiclient-services": "^0.384.0"
+        "google/apiclient-services": "^0.384.0",
+        "mpdf/mpdf": "^8.2",
+        "twig/twig": "^3.3",
+        "phpmailer/phpmailer": "^6.9"
     }
 }

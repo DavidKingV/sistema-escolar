@@ -3,10 +3,19 @@ import { sendFetch } from '../utils/fetch.js';
 import { successAlert, errorAlert, loadingAlert, infoAlert } from '../utils/alerts.js';
 import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
 import  { initializeDataTable } from '../global/dataTables.js';
+import { sendNewPayment } from './newPayment.js';
 
 let phpPath = '../../backend/payments/routes.php';
 
-const GetStudentsNames = async () => {
+const showLoader = () => {
+  $("#globalLoader").fadeIn(200);
+};
+
+const hideLoader = () => {
+  $("#globalLoader").fadeOut(200);
+};
+
+const getStudentsNames = async () => {
 
     const GetStudentsSelect = async () => {
         try {
@@ -24,27 +33,22 @@ const GetStudentsNames = async () => {
     };
 
     try {
+        showLoader(); // 👈 Mostrar loader
+
         const students = await GetStudentsSelect();
 
         if (!students || students.length === 0) {
             return;
         }
 
-        let $select = $('#studentName');
-        $.each(students, function(index, student) {
+        let $select = $('#studentName'); // => const $select
+        const fragment = $(document.createDocumentFragment());
+        students.forEach(student => {
             if (student.success !== false) {
-                let $option = $('<option>', {
-                    value: student.id,
-                    text: student.name
-                });
-
-                $select.append($option);
+                fragment.append(new Option(student.name, student.id));
             }
         });
-
-        $select.select2({
-            theme: "bootstrap-5"
-        });
+        $select.append(fragment).select2({ theme: "bootstrap-5" });        
 
         //cuando se elija un alumno, verificar si tiene datos fiscales
         $select.on('change', async function() {
@@ -53,71 +57,37 @@ const GetStudentsNames = async () => {
         });
     } catch (error) {
         console.error('Error al procesar los datos:', error.message);
-    } 
+    } finally {
+        hideLoader(); // 👈 Ocultar loader siempre (éxito o error)
+    }
    
 };
 
-const AddPaymentDays = async (data) => {
-    enviarPeticionAjaxAction(phpPath, 'POST', 'AddPaymentDays', data)
-    .done(function (response) {
-        if (response.success) {
-            successAlert(response.message);
-            $("#studentPaymentDate")[0].reset();
-            $("#paymentDaysCard").prop('hidden', true);
-            $("#studentName").val('0').trigger('change');
-        }else{
-            errorAlert(response.message);
-        }
-    })
-}
-
 const AddPayment = async (data) => {
+    loadingAlert();
     enviarPeticionAjaxAction(phpPath, 'POST', 'AddPayment', data)
     .done(function (response) {
         if (response.success) {
             $("#paymentsForm")[0].reset();
             $("#studentName").val('0').trigger('change');
-            successAlert(response.message);
+
+            $("#paymentHistoryTable").DataTable().destroy();
+            hideLoadedContent();
+
+            let dataObj = Object.fromEntries(new URLSearchParams(data));        
+
+            const toSend = sendNewPayment(dataObj.studentName, response.paymentId);
+
+            if(toSend){
+                successAlert('Pago registrado y comprobante enviado correctamente.');
+            }else{
+                infoAlert('Pago registrado, pero no se pudo enviar el comprobante: ' + toSend.message);
+            }
+            
         }else{
             errorAlert(response.message);
         }
     })
-}
-
-const HiddenOrShowDiv = (div, value) => {
-    if (value === 'show') {
-        $(div).prop('hidden', false).hide().slideDown();  // Mostrar con deslizamiento
-    } else if (value === 'hide') {
-        $(div).slideUp(function() {
-            $(div).prop('hidden', true);  // Ocultar después del deslizamiento
-        });
-    }
-};
-
-const DisableOrEnableInput = (input, value) => {
-    $(input).prop('disabled', value);
-}
-
-const VerifyTaxData = async (studentId) => {
-
-    enviarPeticionAjaxAction(phpPath, 'POST', 'VerifyTaxData', studentId)
-    .done(function (response) {
-        if (response.success) {
-            let fiscalId = $("#fiscalId");
-
-            fiscalId.val(response.data.factuarapi_id);
-            HiddenOrShowDiv("#invoiceInfoDiv", 'show');
-            DisableOrEnableInput(fiscalId, false);
-
-        }else{
-            errorAlert(response.message);
-            $("#paymentInvoice").val('');
-         }
-    })
-    .fail(function (error) {
-        console.error('Error al verificar los datos:', error);
-    });
-    
 }
 
 function showLoadedContent() {
@@ -130,65 +100,47 @@ function showLoadedContent() {
     $("#paymentHistoryTable").removeClass("d-none"); // 👈 ahora muestra la tabla
 }
 
-function hideLoadedContent() {
-    // Mostrar placeholders
-    $("#paymentDaysPlaceholder").removeClass("d-none");
-    $("#paymentHistoryPlaceholder").removeClass("d-none");
-
-    // Ocultar contenido real
-    $("#paymentDaysContent").addClass("d-none");
-    $("#paymentHistoryTable").addClass("d-none"); // 👈 ocultamos la tabla completa
-}
-
 const VerifyMonthlyPayment = async (studentId) => {
-    loadingAlert();
-    sendFetch(phpPath, 'POST', { action: 'VerifyMonthlyPayment', studentId: studentId })
-    .then(res => res.json())
-    .then(function (response) {
-        console.log(response);
-        if (response.success) {
-            $("#studentId").val(studentId);
-            $("#paymentDaysCard").prop('hidden', false);
+    try {
+        loadingAlert();
+        const res = await sendFetch(phpPath, 'POST', { action: 'VerifyMonthlyPayment', studentId });
+        const response = await res.json();
 
-            $("#savePaymentDays").prop('disabled', true);
-            $("#updatePaymentDays").prop('disabled', false);
-
-            $("#paymentDay").val(response.payment_day);
-            $("#paymentConceptDay").val(response.concept).trigger('change');
-            $("#paymentAmountDay").val(response.monthly_amount);
-
-            // Establece el mes actual en el select "paymentMonth"
-            const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-            const capitalizedMonth = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
-            $("#paymentMonth").val(capitalizedMonth).trigger('change');
-
-            $("#paymentPrice").val(response.monthly_amount);
-
-            CalculateTotal();
-
-            initializeDataTable('#paymentHistoryTable', phpPath, { action: 'GetPaymentHistory', studentId: studentId }, [
-                { data: 'concept', 'className': 'text-center' },
-                { data: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '$' ), 'className': 'text-center' },
-                { data: 'payment_date', 'className': 'text-center' }
-            ]);
-
-            showLoadedContent();
-
-            SurchargeForLatePayment(response.payment_day, studentId);                       
-            
-        }else{
+        if (!response.success) {
             infoAlert(response.message);
-            $("#paymentDay").val('');
-            $("#paymentConceptDay").val('Mensualidad').trigger('change');
-            $("#paymentAmountDay").val('');
-            $("#savePaymentDays").prop('disabled', false);
-            $("#updatePaymentDays").prop('disabled', true);
+            resetPaymentDaysForm();
+            return;
         }
-    })
-    .catch(function (error) {
+
+        $("#studentId").val(studentId);
+        $("#paymentDaysCard").prop('hidden', false);
+        $("#savePaymentDays").prop('disabled', true);
+        $("#updatePaymentDays").prop('disabled', false);
+
+        $("#paymentDay").val(response.payment_day);
+        $("#paymentConceptDay").val(response.concept).trigger('change');
+        $("#paymentAmountDay").val(response.monthly_amount);
+
+        const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+        $("#paymentMonth").val(capitalizeAll(currentMonth)).trigger('change');
+
+        $("#paymentPrice").val(response.monthly_amount);
+        CalculateTotal();
+
+        initializeDataTable('#paymentHistoryTable', phpPath, { action: 'GetPaymentHistory', studentId }, [
+            { data: 'concept', className: 'text-center' },
+            { data: 'amount', render: $.fn.dataTable.render.number(',', '.', 2, '$'), className: 'text-center' },
+            { data: 'payment_date', className: 'text-center' }
+        ]);
+
+        showLoadedContent();
+        await SurchargeForLatePayment(response.payment_day, studentId);
+
+    } catch (error) {
         console.error('Error al verificar los datos:', error);
-    });
-}
+        errorAlert('Ocurrió un error inesperado');
+    }
+};
 
 const CheckActive = (check, input) => {
     //verificar que check este activo
@@ -222,6 +174,11 @@ const CalculateTotal = () => {
     $("#paymentTotal").val(total.toFixed(2));
 }
 
+const toggleInput = (selector, disabled, value = null) => {
+    $(selector).prop('disabled', disabled);
+    if (value !== null) $(selector).val(value);
+};
+
 const SurchargeForLatePayment = (paymentDay, studentId) => {
 
     const limitDate = new Date();
@@ -239,138 +196,32 @@ const SurchargeForLatePayment = (paymentDay, studentId) => {
         .then(res => res.json())
         .then(response => {
             if (response.success) {
-                switch (response.data.status) {
-                    case 'ON_TIME':
-                        infoAlert('El pago de este mes ya ha sido realizado a tiempo.');
-                        $("#paymentExtraCkeck").prop('checked', true);
-                        $("#paymentExtra").prop('disabled', true);
-                        break;
-                    case 'EXTEMPORANEO':
-                        infoAlert('El pago de este mes ya ha sido realizado, pero fue tarde. Se aplicó un recargo por pago tardío.');
-                        $("#paymentExtraCkeck").prop('checked', true);
-                        $("#paymentExtra").prop('disabled', true);
-                        break;
-                }
+                // Mostrar mensaje basado en el estado del pago
+                const messages = {
+                    ON_TIME: 'El pago de este mes ya ha sido realizado a tiempo.',
+                    EXTEMPORANEO: 'El pago de este mes ya ha sido realizado, pero fue tarde. Se aplicó un recargo por pago tardío.',
+                    PENDING: (day) => `El pago de este mes aún no se ha realizado. Si se paga después del día ${day ?? 'SIN DEFINIR'}, se aplicará un recargo.`
+                };
+
+                infoAlert(typeof messages[response.data.status] === "function" ? messages[response.data.status](paymentDay) : messages[response.data.status]);
             }else{
                 infoAlert(response.message);
             }
         });    
 }
 
-$(document).ready(function() {
-
-    validateForm("#paymentsForm", {
-        studentName: {
-            required: true,
-            valueNotEquals: "0"
-        },
-        paymentConcept: {
-            required: true,
-            valueNotEquals: "0"
-        },
-        paymentMonth: {
-            required: true,
-            valueNotEquals: "0"
-        },
-        paymentPrice: {
-            required: true,
-            number: true,
-            min: 0.01
-        },
-        paymentTotal: {
-            required: true,
-            number: true,
-            min: 0.01
-        },
-        paymentMethod: {
-            required: true,
-            valueNotEquals: "0"
-        },
-        paymentInvoice: {
-            required: true,
-            valueNotEquals: " "
-        }
-    },{
-        studentName: {
-            required: "Por favor, seleccione un estudiante.",
-            valueNotEquals: "Por favor, seleccione un estudiante."
-        },
-        paymentConcept: {
-            required: "Por favor, seleccione un concepto.",
-            valueNotEquals: "Por favor, seleccione un concepto."
-        },
-        paymentMonth: {
-            required: "Por favor, seleccione un mes.",
-            valueNotEquals: "Por favor, seleccione un mes."
-        },
-        paymentPrice: {
-            required: "Por favor, ingrese un monto.",
-            number: "Por favor, ingrese un número válido.",
-            min: "El monto debe ser mayor a 0."
-        },
-        paymentTotal: {
-            required: "Por favor, ingrese un total.",
-            number: "Por favor, ingrese un número válido.",
-            min: "El total debe ser mayor a 0."
-        },
-        paymentMethod: {
-            required: "Por favor, seleccione un método de pago.",
-            valueNotEquals: "Por favor, seleccione un método de pago."
-        },
-        paymentInvoice: {
-            required: "Por favor, seleccione un tipo de comprobante.",
-            valueNotEquals: "Por favor, seleccione un tipo de comprobante."
-        }
-    });
-
-
-
-    GetStudentsNames();
-
-    CheckActive($("#todayDate"), $("#paymentDate"));
-    CheckActive($("#paymentExtraCkeck"), $("#paymentExtra"));
-
-    $("#paymentTotal").val('0.00');
-    
-    /*$("#paymentInvoice").on('change', function() {
-        let studentId = $("#studentName").val();
-        let invoice = $(this).val();
-
-        if(invoice === '1'){
-            VerifyTaxData(studentId);
-        }
-    });*/
-
-    $("#paymentDate").datepicker({
-        dateFormat : 'yy-mm-dd',
-        changeMonth: true,
-        changeYear: true,
-        showButtonPanel: true,
-        language: 'es',
-
-        onClose: function(dateText, inst) {
-            $(this).val($.datepicker.formatDate('yy-mm-dd', new Date(dateText)));
-        }
-        
-    });    
-
-    $("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on('input change blur', function() {
+$("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on('input change blur', function() {
         CalculateTotal();
     });
 
     $("#paymentExtraCkeck").on('change', function() {
-        if($(this).prop('checked') || $(this).prop('unchecked')){
-            $("#paymentExtra").val('0.00');
-            CalculateTotal();
-        }
+        const isChecked = $(this).prop('checked');
+        toggleInput("#paymentExtra", isChecked, '0.00');
+        CalculateTotal();
     });
 
     $("#todayDate").on('change', function() {
         CheckActive($("#todayDate"), $("#paymentDate"));        
-    });
-
-    $("#paymentExtraCkeck").on('change', function() {
-        CheckActive($("#paymentExtraCkeck"), $("#paymentExtra"));
     });
 
     $("#paymentsForm").on('submit', function(e) {
@@ -385,7 +236,7 @@ $(document).ready(function() {
 
     });
 
-    $("#studentName").on('change', async function() {
+    /*$("#studentName").on('change', async function() {
         let studentId = $("#studentName").val();
         if($("#paymentConcept").val() === 'Mensualidad'){
             loadingAlert();
@@ -396,7 +247,7 @@ $(document).ready(function() {
             $("#paymentPrice").val('');
             CalculateTotal();
         }
-    });
+    });*/
 
     /*$("#paymentConcept").on('change', async function() {
         let studentId = $("#studentName").val();
@@ -473,4 +324,102 @@ $(document).ready(function() {
             });
 
     });
+
+function hideLoadedContent() {
+    // Mostrar placeholders
+    $("#paymentDaysPlaceholder").removeClass("d-none");
+    $("#paymentHistoryPlaceholder").removeClass("d-none");
+
+    // Ocultar contenido real
+    $("#paymentDaysContent").addClass("d-none");
+    $("#paymentHistoryTable").addClass("d-none"); // 👈 ocultamos la tabla completa
+}
+
+$(document).ready(function() {
+
+    validateForm("#paymentsForm", {
+        studentName: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentConcept: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentMonth: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentPrice: {
+            required: true,
+            number: true,
+            min: 0.01
+        },
+        paymentTotal: {
+            required: true,
+            number: true,
+            min: 0.01
+        },
+        paymentMethod: {
+            required: true,
+            valueNotEquals: "0"
+        },
+        paymentInvoice: {
+            required: true,
+            valueNotEquals: " "
+        }
+    },{
+        studentName: {
+            required: "Por favor, seleccione un estudiante.",
+            valueNotEquals: "Por favor, seleccione un estudiante."
+        },
+        paymentConcept: {
+            required: "Por favor, seleccione un concepto.",
+            valueNotEquals: "Por favor, seleccione un concepto."
+        },
+        paymentMonth: {
+            required: "Por favor, seleccione un mes.",
+            valueNotEquals: "Por favor, seleccione un mes."
+        },
+        paymentPrice: {
+            required: "Por favor, ingrese un monto.",
+            number: "Por favor, ingrese un número válido.",
+            min: "El monto debe ser mayor a 0."
+        },
+        paymentTotal: {
+            required: "Por favor, ingrese un total.",
+            number: "Por favor, ingrese un número válido.",
+            min: "El total debe ser mayor a 0."
+        },
+        paymentMethod: {
+            required: "Por favor, seleccione un método de pago.",
+            valueNotEquals: "Por favor, seleccione un método de pago."
+        },
+        paymentInvoice: {
+            required: "Por favor, seleccione un tipo de comprobante.",
+            valueNotEquals: "Por favor, seleccione un tipo de comprobante."
+        }
+    });
+
+    getStudentsNames();
+
+    CheckActive($("#todayDate"), $("#paymentDate"));
+    CheckActive($("#paymentExtraCkeck"), $("#paymentExtra"));
+
+    $("#paymentTotal").val('0.00');
+    
+    $("#paymentDate").datepicker({
+        dateFormat : 'yy-mm-dd',
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        language: 'es',
+
+        onClose: function(dateText, inst) {
+            $(this).val($.datepicker.formatDate('yy-mm-dd', new Date(dateText)));
+        }
+        
+    });    
+
+    
 });

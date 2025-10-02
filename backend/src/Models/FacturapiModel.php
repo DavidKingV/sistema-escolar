@@ -11,59 +11,23 @@ class FacturApiModel{
 
     /* ==== MAPEOS COMO ESTÁTICOS PRIVADOS ==== */
     private static array $factorMapping = [
-        "Terapia" => "Exento",
-        "Masaje" => "Exento",
-        "Valoración" => "Exento",
-        "Infiltración" => "Exento",
-        "ReValoración" => "Exento",
-        "Paquete 13 S." => "Exento",
-        "Paquete 3 S." => "Exento",
-        "Paquete 13 Sesiones" => "Exento",
-        "Paquete 3 Sesiones" => "Exento",
+        "Mensualidad" => "Exento",
+        "Inscripción" => "Exento",        
     ];
 
     private static array $unitKeyMapping = [
-        "Terapia" => "E48",
-        "Masaje" => "E48",
-        "Valoración" => "E48",
-        "Infiltración" => "E48",
-        "ReValoración" => "E48",
-        "Paquete 13 S." => "E48",
-        "Paquete 3 S." => "E48",
-        "Paquete 13 Sesiones" => "E48",
-        "Paquete 3 Sesiones" => "E48",
+        "Mensualidad" => "E48",
+        "Inscripción" => "E48",
     ];
 
     private static array $unitNameMapping = [
-        "Terapia" => "Servicio",
-        "Masaje" => "Servicio",
-        "Valoración" => "Servicio",
-        "Infiltración" => "Servicio",
-        "ReValoración" => "Servicio",
-        "Paquete 13 S." => "Servicio",
-        "Paquete 3 S." => "Servicio",
-        "Paquete 13 Sesiones" => "Servicio",
-        "Paquete 3 Sesiones" => "Servicio",
+        "Mensualidad" => "Servicio",
+        "Inscripción" => "Servicio",
     ];
 
     private static array $productKeyMapping = [
-        "Terapia" => "85122101",
-        "Masaje" => "85122101",
-        "Valoración" => "85122101",
-        "Infiltración" => "85122101",
-        "ReValoración" => "85122101",
-        "Paquete 13 S." => "85122101",
-        "Paquete 3 S." => "85122101",
-        "Paquete 13 Sesiones" => "85122101",
-        "Paquete 3 Sesiones" => "85122101",
-        "Plantillas" => "85122101",
-        "Test Epigenético" => "85122101",
-        "Cloruro de Magnesio" => "51191905",
-        "Citrato de Potasio" => "51191905",
-        "Membresía Familiar" => "85101603",
-        "M.Familiar" => "85101603",
-        "M. Individual" => "85101603",
-        "Membresía Individual" => "85101603",
+        "Mensualidad" => "86121800",
+        "Inscripción" => "86121800",
     ];
 
     private static array $paymentMapping = [
@@ -222,7 +186,7 @@ class FacturApiModel{
 
             // Defaults seguros para los catálogos
             $factor     = self::$factorMapping[$productName]      ?? 'Tasa';
-            $productKey = self::$productKeyMapping[$productName]  ?? '85122101';
+            $productKey = self::$productKeyMapping[$productName]  ?? '84111506';
             $unitKey    = self::$unitKeyMapping[$productName]     ?? 'H87';
             $unitName   = self::$unitNameMapping[$productName]    ?? 'Pieza';
 

@@ -106,7 +106,7 @@ class PaymentsController{
             $date,
             $paymentDataArray['paymentMethod'],
             $isInvoice,
-            $paymentDataArray['paymentConcept'],
+            $paymentDataArray['paymentConcept']." ".$paymentDataArray['paymentMonth'],
             $paymentDataArray['paymentPrice'],
             $extra,
             $paymentDataArray['paymentTotal'],
@@ -168,5 +168,13 @@ class PaymentsController{
         }
         return $this->payments->checkIfPaymentMade($studentId, $paymentDay);
     
+    }
+
+    public function sendPaymentReceipt($studentId, $paymentId){
+        $verifySession = auth::check();
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->sendPaymentReceipt($studentId, $paymentId);
     }
 }
