@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
+require_once(__DIR__.'/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -10,7 +10,7 @@ use Vendor\Schoolarsystem\loadEnv;
 session_start();
 
 loadEnv::cargar();
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();
@@ -25,46 +25,59 @@ if (!$VerifySession['success']) {
 $studentId = $_POST['id'] ?? NULL;
 
 ?>
-
-<p class="placeholder-glow">
-    <span class="placeholder col-12" id="placeholderStudent"><h3 id="studentNameH"></h3></span>
-</p></div>
-
 <form id="addHoursForm">
-<div class="mb-3">
-        <label for="date" class="form-label">Fecha a registrar</label>
-        <input type="date" placeholder="" name="date" id="date" class="form-control" required>
+    <!-- Encabezado estudiante -->
+    <div class="text-center mb-3">
+        <h4 id="studentNameH" class="fw-bold text-primary">Nombre del estudiante</h4>
     </div>
+
+    <!-- Fecha -->
     <div class="mb-3">
-        <label for="start" class="form-label">Hora de entrada: </label>
-        <div data-bs-toggle="time-picker"></div>
-        <input type="text" placeholder="" name="start" id="start" class="form-control">
+        <label for="date" class="form-label">📅 Fecha a registrar</label>
+        <input type="date" name="date" id="date" class="form-control" required>
     </div>
+
+    <!-- Hora de entrada -->
     <div class="mb-3">
-        <label for="end" class="form-label">Hora de salida: </label>
-        <input type="text" placeholder="" name="end" id="end" class="form-control">
-    </div>
-    <div class="mb-3">
-        <label for="totalHours" class="form-label">Horas totales</label>
+        <label for="start" class="form-label">⏰ Hora de entrada</label>
         <div class="input-group">
-            <button type="button" id="btn_menos" data-ajuste="-30" class="btn btn-danger">-</button>
-            <input type="text" placeholder="" name="totalHours" id="totalHours" class="form-control text-center" readonly>
-            <button type="button" id="btn_mas" data-ajuste="30" class="btn btn-success">+</button>
+            <span class="input-group-text"><i class="bi bi-clock"></i></span>
+            <input type="text" name="start" id="start" class="form-control" placeholder="Ej. 08:00">
         </div>
     </div>
-    <div class="d-grid">
-        <button class="btn btn-success register" type="submit">Registrar</button>
+
+    <!-- Hora de salida -->
+    <div class="mb-3">
+        <label for="end" class="form-label">⏰ Hora de salida</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+            <input type="text" name="end" id="end" class="form-control" placeholder="Ej. 14:00">
+        </div>
+    </div>
+
+    <!-- Horas totales -->
+    <div class="mb-3">
+        <label for="totalHours" class="form-label">⏳ Horas totales</label>
+        <div class="input-group">
+            <button type="button" id="btn_menos" data-ajuste="-30" class="btn btn-outline-danger">
+                <i class="bi bi-dash-lg"></i>
+            </button>
+            <input type="text" name="totalHours" id="totalHours" 
+                   class="form-control text-center fw-bold" readonly>
+            <button type="button" id="btn_mas" data-ajuste="30" class="btn btn-outline-success">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
     </div>
 </form>
 
-
 <script type="module">
-    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, selectAlert, warningAlert } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js';
-    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fullcalendar/index.js';
-    import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/dataTables.js';
+    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, selectAlert, warningAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
+    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
+    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
+    import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/dataTables.js';
 
-    const callback = '<?php echo $_ENV['BASE_URL']; ?>/public/api.php';
+    const callback = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     const studentId = '<?php echo $studentId; ?>';
 
     let format = 'HH:mm';

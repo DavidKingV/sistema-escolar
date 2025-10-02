@@ -34,6 +34,18 @@ export function successAlert(message) {
     });
 }
 
+export function successAlertNoReload(message) {
+    return Swal.fire({
+        icon: 'success',
+        title: 'Completado',
+        text: message,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            //location.reload();
+        }
+    });
+}
+
 export function successAlertAuto(message) {
     return Swal.fire({
         icon: 'success',

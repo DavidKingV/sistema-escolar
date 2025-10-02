@@ -17,12 +17,22 @@ export function validateForm(formId, rules, messages) {
     $.validator.addMethod("valueNotEquals", function(value, element, arg){
         return arg !== value;
     }, "Por favor, selecciona una opción");
+
+    $.validator.addMethod("noSpace", function(value, element) {
+        return this.optional(element) || (value.trim().indexOf(" ") === -1);
+    }, "El campo no debe contener espacios");
 }
 
 export function capitalizeFirstLetter(input) {
     if(!input) return input;
     input = String(input); // Asegurar que sea una cadena de texto
     return input.charAt(0).toUpperCase() + input.slice(1);
+}
+
+export function capitalizeAll(input) {
+    if(!input) return input;
+    input = String(input); // Asegurar que sea una cadena de texto
+    return input.toUpperCase();
 }
 
 export function capitalizeAllWords(input) {

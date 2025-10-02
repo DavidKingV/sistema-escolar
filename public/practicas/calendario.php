@@ -1,68 +1,47 @@
-<?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
-
-use Vendor\Schoolarsystem\auth;
-use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\userData;
-use Vendor\Schoolarsystem\MicrosoftActions;
-use Vendor\Schoolarsystem\loadEnv;
-
-session_start();
-
-loadEnv::cargar();
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
-
-$dbConnection = new DBConnection();
-$connection = $dbConnection->getConnection();
-
-if (!$VerifySession['success']) {
-    header('Location: ../../index.php?sesion=expired');
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../../assets/css/all.min.css">
-    <link rel="stylesheet" href="../../assets/css/alumnos.css">
+    <link rel="stylesheet" href="../assets/css/allMain.min.css">
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <!-- timepicker -->
     <link href="https://cdn.jsdelivr.net/npm/timepicker@1.14.1/jquery.timepicker.min.css" rel="stylesheet">
     <!-- select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
-    <title>Alumnos</title>
+    <title>Calendario de practicas</title>
 </head>
 <body>
 
-    <?php include_once '../../backend/views/mainMenu.php'; ?>
+    <?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
       
-    <section class="home" id="home">           
-        <div class="text">Calendario</div>
-        <hr class="border-top border-2 border-dark mx-auto w-25">
-
-        <div class="row">
-
-            <div class="col-lg-12">
-
-                <!-- Overflow Hidden -->
-                <div class="card mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Calendario para el registro de alumnos</h6>
-                    </div>
-                    <div class="card-body">
-                        <div id="calendar"></div>
-                    </div>
-                </div>                        
-
+    <div id="content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Calendario de Prácticas</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#">
+                    <i class="fas fa-plus"></i> Agregar Evento
+                </button>
             </div>
-
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-calendar-alt"></i> Calendario de Eventos
+                        </div>
+                        <div class="card-body">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
 <!-- Modales-->
 
@@ -98,8 +77,8 @@ if (!$VerifySession['success']) {
 </body>
 </html>
 <!-- Boostrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- jquery -->
@@ -117,6 +96,9 @@ if (!$VerifySession['success']) {
 <script src="../js/global/moment.js"></script>
 <!-- select2 -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- globaljs -->
+<script src="../js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
 <script type="module" src="../js/calendar.js"></script>

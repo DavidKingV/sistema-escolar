@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
+require_once(__DIR__.'/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -10,7 +10,7 @@ use Vendor\Schoolarsystem\loadEnv;
 session_start();
 
 loadEnv::cargar();
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();
@@ -49,12 +49,12 @@ $totalHours = $_POST['total'] ?? NULL;
 </div>
 
 <script type="module">
-    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, selectAlert } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js';
-    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fullcalendar/index.js';
-    import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/dataTables.js';
+    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, selectAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
+    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
+    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
+    import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/dataTables.js';
 
-    const callback = '<?php echo $_ENV['BASE_URL']; ?>/public/api.php';
+    const callback = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     const studentId = '<?php echo $studentId; ?>';
 
     $(function() {

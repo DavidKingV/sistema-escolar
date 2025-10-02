@@ -4,7 +4,7 @@ import { loadingSpinner } from './global/alerts.js';
 
 
 var element = '#calendar';
-var api = '../api.php';
+var api = '/api.php';
 
 $(function() {
     const calendarEl = document.getElementById('calendar');
@@ -67,7 +67,7 @@ $(function() {
             loadingSpinner(true, '#eventDetailsBody');
             $('#eventDetails').modal('show');
             $("#eventDetailsLabel").html(info.event.title);
-            await $.post('../modals/eventDetails.Modal.php', { eventId: info.event._def.publicId, eventData: info.event._def, dateTime : info.event._instance.range }, function (data) {                
+            await $.post('../modals/eventDetails.Modal.php', { eventId: info.event._def.publicId, eventData: info.event._def, dateTime : info.event._instance.range }, function (data) {
                 $('#eventDetailsBody').html(data);
             });
         },

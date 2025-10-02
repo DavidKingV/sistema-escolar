@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../php/vendor/autoload.php');
+require_once(__DIR__.'/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -10,7 +10,7 @@ use Vendor\Schoolarsystem\loadEnv;
 session_start();
 
 loadEnv::cargar();
-$VerifySession = auth::verify($_COOKIE['auth'] ?? NULL);
+$VerifySession = auth::check();
 
 $dbConnection = new DBConnection();
 $connection = $dbConnection->getConnection();
@@ -77,11 +77,11 @@ $dateTime = $_POST['dateTime'] ?? null;
 </form>
 
 <script type="module">    
-    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, selectAlert } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fetchCall.js';
-    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/public/js/global/fullcalendar/index.js';
+    import { errorAlert, successAlert, successAlertNoReload, infoAlert, loadingSpinner, loadingAlert, selectAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
+    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
+    import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
 
-    let api = '<?php echo $_ENV['BASE_URL']; ?>/public/api.php';
+    let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     let eventId = '<?php echo $eventId; ?>';
 
     $(function() {
@@ -99,12 +99,12 @@ $dateTime = $_POST['dateTime'] ?? null;
                 })
                 .then(async data => {
                     if (data.success) {                                                
+                        $start.val(data.data.start);
+                        $end.val(data.data.end);
                         // Remover placeholders y mostrar inputs
                         $("#startPlaceholder, #endPlaceholder").remove();
                         $("#start, #end").removeClass("d-none");
                         
-                        $start.val(data.data.start);
-                        $end.val(data.data.end);
                         await calcularHoras($start.val(), $end.val(), $totalHours, $format);
                     } else {
                         errorAlert(data.message);
@@ -131,6 +131,7 @@ $dateTime = $_POST['dateTime'] ?? null;
             data += `&eventId=${eventId}`;
 
             confirmHours(data);
+            window.calendar.refetchEvents();
         });
 
         $('#deleteEvent').on('click', function() {
@@ -214,7 +215,7 @@ $dateTime = $_POST['dateTime'] ?? null;
                 })
                 .then(async data => {
                     if (data.success) {                                             
-                        successAlert(data.message);                        
+                        successAlertNoReload(data.message);                        
                         $('#eventDetails').modal('hide');
                         window.calendar.refetchEvents();
                     } else {

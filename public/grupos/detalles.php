@@ -1,0 +1,172 @@
+<?php
+require __DIR__.'/../../backend/vendor/autoload.php';
+
+use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\PermissionHelper;
+
+session_start();
+
+$VerifySession = auth::check();
+
+$isAdmin       = $VerifySession['isAdmin']       ?? false;
+$userPerms     = $VerifySession['permissions']   ?? [];
+
+if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
+    header('Location: ../dashboard.php');
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../assets/css/allMain.min.css">
+    <!--<link rel="stylesheet" href="../assets/css/alumnos.css">-->
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    <title>Detalles del grupo</title>
+</head>
+<body>
+
+    <?php include __DIR__.'/../../backend/views/mainMenu.php'; ?>
+      
+    <div id="content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Detalles del grupo</h2>
+                <a href="../grupos.php" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la lista de grupos
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 mb-4">
+                    <div class="card border-primary shadow">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-list-check"></i> Detalles
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title py-3">Información completa</h4>
+                            <div class="row g-2">
+                                <div class="col-md py-3">
+                                    <h5>Carrera:</h5>
+                                    <p id="groupCarreerNameDetails"></p>
+                                </div>
+                                <div class="col-md py-3">
+                                    <h5>Clave del grupo:</h5>
+                                    <p id="groupKeyDetails"></p>
+                                </div>
+                                <div class="col-md py-3">
+                                    <h5>Nombre del grupo:</h5>
+                                    <p id="groupNameDetails"></p>
+                                </div>
+                                <div class="col-md py-3">
+                                    <h5>Fecha de Inicio:</h5>
+                                    <p id="groupInitialDateDetails"></p>
+                                </div>
+                                <div class="col-md py-3">
+                                    <h5>Fecha de Termino:</h5>
+                                    <p id="groupFinalDateDetails"></p>
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md py-3">
+                                    <h5>Descripción del grupo:</h5>
+                                    <p id="groupDescriptionDetails"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 mb-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="studentsList" data-bs-toggle="tab" data-bs-target="#studentListTab" type="button" role="tab" aria-controls="studentListTab" aria-selected="true">Alumnos</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" id="addStudentTab" data-bs-toggle="tab" data-bs-target="#addStudentGroup" type="button" role="tab" aria-controls="addStudentGroup" aria-selected="false">Agregar</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade show active" id="studentListTab" role="tabpanel" aria-labelledby="studentListTab" tabindex="0">
+                                    <h4 class="card-title py-3">Lista de alumnos</h4>
+                                    <table class="table" id="groupStudentsTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">ID</th>
+                                                <th class="text-center">Alumno</th>
+                                                <th class="text-center">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Datos de alumnos aquí -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="tab-pane fade" id="addStudentGroup" role="tabpanel" aria-labelledby="addStudentGroup" tabindex="0">
+                                    <h4 class="card-title py-3">Agregar alumno al grupo</h4>
+                                    <form id="addStudentGroupForm">
+                                        <div class="row g-2">
+                                            <div class="col-md">
+                                                <select class="form-select" id="studentIdGroup" name="studentIdGroup[]" multiple="multiple">
+                                                    <!-- Opciones de alumnos aquí -->
+                                                </select>
+                                                <div>
+                                                    <p class="py-1">
+                                                        <label id="studentNameGroup-error" class="error text-bg-danger" for="studentNameGroup" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md py-1">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            <button type="submit" class="btn btn-primary">Agregar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+<!-- Boostrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- jquery -->
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js" integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+
+<!-- datables -->
+<script src="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.js"></script>
+
+<!-- select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- globaljs -->
+<script src="../js/global/mainMenu.js"></script>
+
+<!-- Custom JS -->
+<script type="module" src="../js/groups/index.js"></script>
+<script type="module" src="../js/groupsDetails.js"></script>
+<script type="module" src="../js/utils/sessions.js"></script>

@@ -1,12 +1,12 @@
 <?php
-require __DIR__.'/../php/vendor/autoload.php';
-require __DIR__.'/../backend/controllers/studentsController.php';
-require __DIR__.'/../backend/controllers/subjectsController.php';
-require __DIR__.'/../backend/controllers/practicalHoursController.php';
-require __DIR__.'/../backend/controllers/groupsController.php';
-require __DIR__.'/../backend/controllers/gradesController.php';
+require __DIR__.'/../backend/vendor/autoload.php';
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Controllers\StudentsController;
+use Vendor\Schoolarsystem\Controllers\SubjectsController;
+use Vendor\Schoolarsystem\Controllers\PracticalHoursController;
+use Vendor\Schoolarsystem\Controllers\GroupsController;
+use Vendor\Schoolarsystem\Controllers\GradesController;
 
 $connection = new DBConnection();
 $students = new StudentsController($connection);
