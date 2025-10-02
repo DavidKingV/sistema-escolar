@@ -103,7 +103,6 @@ $sidebarIsAdmin      = $isAdmin ? 'true' : 'false';
 $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_UNICODE) ?: '[]', ENT_QUOTES, 'UTF-8');
 
 ?>
-
 <div id="sidebar" data-role="<?php echo $sidebarRole; ?>" data-role-name="<?php echo $sidebarRoleName; ?>" data-auth-source="<?php echo $sidebarAuthSource; ?>" data-is-admin="<?php echo $sidebarIsAdmin; ?>" data-permissions="<?php echo $sidebarPermissions; ?>">
     <div class="sidebar-header d-flex justify-content-between align-items-center">
         <h3 class="mb-0">ESMEFIS</h3>
