@@ -47,9 +47,11 @@ class PaymentsModel{
 
     public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy){
         try {
-            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
+
+            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("issisiiii", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy);
+            $stmt->bind_param("issisiiiis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy, $randomPassword);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
@@ -324,6 +326,32 @@ LIMIT 1;";
     }
 
 
+
+    public function getReceiptDetailsData($receiptId){
+        try {
+            $sql = "SELECT students_payments.*, students.nombre AS student_name, students.email AS student_email
+                    FROM students_payments
+                    JOIN students ON students_payments.id_student = students.id
+                    WHERE students_payments.id = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("i", $receiptId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                return array("success" => false, "message" => "Recibo no encontrado");
+            }
+
+            return array("success" => true, "data" => $result);
+
+        } catch (mysqli_sql_exception $e) {
+            return array("success" => false, "message" => "Error al procesar la solicitud");
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
 
 }
 ?>
