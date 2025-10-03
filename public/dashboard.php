@@ -1,3 +1,4 @@
+<?php include_once __DIR__.'/../backend/views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +13,6 @@
     <title>Inicio</title>
 </head>
 <body>
-<?php include_once __DIR__.'/../backend/views/mainMenu.php'; ?>
     <!-- Content -->
     <div id="content">
         <div class="container-fluid">
