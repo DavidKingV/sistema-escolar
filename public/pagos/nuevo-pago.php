@@ -1,3 +1,4 @@
+<?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +16,6 @@
 </head>
 <body>
 
-    <?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
 
     <div id="globalLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(33,37,41,0.5); z-index: 2000;">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">

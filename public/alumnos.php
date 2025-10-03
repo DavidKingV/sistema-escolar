@@ -1,25 +1,4 @@
-<?php
-require_once(__DIR__.'/../backend/vendor/autoload.php');
-
-use Vendor\Schoolarsystem\auth;
-use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\userData;
-use Vendor\Schoolarsystem\MicrosoftActions;
-use Vendor\Schoolarsystem\loadEnv;
-
-session_start();
-
-loadEnv::cargar();
-$VerifySession = auth::check();
-
-$dbConnection = new DBConnection();
-$connection = $dbConnection->getConnection();
-
-if (!$VerifySession['success']) {
-    header('Location: index.php?sesion=expired');
-    exit();
-}
-?>
+<?php include_once __DIR__.'/../backend/views/mainMenu.php';?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -35,8 +14,6 @@ if (!$VerifySession['success']) {
     <title>Alumnos</title>
 </head>
 <body>
-
-<?php include __DIR__.'/../backend/views/mainMenu.php'; ?>
 <!-- Content -->
 <div id="content">
     <div class="container-fluid">

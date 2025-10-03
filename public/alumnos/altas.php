@@ -1,3 +1,4 @@
+<?php include __DIR__.'/../../backend/views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,7 +15,6 @@
 </head>
 <body>
 
-    <?php include __DIR__.'/../../backend/views/mainMenu.php'; ?>
       
     
     <!-- Content -->
