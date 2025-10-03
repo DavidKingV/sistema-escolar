@@ -2,13 +2,21 @@
 session_start();
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Vendor\Schoolarsystem\loadEnv;
 use myPHPnotes\Microsoft\Models\User;
 use myPHPnotes\Microsoft\Auth;
 use myPHPnotes\Microsoft\Handlers\Session;
 use GuzzleHttp\Client;
 
+loadEnv::cargar();
 
-$microsoft = new Auth(Session::get("tenant_id"),Session::get("client_id"),  Session::get("client_secret"), Session::get("redirect_uri"), Session::get("scopes"));
+$tenant = Session::get("tenant_id") ?? $_ENV['TENANT_ID'];
+$clientId = Session::get("client_id") ?? $_ENV['CLIENT_ID'];
+$clientSecret = Session::get("client_secret") ?? $_ENV['CLIENT_SECRET'];
+$redirectUri = Session::get("redirect_uri") ?? $_ENV['CALLBACK_PATH'];
+$scopes = Session::get("scopes") ?? ["User.ReadBasic.All", "offline_access"];
+
+$microsoft = new Auth($tenant, $clientId, $clientSecret, $redirectUri, $scopes);
 
 try {
     $tokens = $microsoft->getToken($_REQUEST['code'], Session::get("state"));
