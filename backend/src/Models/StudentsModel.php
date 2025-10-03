@@ -287,9 +287,12 @@ class StudentsModel{
             if($studentDataArray['controlSepNumber'] === ''){
                 $studentDataArray['controlSepNumber'] = NULL;
             }
+
+            $studentPhone = $studentDataArray['countryCode'] . $studentDataArray['studentPhone'];
+
             $sql = "INSERT INTO students (no_control, noControlSep, nombre, genero, nacimiento, estado_civil, nacionalidad, curp, telefono, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('ssssssssss', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail']);
+            $stmt->bind_param('ssssssssss', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentPhone, $studentDataArray['studentEmail']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
