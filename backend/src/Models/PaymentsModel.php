@@ -283,7 +283,6 @@ LIMIT 1;";
 
 
     public function sendPaymentReceipt($studentId, $paymentId){
-        $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
         try {
             // Obtener datos del pago
             $sql = "SELECT sp.*, sd.email, sd.nombre AS student_name
@@ -305,7 +304,7 @@ LIMIT 1;";
                 $paymentData['id'],
                 $paymentData,
                 "https://controlescolar.esmefis.edu.mx/my-receipt.php?id={$paymentData['id']}",
-                $randomPassword,
+                $paymentData['password'],
                 $paymentData['email']
             );
 
