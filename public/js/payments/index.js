@@ -74,16 +74,21 @@ const AddPayment = async (data) => {
             $("#paymentHistoryTable").DataTable().destroy();
             hideLoadedContent();
 
-            let dataObj = Object.fromEntries(new URLSearchParams(data));        
-
-            const toSend = sendNewPayment(dataObj.studentName, response.paymentId);
-
-            if(toSend){
-                successAlert('Pago registrado y comprobante enviado correctamente.');
-            }else{
-                infoAlert('Pago registrado, pero no se pudo enviar el comprobante: ' + toSend.message);
-            }
+            let dataObj = Object.fromEntries(new URLSearchParams(data));   
             
+            if(dataObj.toEmail === 'on'){
+                const toSend = sendNewPayment(dataObj.studentName, response.paymentId);
+
+                if(toSend){
+                    successAlert('Pago registrado y comprobante enviado correctamente.');
+                }else{
+                    infoAlert('Pago registrado, pero no se pudo enviar el comprobante: ' + toSend.message);
+                }
+
+            }else{
+                successAlert(response.message);
+            }
+ 
         }else{
             errorAlert(response.message);
         }

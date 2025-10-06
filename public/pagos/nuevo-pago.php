@@ -218,7 +218,13 @@
                                     <option value="1" data-id="1">Factura</option>
                                 </select>
                             </div>
-                        </div>                        
+                        </div>    
+                        <div class="row g-2 py-2">
+                            <div class="col-md">
+                                <label for="toEmail">Enviar por email</label>
+                                <input class="form-check-input" type="checkbox" id="toEmail" name="toEmail" checked>   
+                            </div> 
+                        </div>                    
                         <div class="row g-2 py-4">
                             <div class="col-md">
                                 <button type="submit" class="btn btn-primary">Registrar pago</button>
