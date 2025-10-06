@@ -242,7 +242,9 @@ class PracticalHoursModel{
                     ];
             }
 
-            return $data;
+            return !empty($data)
+            ? ['success' => true, 'data' => $data]
+            : ['success' => false, 'message' => 'No se encontraron registros.'];
             
         } catch (Exception $e) {
             return [
