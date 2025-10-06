@@ -262,6 +262,6 @@
 <script src="../js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="../js/payments/index.js"></script>
+<script type="module" src="../js/payments/index.js?version=1.0"></script>
 <script type="module" src="../js/utils/sessions.js"></script>
 

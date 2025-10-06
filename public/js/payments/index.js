@@ -1,7 +1,7 @@
 import { enviarPeticionAjaxAction } from '../utils/ajax.js';
 import { sendFetch } from '../utils/fetch.js';
 import { successAlert, errorAlert, loadingAlert, infoAlert } from '../utils/alerts.js';
-import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
+import { validateForm, capitalizeAllWords, capitalizeAll,capitalizeFirstLetter } from '../global/validate/index.js';
 import  { initializeDataTable } from '../global/dataTables.js';
 import { sendNewPayment } from './newPayment.js';
 
@@ -41,7 +41,7 @@ const getStudentsNames = async () => {
             return;
         }
 
-        let $select = $('#studentName'); // => const $select
+        const $select = $('#studentName'); // => const $select
         const fragment = $(document.createDocumentFragment());
         students.forEach(student => {
             if (student.success !== false) {
@@ -127,7 +127,9 @@ const VerifyMonthlyPayment = async (studentId) => {
         $("#paymentAmountDay").val(response.monthly_amount);
 
         const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-        $("#paymentMonth").val(capitalizeAll(currentMonth)).trigger('change');
+        $("#paymentMonth").val(capitalizeFirstLetter(currentMonth)).trigger('change');
+
+        changeCurrentMonth();
 
         $("#paymentPrice").val(response.monthly_amount);
         CalculateTotal();
@@ -147,13 +149,11 @@ const VerifyMonthlyPayment = async (studentId) => {
     }
 };
 
-const CheckActive = (check, input) => {
-    //verificar que check este activo
-    if(check.prop('checked')){
-        input.prop('disabled', true);
+const toggleInputOnCheckboxChange = (check, input) => {
+    const isChecked = check.prop('checked');
+    input.prop('disabled', isChecked);
+    if (isChecked) {
         input.val('');
-    }else{
-        input.prop('disabled', false);
     }
 
 }
@@ -215,6 +215,58 @@ const SurchargeForLatePayment = (paymentDay, studentId) => {
         });    
 }
 
+const changeCurrentMonth = () => {
+    let currentMonth = new Date().toLocaleString('default', { month: 'long' });
+
+    currentMonth = capitalizeFirstLetter(currentMonth);
+    
+    if(currentMonth !== $("#paymentMonth").val()){
+        $("#todayDate").prop('checked', false);
+        $("#paymentDate").prop('disabled', false);
+    }else{
+        $("#todayDate").prop('checked', true);
+        $("#paymentDate").prop('disabled', true);
+    }
+}
+
+const handlePaymentDayAction = async (actionType) => {
+    const studentId = $("#studentId").val();
+    const paymentDay = $("#paymentDay").val();
+    
+    // Validación centralizada
+    if (!paymentDay || paymentDay < 1 || paymentDay > 31) {
+        errorAlert('Por favor, ingrese un día válido (1-31).');
+        return;
+    }
+
+    const payload = {
+        studentId: studentId,
+        paymentDay: paymentDay,
+        paymentConcept: $("#paymentConceptDay").val(),
+        paymentAmount: $("#paymentAmountDay").val()
+    };
+
+    loadingAlert();
+    try {
+        const res = await sendFetch(phpPath, 'POST', { action: 'savePaymentDays', data: payload });
+        const resp = await res.json();
+
+        if (resp.success) {
+            successAlert(resp.message);
+            // Si es un guardado nuevo, resetea el form
+            if (actionType === 'save') {
+                $("#studentPaymentDate")[0].reset();
+                hideLoadedContent();
+            }
+        } else {
+            errorAlert(resp.message || `Error al ${actionType === 'save' ? 'reservar' : 'actualizar'}`);
+        }
+    } catch (err) {
+        console.error(err);
+        errorAlert('Error de red al procesar la solicitud.');
+    }
+};
+
 $("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on('input change blur', function() {
         CalculateTotal();
     });
@@ -226,7 +278,7 @@ $("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on('input 
     });
 
     $("#todayDate").on('change', function() {
-        CheckActive($("#todayDate"), $("#paymentDate"));        
+        toggleInputOnCheckboxChange($("#todayDate"), $("#paymentDate"));
     });
 
     $("#paymentsForm").on('submit', function(e) {
@@ -241,67 +293,13 @@ $("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on('input 
 
     });
 
-    /*$("#studentName").on('change', async function() {
-        let studentId = $("#studentName").val();
-        if($("#paymentConcept").val() === 'Mensualidad'){
-            loadingAlert();
-            await VerifyMonthlyPayment(studentId);
-            Swal.close();
-        }else{
-            $("#paymentPrice").prop('readonly', false);
-            $("#paymentPrice").val('');
-            CalculateTotal();
-        }
-    });*/
 
-    /*$("#paymentConcept").on('change', async function() {
-        let studentId = $("#studentName").val();
-        if($("#paymentConcept").val() === 'Mensualidad'){
-            loadingAlert();
-            await VerifyMonthlyPayment(studentId);
-            Swal.close();    
-        }else{
-            $("#paymentPrice").prop('readonly', false);
-            $("#paymentPrice").val('');
-            CalculateTotal();
-        }
-    });*/
-
-    //$("#paymentDaysCard").prop('hidden', true);
-
-
-
-    $("#savePaymentDays").on('click', async function() {
-        const payload = {
-            studentId: $("#studentId").val(),
-            paymentDay: $("#paymentDay").val(),
-            paymentConcept: $("#paymentConceptDay").val(),
-            paymentAmount: $("#paymentAmountDay").val()
-        }
-
-        if(payload.paymentDay === '' || payload.paymentDay < 1 || payload.paymentDay > 31){
-            errorAlert('Por favor, ingrese un día válido (1-31).');
-            return;
-        }
-
-        loadingAlert();
-        await sendFetch(phpPath, 'POST', { action: 'savePaymentDays', data: payload })
-        .then(res => res.json())
-            .then(resp => {
-                if (resp.success) {
-                    successAlert(resp.message);
-                    $("#studentPaymentDate")[0].reset();
-                    hideLoadedContent();
-                    
-                } else {
-                    errorAlert(resp.message || 'Error al reservar');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                errorAlert('Error de red');
-            });
+    $("#paymentMonth").on('change', function() {
+        changeCurrentMonth();
     });
+
+    $("#savePaymentDays").on('click', () => handlePaymentDayAction('save'));
+    $("#updatePaymentDays").on('click', () => handlePaymentDayAction('update'));
 
     $("#updatePaymentDays").on('click', async function() {
         let studentId = $("#studentId").val();
@@ -347,6 +345,12 @@ $(document).ready(function() {
             required: true,
             valueNotEquals: "0"
         },
+        paymentDate: {
+            required: function() {
+                return !$("#todayDate").prop('checked');
+            },
+            date: true
+        },
         paymentConcept: {
             required: true,
             valueNotEquals: "0"
@@ -378,6 +382,10 @@ $(document).ready(function() {
             required: "Por favor, seleccione un estudiante.",
             valueNotEquals: "Por favor, seleccione un estudiante."
         },
+        paymentDate: {
+            required: "Por favor, ingrese una fecha.",
+            date: "Por favor, ingrese una fecha válida."
+        },
         paymentConcept: {
             required: "Por favor, seleccione un concepto.",
             valueNotEquals: "Por favor, seleccione un concepto."
@@ -408,8 +416,8 @@ $(document).ready(function() {
 
     getStudentsNames();
 
-    CheckActive($("#todayDate"), $("#paymentDate"));
-    CheckActive($("#paymentExtraCkeck"), $("#paymentExtra"));
+    toggleInputOnCheckboxChange($("#todayDate"), $("#paymentDate"));
+    toggleInputOnCheckboxChange($("#paymentExtraCkeck"), $("#paymentExtra"));
 
     $("#paymentTotal").val('0.00');
     
