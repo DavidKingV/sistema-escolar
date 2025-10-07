@@ -45,13 +45,13 @@ class PaymentsModel{
         return $response;
     }
 
-    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy){
+    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy){
         try {
             $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
 
-            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("issisiiiis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy, $randomPassword);
+            $stmt->bind_param("issisiiisis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {

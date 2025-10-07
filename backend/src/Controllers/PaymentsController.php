@@ -110,6 +110,7 @@ class PaymentsController{
             $paymentDataArray['paymentPrice'],
             $extra,
             $paymentDataArray['paymentTotal'],
+            $paymentDataArray['paymentComments'] ?? '',
             $registredBy
         );
     }
