@@ -426,11 +426,7 @@ $(document).ready(function() {
         changeMonth: true,
         changeYear: true,
         showButtonPanel: true,
-        language: 'es',
-
-        onClose: function(dateText, inst) {
-            $(this).val($.datepicker.formatDate('yy-mm-dd', new Date(dateText)));
-        }
+        language: 'es',        
         
     });    
 

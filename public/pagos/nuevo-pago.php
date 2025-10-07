@@ -221,6 +221,12 @@
                         </div>    
                         <div class="row g-2 py-2">
                             <div class="col-md">
+                                <label for="paymentComments">Comentarios</label>
+                                <textarea type="text" class="form-control" id="paymentComments" name="paymentComments" placeholder="Comentarios sobre el pago"></textarea>
+                            </div>
+                        </div>
+                        <div class="row g-2 py-2">
+                            <div class="col-md">
                                 <label for="toEmail">Enviar por email</label>
                                 <input class="form-check-input" type="checkbox" id="toEmail" name="toEmail" checked>   
                             </div> 
