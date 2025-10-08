@@ -117,6 +117,26 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
 
         <!-- Estudiantes -->
         <li class="nav-item">
+            <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#admissionsMenu" role="button" aria-expanded="false" aria-controls="admissionsMenu">
+                <i class="bi bi-file-earmark-text px-3"></i>
+                <span class="sidebar-link-text">Admisiones</span>
+            </a>
+            <ul id="admissionsMenu" class="submenu collapse">
+                <li class="nav-item">
+                    <a href="<?php echo $_ENV['BASE_URL']; ?>/admissions/solicitudes.php" class="list-group-item list-group-item-action sidebar-link">
+                        <i class="fas fa-list"></i> Solicitudes
+                    </a>
+                </li>
+                <!--<li class="nav-item">
+                    <a href="<?php echo $_ENV['BASE_URL']; ?>/admissions/altas.php" class="list-group-item list-group-item-action sidebar-link">
+                        <i class="fas fa-plus-circle"></i> Agregar Alumno
+                    </a>
+                </li>-->                
+            </ul>
+        </li>
+
+        <!-- Estudiantes -->
+        <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#studentsMenu" role="button" aria-expanded="false" aria-controls="studentsMenu">
                 <i class="bi bi-person-badge-fill px-3"></i>
                 <span class="sidebar-link-text">Alumnos</span>
@@ -148,11 +168,13 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                 <span class="sidebar-link-text">Pagos</span>
             </a>
             <ul id="paymentsMenu" class="submenu collapse">
+                <?php if (PermissionHelper::canAccess(['add_payments'], $userPerms, $isAdmin)): ?>
                 <li class="nav-item">
                     <a href="<?php echo $_ENV['BASE_URL']; ?>/pagos/nuevo-pago.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-list"></i> Agregar pagos
                     </a>
                 </li>
+                <?php endif; ?>
                 <li class="nav-item">
                     <a href="<?php echo $_ENV['BASE_URL']; ?>/pagos.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-plus-circle"></i> Lista de pagos
