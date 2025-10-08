@@ -33,7 +33,7 @@ $("#endSession").click(function(e){
                             }
                         }, false);
                     }
-                    window.location.href = "http://localhost:8080/CONTROL%20ESCOLAR%20NUEVO/index.php?sesion=close";
+                    window.location.href = "/public/index.php?sesion=close";
                 } else {
                     errorAlert(data.message);
                 }
