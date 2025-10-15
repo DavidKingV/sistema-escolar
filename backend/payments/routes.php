@@ -85,6 +85,13 @@ if(!isset($data['action'])){
             responseJson($send);
             break;
 
+        case 'SendPaymentByEmail':
+            $studentId = $data['studentId'];
+            $paymentId = $data['paymentId'];
+            $send = $payments->sendPaymentByEmail($studentId, $paymentId);
+            responseJson($send);
+            break;
+
         default:
             responseJson(['error' => 'Unknown action']);
             break;

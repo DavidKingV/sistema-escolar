@@ -202,7 +202,7 @@ class PaymentsModel{
 
     public function getPaymentHistory($studentId){
         try {
-            $sql = "SELECT concept, total, payment_date FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
+            $sql = "SELECT id, id_student, concept, total, payment_date FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("i", $studentId);
             $stmt->execute();
@@ -212,6 +212,8 @@ class PaymentsModel{
             
             while($row = $result->fetch_assoc()){
                 $response[] = [
+                    "id" => $row['id'],
+                    "id_student" => $row['id_student'],
                     "concept" => $row['concept'],
                     "amount" => $row['total'],
                     "payment_date" => $row['payment_date']
@@ -350,6 +352,10 @@ LIMIT 1;";
                 $stmt->close();
             }
         }
+    }
+
+    public function sendPaymentByEmail($studentId, $paymentId){
+        return $this->sendPaymentReceipt($studentId, $paymentId);
     }
 
 }
