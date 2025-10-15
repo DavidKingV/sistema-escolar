@@ -137,7 +137,11 @@ const VerifyMonthlyPayment = async (studentId) => {
         initializeDataTable('#paymentHistoryTable', phpPath, { action: 'GetPaymentHistory', studentId }, [
             { data: 'concept', className: 'text-center' },
             { data: 'amount', render: $.fn.dataTable.render.number(',', '.', 2, '$'), className: 'text-center' },
-            { data: 'payment_date', className: 'text-center' }
+            { data: 'payment_date', className: 'text-center' },
+            { data: 'null', render: function(data, type, row) {
+                return `<button class="btn btn-sm btn-primary sendPayment" data-id="${row.id}" data-student="${row.id_student}">Enviar</button>`;
+            }, className: 'text-center'}
+            
         ]);
 
         showLoadedContent();
@@ -146,6 +150,23 @@ const VerifyMonthlyPayment = async (studentId) => {
     } catch (error) {
         console.error('Error al verificar los datos:', error);
         errorAlert('Ocurrió un error inesperado');
+    }
+};
+
+const sendPaymentByEmail = async (studentId, paymentId) => {
+    console.log('Enviando comprobante para studentId:', studentId, 'paymentId:', paymentId);
+    try {
+        loadingAlert();
+        const res = await sendFetch(phpPath, 'POST', { action: 'SendPaymentByEmail', studentId, paymentId });
+        const response = await res.json();
+        if (response.success) {
+            successAlert(response.message);
+        } else {
+            errorAlert(response.message);
+        }
+    } catch (error) {
+        console.error('Error al enviar el comprobante:', error);
+        errorAlert('Ocurrió un error inesperado al enviar el comprobante');
     }
 };
 
@@ -266,6 +287,12 @@ const handlePaymentDayAction = async (actionType) => {
         errorAlert('Error de red al procesar la solicitud.');
     }
 };
+
+$("#paymentHistoryTable").on('click', '.sendPayment', function() {
+    let paymentId = $(this).data('id');
+    let studentId = $(this).data('student');
+    sendPaymentByEmail(studentId, paymentId);
+});
 
 $("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on('input change blur', function() {
         CalculateTotal();

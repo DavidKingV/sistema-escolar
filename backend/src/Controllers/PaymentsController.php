@@ -178,4 +178,12 @@ class PaymentsController{
         }
         return $this->payments->sendPaymentReceipt($studentId, $paymentId);
     }
+
+    public function sendPaymentByEmail($studentId, $paymentId){
+        $verifySession = auth::check();
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->sendPaymentByEmail($studentId, $paymentId);
+    }
 }
