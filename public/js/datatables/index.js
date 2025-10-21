@@ -103,7 +103,7 @@ function initializeStudentsUsersTable() {
         },
         "columns": [
             // Define las columnas
-            { "data": "id", "className": "text-center" },
+            //{ "data": "id", "className": "text-center" },
             { "data": "name", "className": "text-center" },
             { "data": "user", "className": "text-center", "defaultContent": "No asignado"},
             {
@@ -133,6 +133,13 @@ function initializeStudentsUsersTable() {
                     }
                     return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle addUserStudents" data-bs-toggle="modal" data-bs-target="#StutentUserModal"><i class="bi bi-arrow-up-square-fill"></i></button>';
                 
+                },
+                "className": "text-center"
+            },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle toMicrosoft" data-bs-toggle="modal" data-bs-target="#toMicrosoftModal">Asociar cuenta Microsoft</button>';            
                 },
                 "className": "text-center"
             }

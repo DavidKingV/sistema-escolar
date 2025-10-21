@@ -35,13 +35,18 @@ export function infoAlert(message) {
     })
 }
 
-export function loadingSpinner(show, element) {
+export function loadingSpinner(show, text = 'Buscando usuarios de Microsoft...') {
     if (show) {
-        $(element).append('<div class="d-flex align-items-center py-2"><strong role="status" class="text-primary">Buscando...</strong><div class="spinner-border ms-auto text-primary" aria-hidden="true"></div></div>');
-    } else {
-        $(element).empty();
+        return `
+            <div class="d-flex align-items-center py-2">
+                <strong role="status" class="text-primary">${text}</strong>
+                <div class="spinner-border ms-auto text-primary" aria-hidden="true"></div>
+            </div>
+        `;
     }
+    return "";
 }
+
 
 export function confirmAlert(message, confirmButtonText, cancelButtonText, confirmCallback) {
     Swal.fire({
