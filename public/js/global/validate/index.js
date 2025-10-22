@@ -36,9 +36,9 @@ export function capitalizeAll(input) {
 }
 
 export function capitalizeAllWords(input) {
-    if(!input) return input;
-    input = String(input); // Asegurar que sea una cadena de texto
-    return input.replace(/\b\w/g, l => l.toUpperCase());
+  if (!input) return input;
+  input = String(input).toLowerCase(); // Convertir todo a minúsculas primero
+  return input.replace(/\b\w/g, l => l.toUpperCase());
 }
 
 
