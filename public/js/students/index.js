@@ -124,6 +124,78 @@ $(function () {
             email: "Por favor, ingresa un correo electrónico válido."
         }
     });
+
+    let isLoading = false;
+    
+    $('#microsoftUser').select2({
+        theme: "bootstrap-5",
+        minimumInputLength: 2, // empieza a buscar con 2 caracteres
+        ajax: {
+            url: '../../backend/students/routes.php',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                isLoading = true; // empieza carga
+                return {
+                    displayName: params.term, // término que el usuario escribe
+                    action: 'searchMicrosoftUser'
+                };
+            },
+            processResults: function (data) {
+                isLoading = false; // termina carga
+                // tu backend devuelve un solo usuario, lo empaquetamos como array
+                if (data.success && data.data && data.data.success) {
+                    const user = data.data;
+                    return {
+                        results: [{
+                            id: user.id,
+                            text: user.displayName,
+                            mail: user.mail,
+                        }]
+                    };
+                } else {
+                    return { results: [] };
+                }
+            },
+            cache: true
+        },
+        minimumInputLength: 2,
+            language: {
+                inputTooShort: function() {
+                    return "Por favor ingrese al menos 2 caracteres";
+                },
+                searching: function() {
+                    return "Buscando...";
+                },
+                noResults: function() {
+                    return "No se encontraron resultados";
+                }
+            }
+    });
+
+    $('#microsoftUser').on('select2:closing', function (e) {
+        if (isLoading) {
+            e.preventDefault(); // no dejar cerrar
+        }
+    });
+
+    /// Cuando el usuario selecciona un resultado
+    $('#microsoftUser').on('select2:select', function (e) {
+        const data = e.params.data;
+        const usuario = obtenerUsuario(data.mail); // tu función existente
+
+        // ✅ Asegurar que la opción seleccionada se guarda en el select
+        if ($('#microsoftUser').find("option[value='" + data.id + "']").length === 0) {
+            const newOption = new Option(data.text, data.id, true, true);
+            $('#microsoftUser').append(newOption).trigger('change');
+        }
+        // ✅ Rellenar tus otros campos
+        $("#microsoftId").val(data.id).prop("disabled", false);
+        $("#microsoftEmail").val(data.mail).prop("disabled", false);
+        $("#controlNumber").val(usuario);
+        $("#studentName").val(data.text);
+        $("#microsoftDiv").show();
+    });
 });
 
 $('#studentTable').on('click', '.editStudent', function() {
@@ -244,44 +316,6 @@ $("#addStudents").on( "submit", function( event ) {
     }
 });
 
-$("#studentName").on("blur", function(){
-    let studentName = $(this).val();
-   
-    if(studentName){
-        loadingSpinner(true, "#userList");
-        enviarPeticionAjax('../../backend/students/routes.php', 'GET', {displayName: studentName, action: 'searchMicrosoftUser'} )
-        .done(function(data) {
-            loadingSpinner(false, "#userList");
-            $("#microsoftId, #microsoftEmail").val('');
-            $("#microsoftId, #microsoftEmail").prop("disabled", true);
-            if (data.success) {
-                $("#userList").append('<div class="list-group-item" data-id="' + data.data.id + '">' + data.data.displayName + '</div>');
-
-                $(".list-group-item").on("click", function() {
-                    loadingSpinner(false, "#userList");
-                    $("#studentName").val($(this).text());
-                    $("#microsoftId").val($(this).data('id'));
-                    $("#microsoftEmail").val(data.data.mail);
-                    $("#microsoftId, #microsoftEmail").prop("disabled", false);
-                    $("#microsoftDiv").show();
-                });
-            
-            } else {
-                infoAlert(data.message);
-                loadingSpinner(false, "#userList");
-                $("#microsoftId, #microsoftEmail").val('');
-                $("#microsoftId, #microsoftEmail").prop("disabled", true);
-                $("#microsoftDiv").hide();
-                return;
-            }
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            errorAlert("Error en la petición" + errorThrown);
-        });
-
-    }
-    return;
-});
 
 $("#studentsUsersTable").on( "click", ".addUserStudents", function() {
     let studentId = $(this).data('id');
@@ -1068,3 +1102,29 @@ $('#StutentUserModal').on('hidden.bs.modal', function() {
 $('#StutentUserEditModal').on('hidden.bs.modal', function() {
     ClearStudensEditUser();
 });
+
+
+/**
+ * Extrae el usuario (local-part) de un email y lo convierte a mayúsculas.
+ * @param {string} email - Dirección de correo, p. ej. "2409LF01001@escuela.edu.mx"
+ * @returns {string|null} El usuario en mayúsculas, o null si el email no es válido.
+ */
+function obtenerUsuario(email) {
+  if (typeof email !== 'string') return null;
+
+  // 1) Limpia espacios
+  const limpio = email.trim();
+  if (!limpio) return null;
+
+  // 2) Busca el separador '@'
+  const atIndex = limpio.indexOf('@');
+  if (atIndex <= 0) return null; // sin usuario o sin '@'
+
+  // 3) Toma solo la parte antes de '@'
+  let usuario = limpio.slice(0, atIndex);
+
+  // 4) Normaliza y convierte letras a mayúsculas (respetando acentos/ñ si aparecieran)
+  usuario = usuario.normalize('NFC').toLocaleUpperCase('es-MX');
+
+  return usuario;
+}

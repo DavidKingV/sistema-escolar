@@ -13,6 +13,13 @@
     <title>Usuaros de alumnos</title>
 </head>
 <body>
+    <div id="globalLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(33,37,41,0.5); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    </div>
       
     <div id="content">
         <div class="container-fluid">
@@ -32,11 +39,12 @@
                         <table class="table" id="studentsUsersTable">
                             <thead>
                                 <tr>
-                                    <th class="text-center">ID</th>
+                                    <!--<th class="text-center">ID</th>-->
                                     <th class="text-center">Nombre</th>
                                     <th class="text-center">Usuario</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Acciones</th>
+                                    <th class="text-center"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -196,6 +204,44 @@
   </div>
 </div>
 
+<!-- Modal Microsoft-->
+<div class="modal fade modal-lg" id="toMicrosoftModal" tabindex="-1" aria-labelledby="toMicrosoftModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="toMicrosoftModalTitle">Asociar cuenta Microsoft</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="toMicrosoftStudentUser">
+            <div class="row g-2 py-3">            
+                <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="studentUserIdMicrosoft" name="studentUserIdMicrosoft" readonly>
+                    <label for="studentUserIdMicrosoft">ID</label>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-floating input-group">
+                        <input type="text" class="form-control" id="studentUserNameMicrosoft" name="studentUserNameMicrosoft">
+                        <label for="studentUserNameMicrosoft">Nombre del alumno</label>
+                        <button class="btn btn-outline-success" type="button" id="searchMicrosoftUser">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>                   
+                </div>                
+            </div>            
+        </form>
+
+        <div class="mt-3" id="microsoftUserSearchResults"></div>
+      </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+
 <!-- Boostrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
@@ -215,4 +261,5 @@
 
 <!-- Custom JS -->
 <script type="module" src="../js/students/index.js"></script>
+<script type="module" src="../js/students/users/index.js"></script>
 <script type="module" src="../js/utils/sessions.js"></script>

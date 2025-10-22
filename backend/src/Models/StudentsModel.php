@@ -936,4 +936,34 @@ class StudentsModel{
                 }
             }
     }
+
+    public function assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail){
+        $VerifySession = auth::check();
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "INSERT INTO microsoft_students (id, student_id, displayName, mail) VALUES (?, ?, ?, ?)";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param('siss', $microsoftUserId, $studentId, $microsoftDisplayName, $microsoftEmail);
+            $stmt->execute();
+
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                
+                //se elimina el usuario local si existe
+                $sqlDeleteLocalUser = "DELETE FROM login_students WHERE student_id = ?";
+                $stmtDelete = $this->connection->prepare($sqlDeleteLocalUser);
+                $stmtDelete->bind_param('i', $studentId);
+                $stmtDelete->execute();
+                $stmtDelete->close();
+
+                $this->connection->close();
+                return array("success" => true, "message" => "Usuario de Microsoft asignado correctamente");
+            }else{
+                $stmt->close();
+                $this->connection->close();
+                return array("success" => false, "message" => "Error al asignar el usuario de Microsoft, por favor intente de nuevo más tarde");
+            }
+        }
+    }
 }

@@ -8,8 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/allMain.min.css">
-    <link rel="stylesheet" href="../assets/css/alumnos.css">
-    <!--<link rel="stylesheet" href="../assets/css/alumnos.css">-->
+    <!--<link rel="stylesheet" href="../assets/css/alumnos.css">
+    <link rel="stylesheet" href="../assets/css/alumnos.css">-->    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <title>Altas</title>
 </head>
@@ -36,12 +38,30 @@
                 <form id="addStudents">
                     <div class="row">
                         <!-- Nombre completo -->
+                        <div class="col-md-12 mb-3">
+                            <label for="microsoftUser" class="form-label">
+                                <i class="fas fa-id-card"></i> Buscar Usuario Microsoft <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="microsoftUser" name="microsoftUser" required>
+                                <option value="0">Selecciona un usuario Microsoft...</option>
+                            </select>
+                        </div>
+                         <!-- Usuario Microsoft (oculto por defecto) -->
+                        <div class="col-md-12 mb-3" id="microsoftDiv" style="display: none;">
+                            <div class="alert alert-success" role="alert">
+                                <h5 class="alert-heading">
+                                    <i class="fab fa-microsoft"></i> Usuario Microsoft Encontrado
+                                </h5>
+                                <input type="text" readonly class="form-control-plaintext" id="microsoftId" name="microsoftId">
+                                <input type="text" readonly class="form-control-plaintext" id="microsoftEmail" name="microsoftEmail">
+                            </div>
+                        </div>
+                        <!-- Nombre completo -->
                         <div class="col-md-6 mb-3">
                             <label for="studentName" class="form-label">
                                 <i class="fas fa-id-card"></i> Nombre Completo <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="studentName" name="studentName" required>
-                            <div id="userList" class="list-group"></div>
+                            <input class="form-control" id="studentName" name="studentName" required>
                         </div>
 
                         <!-- No. Control Interno -->
@@ -58,18 +78,7 @@
                                 <i class="fas fa-hashtag"></i> No. Control SEP <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="controlSepNumber" name="controlSepNumber" placeholder="123456" required>
-                        </div>
-
-                        <!-- Usuario Microsoft (oculto por defecto) -->
-                        <div class="col-md-12 mb-3" id="microsoftDiv" style="display: none;">
-                            <div class="alert alert-success" role="alert">
-                                <h5 class="alert-heading">
-                                    <i class="fab fa-microsoft"></i> Usuario Microsoft Encontrado
-                                </h5>
-                                <input type="text" readonly class="form-control-plaintext" id="microsoftId" name="microsoftId">
-                                <input type="text" readonly class="form-control-plaintext" id="microsoftEmail" name="microsoftEmail">
-                            </div>
-                        </div>
+                        </div>                       
 
                         <!-- Género -->
                         <div class="col-md-6 mb-3">
@@ -201,5 +210,5 @@
 <script src="../js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="../js/students/index.js"></script>
+<script type="module" src="../js/students/index.js?v=1.1"></script>
 <script type="module" src="../js/utils/sessions.js"></script>

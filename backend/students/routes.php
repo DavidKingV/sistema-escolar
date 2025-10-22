@@ -121,6 +121,24 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             echo json_encode($add);
             break;
 
+        case 'searchMicrosoftUser':
+            $displayName = $_POST['data']['studentName'] ?? '';
+            $search = $studentsController->searchMicrosoftUser($displayName);
+            header('Content-Type: application/json');
+            echo json_encode($search);
+            break;
+
+        case 'assignMicrosoftUserToStudent':
+            $data = parse_str($_POST['data'], $dataArray);
+            $studentId = $dataArray['studentId'] ?? '';
+            $microsoftUserId = $dataArray['microsoftId'] ?? '';
+            $microsoftDisplayName = $dataArray['displayName'] ?? '';
+            $microsoftEmail = $dataArray['mail'] ?? '';
+            $assign = $studentsController->assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail);
+            header('Content-Type: application/json');
+            echo json_encode($assign);
+            break;
+
         default:
             echo json_encode(array("success" => false, "message" => "Acción no válida"));
     }
