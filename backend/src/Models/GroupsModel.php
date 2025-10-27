@@ -501,4 +501,48 @@ class GroupsModel{
         $this->connection->close();
         return array("success" => false, "message" => "Error al eliminar los estudiantes del grupo".$error);
     }
+
+    public function getGroupCareer($studentId){
+        $VerifySession = auth::check();
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        $sql = "SELECT carreers.id as career_id, carreers.nombre as career_name 
+                FROM students 
+                INNER JOIN groups ON students.id_group = groups.id 
+                INNER JOIN carreers ON groups.id_carreer = carreers.id 
+                WHERE students.id = ?";
+        $stmt = $this->connection->prepare($sql);
+
+        if(!$stmt){
+            $this->connection->close();
+            return array("success" => false, "message" => "Error al obtener la carrera del estudiante");
+        }
+
+        $stmt->bind_param('i', $studentId);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if($result->num_rows === 0){
+            $stmt->close();
+            $this->connection->close();
+            return array("success" => false, "message" => "No se encontró la carrera para el estudiante");
+        }
+
+        $career = array();
+        while($row = $result->fetch_assoc()){
+            $career = array(
+                "success" => true,
+                "careerId" => $row['career_id'],
+                "careerName" => $row['career_name']
+            );
+        }
+
+        $stmt->close();
+        $this->connection->close();
+
+        return $career;
+    }
 }

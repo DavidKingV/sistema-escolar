@@ -249,7 +249,7 @@ class PaymentsModel{
 FROM students_payments
 WHERE id_student = ?
   AND YEAR(payment_date) = YEAR(CURDATE())
-  AND MONTH(payment_date) = MONTH(CURDATE())
+  AND MONTH(payment_date) = MONTH(CURDATE()) AND concept LIKE 'Mensualidad%'
 ORDER BY payment_date ASC
 LIMIT 1;";
             $stmt = $this->connection->prepare($sql);
