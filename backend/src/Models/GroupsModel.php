@@ -16,7 +16,7 @@ class GroupsModel{
     public function getNoGroupStudentsList($search = '', $page = 1, $limit = 30){
         try {
             // Query base
-            $sql = "SELECT id, nombre FROM students WHERE 1=1 AND id_group IS NULL";
+            $sql = "SELECT a.id, a.nombre FROM students a LEFT JOIN student_groups sg ON a.id = sg.student_id WHERE is_primary = TRUE";
             $params = [];
             $types = "";
             
@@ -194,7 +194,17 @@ class GroupsModel{
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $sql = "SELECT students.id as student_id, students.nombre as student_name, students.id_group as student_group_id, groups.id as group_id FROM students INNER JOIN groups ON students.id_group = groups.id WHERE students.id_group = ?";
+        $sql = "SELECT 
+    s.id AS student_id,
+    s.nombre AS student_name,
+    sg.group_id AS student_group_id,
+    g.id AS group_id,
+    g.nombre AS group_name,
+    sg.is_primary
+FROM students s
+INNER JOIN student_groups sg ON s.id = sg.student_id
+INNER JOIN groups g ON sg.group_id = g.id
+WHERE sg.group_id = ?;";
         $stmt = $this->connection->prepare($sql);
 
         if(!$stmt){
@@ -452,34 +462,70 @@ class GroupsModel{
         $ids = array_map('intval', $studentId);
         $ids_str = implode(',', $ids);
 
-        $sql = "UPDATE students SET id_group = ? WHERE id IN ($ids_str)";
-        $stmt = $this->connection->prepare($sql);
+        $checkSql = "SELECT DISTINCT student_id FROM student_groups WHERE student_id IN ($ids_str) AND is_primary = TRUE";
+        $result = $this->connection->query($checkSql);
 
-        if(!$stmt){
-            $this->connection->close();
-            return array("success" => false, "message" => "Error al agregar los estudiantes al grupo");
+        $studentsWithPrimary = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $studentsWithPrimary[] = (int)$row['student_id'];
+            }
+        }
+        // 2️⃣ Separar los alumnos en dos grupos
+        $primaryStudents = array_diff($ids, $studentsWithPrimary);  // sin grupo principal
+        $secondaryStudents = $studentsWithPrimary;
+
+        $inserted = 0;
+
+        // 3️⃣ Insertar los alumnos sin grupo principal como is_primary = TRUE
+        if (!empty($primaryStudents)) {
+            $primaryIdsStr = implode(',', $primaryStudents);
+            $sqlPrimary = "INSERT INTO student_groups (student_id, group_id, is_primary)
+                SELECT id AS student_id, ? AS group_id, TRUE AS is_primary
+                FROM students
+                WHERE id IN ($primaryIdsStr)
+                ON DUPLICATE KEY UPDATE is_primary = VALUES(is_primary)";
+            $stmt1 = $this->connection->prepare($sqlPrimary);
+            if ($stmt1) {
+                $stmt1->bind_param('i', $groupId);
+                $stmt1->execute();
+                $inserted += $stmt1->affected_rows;
+                $stmt1->close();
+            }
         }
 
-        $stmt->bind_param('i', $groupId);
-
-        if($stmt->execute()){
-            $stmt->close();
-            $this->connection->close();
-            return array("success" => true, "message" => "Estudiantes agregados al grupo correctamente");
+         // 4️⃣ Insertar los alumnos que ya tenían grupo principal como is_primary = FALSE
+        if (!empty($secondaryStudents)) {
+            $secondaryIdsStr = implode(',', $secondaryStudents);
+            $sqlSecondary = "INSERT INTO student_groups (student_id, group_id, is_primary)
+                SELECT id AS student_id, ? AS group_id, FALSE AS is_primary
+                FROM students
+                WHERE id IN ($secondaryIdsStr)
+                ON DUPLICATE KEY UPDATE is_primary = VALUES(is_primary)";
+            $stmt2 = $this->connection->prepare($sqlSecondary);
+            if ($stmt2) {
+                $stmt2->bind_param('i', $groupId);
+                $stmt2->execute();
+                $inserted += $stmt2->affected_rows;
+                $stmt2->close();
+            }
         }
 
-        $stmt->close();
         $this->connection->close();
-        return array("success" => false, "message" => "Error al agregar los estudiantes al grupo");
+
+        if ($inserted > 0) {
+            return ["success" => true, "message" => "Estudiantes agregados correctamente (se asignaron primarios/secundarios según correspondía)"];
+        }
+        return ["success" => false, "message" => "No se pudieron agregar los estudiantes al grupo"];
     }
 
-    public function deleteStudentGroup($studentId){
+    public function deleteStudentGroup($groupId, $studentId){
         $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $sql = "UPDATE students SET id_group = NULL WHERE id = ?";
+        $sql = "DELETE FROM student_groups WHERE student_id = ? AND group_id = ?";
         $stmt = $this->connection->prepare($sql);
 
         if(!$stmt){
@@ -487,7 +533,7 @@ class GroupsModel{
             return array("success" => false, "message" => "Error al eliminar los estudiantes del grupo");
         }
 
-        $stmt->bind_param('i', $studentId);
+        $stmt->bind_param('ii', $studentId, $groupId);
         $stmt->execute();
 
         if($stmt->affected_rows > 0){
