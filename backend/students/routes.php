@@ -1,19 +1,30 @@
 <?php
 require_once(__DIR__.'/../vendor/autoload.php');
-require_once __DIR__.'/verify.php';
+session_start();
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Controllers\StudentsController;
 
-session_start();
-
 $connection = new DBConnection();
 $studentsController = new StudentsController($connection);
 
-if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
-    $action = $_POST['action'];
+$data = json_decode(file_get_contents('php://input'), true);
 
-    switch ($action){
+function responseJson($data) {
+    header('Content-Type: application/json');
+    echo json_encode($data);
+}
+
+if ($data === null) {
+    $data = $_POST;
+}
+
+
+if(!isset($data['action'])){
+    responseJson(['error' => 'Action not specified']);
+    exit;
+}else{
+    switch ($data['action']){
         case 'getStudents':
             $students = $studentsController->getStudents();
             header('Content-Type: application/json');
@@ -22,8 +33,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
         case 'GetStudentsNames':
             $studentsNames = $studentsController->getStudentsNames();
-            header('Content-Type: application/json');
-            echo json_encode($studentsNames);
+            responseJson($studentsNames);
             break;
 
         case 'addStudent':

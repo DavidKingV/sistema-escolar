@@ -92,6 +92,8 @@ class PaymentsController{
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
+        $paymentConcept = $paymentDataArray['paymentConcept']." ".$paymentDataArray['subjectConcept'] ?? ''."-".$paymentDataArray['childSubjectName'] ?? ''."/".$paymentDataArray['paymentMonth'];
+
         $date = $paymentDataArray['paymentDate'] ?? date('Y-m-d');
         $extra = $paymentDataArray['paymentExtra'] ?? 0;
         $registredBy = $_SESSION['userId'] ?? NULL;
@@ -106,7 +108,7 @@ class PaymentsController{
             $date,
             $paymentDataArray['paymentMethod'],
             $isInvoice,
-            $paymentDataArray['paymentConcept']." ".$paymentDataArray['paymentMonth'],
+            $paymentConcept,
             $paymentDataArray['paymentPrice'],
             $extra,
             $paymentDataArray['paymentTotal'],

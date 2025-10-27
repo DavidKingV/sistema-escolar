@@ -148,7 +148,30 @@
                                     <option selected value="0">Concepto</option>
                                     <option value="Inscripción">Inscripción</option>
                                     <option value="Mensualidad">Mensualidad</option>
+                                    <option value="Nivelación">Nivelación</option>
+                                    <option value="Examen Extraordinario">Examen Extraordinario</option>
+                                    <option value="Constancia de Estudios">Constancia de Estudios</option>
+                                    <option value="Bordado">Bordado</option>
                                 </select>
+                            </div>
+                            <div class="col-md" id="subjectConceptDiv" hidden>
+                                <label for="subjectConcept">Materia</label>
+                                <label id="subjectConcept-error" class="error text-bg-danger" for="subjectConcept" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <select class="form-select" id="subjectConcept" name="subjectConcept" aria-label="Floating label select example">
+                                    <option selected value="0">Asignatura (solo para Examen Extraordinario)</option>
+                                </select>
+                            </div>
+                            <div class="col-md" id="childSubjectDiv" style="display: none;">
+                                <label for="childSubjectName">SubMateria</label>
+                                <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <select class="form-select" id="childSubjectName" name="childSubjectName" aria-label="Floating label select example">
+                                    <option selected value="0">Asignatura (solo para Examen Extraordinario)</option>
+                                </select>
+                            </div>
+                            <div class="col-md" id="careerDiv" hidden>
+                                <label for="careerName">Carrera</label>
+                                <label id="careerName-error" class="error text-bg-danger" for="careerName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <input type="text" class="form-control" id="careerName" name="careerName">
                             </div>
                             <div class="col-md">
                                 <label for="paymentMonth">Mes</label>                                
