@@ -528,7 +528,7 @@ function initializeGroupsStudentsDataTable(groupId) {
         {
             "data": null,
             "render": function(data, type, row) {
-                return '</button><button data-id="'+row.student_id+'" class="btn btn-danger btn-circle deleteGroupStudent"><i class="bi bi-trash-fill"></i></button>';
+                return '</button><button data-id="'+row.student_id+'" data-group="'+row.id_group+'" class="btn btn-danger btn-circle deleteGroupStudent"><i class="bi bi-trash-fill"></i></button>';
                         
             },
             "className": "text-center"

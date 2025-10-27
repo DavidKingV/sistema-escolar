@@ -125,3 +125,4 @@ if (!PermissionHelper::canAccess('add_groups', $userPerms, $isAdmin)) {
 
 <!-- Custom JS -->
 <script type="module" src="../js/groups/index.js"></script>
+<script type="module" src="../js/groups/add.js"></script>
