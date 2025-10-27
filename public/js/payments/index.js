@@ -463,6 +463,7 @@ $(document).ready(function () {
         Swal.close?.();
         if (response.success) {
           $('#subjectConceptDiv').prop('hidden', false);
+          $("#paymentMonth").val(null).trigger('change').prop('disabled', true);
           getSubjectsList($('#subjectConcept'), response.careerId);
           $("#subjectConcept").prop("disabled", false)
         } else {
@@ -478,6 +479,7 @@ $(document).ready(function () {
         Swal.close?.();
         if (response.success) {
           $('#careerDiv').prop('hidden', false);
+          $("#paymentMonth").val(null).trigger('change').prop('disabled', true);
           $("#careerName").val(escapeHtml(response.careerName));
         } else {
           infoAlert('El estudiante no tiene un grupo asignado.');
@@ -485,7 +487,10 @@ $(document).ready(function () {
       } else {
         ensureStudentSelected();
       }
+    } else if (concept === 'Bordado') {
+      $("#paymentMonth").val(null).trigger('change').prop('disabled', true);
     } else {
+      $("#paymentMonth").val(0).trigger('change').prop('disabled', false);
       $('#subjectConceptDiv').prop('hidden', true);
       $("#subjectConcept").prop("disabled", true).val(null).trigger('change');
       $("#childSubjectName").prop("disabled", true);
