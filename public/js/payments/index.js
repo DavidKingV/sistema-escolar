@@ -136,6 +136,12 @@ const AddPayment = async (serializedForm) => {
       $("#paymentsForm")[0].reset();
       $("#studentName").val('0').trigger('change');
       $("#paymentHistoryTable").DataTable().destroy();
+      $("#subjectConceptDiv").prop('hidden', true);
+      $("#subjectConcept").prop("disabled", true).val(null).trigger('change');
+      $("#childSubjectName").prop("disabled", true);
+      $("#careerName").prop("disabled", true).val('');
+      $("#childSubjectDiv").prop('hidden', true);
+      $("#careerDiv").prop('hidden', true);
       hideLoadedContent();
 
       const dataObj = Object.fromEntries(new URLSearchParams(serializedForm));
@@ -401,7 +407,7 @@ const getSubjectsList = async (input, careerId) => {
         }),
         processResults: (data, params) => {
           params.page = params.page || 1;
-                    
+
           const results = data.results.map(item => ({
                 id: item.text,  // 👈 usar el nombre como value
                 text: item.text // 👈 mostrar también el nombre
