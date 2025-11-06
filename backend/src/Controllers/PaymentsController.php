@@ -92,7 +92,21 @@ class PaymentsController{
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $paymentConcept = $paymentDataArray['paymentConcept']." ".$paymentDataArray['subjectConcept'] ?? ''."-".$paymentDataArray['childSubjectName'] ?? ''." ".$paymentDataArray['paymentMonth'] ?? '';
+        $paymentConcept = $paymentDataArray['paymentConcept'];
+
+        if (!empty($paymentDataArray['subjectConcept'])) {
+            // subjectConcept está definido y no vacío
+            $paymentConcept .= ' ' . $paymentDataArray['subjectConcept'];
+            
+            if (!empty($paymentDataArray['childSubjectName'])) {
+                $paymentConcept .= '-' . $paymentDataArray['childSubjectName'];
+            }
+        } else {
+            // subjectConcept no definido o vacío → usar paymentMonth
+            if (!empty($paymentDataArray['paymentMonth'])) {
+                $paymentConcept .= ' ' . $paymentDataArray['paymentMonth'];
+            }
+        }
 
         $date = $paymentDataArray['paymentDate'] ?? date('Y-m-d');
         $extra = $paymentDataArray['paymentExtra'] ?? 0;
