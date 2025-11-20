@@ -132,7 +132,7 @@ $(function () {
         minimumInputLength: 2, // empieza a buscar con 2 caracteres
         ajax: {
             url: '../../backend/students/routes.php',
-            method: 'POST',
+            method: 'GET',
             dataType: 'json',
             delay: 250,
             data: function (params) {
