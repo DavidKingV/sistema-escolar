@@ -37,8 +37,10 @@ export function capitalizeAll(input) {
 
 export function capitalizeAllWords(input) {
   if (!input) return input;
-  input = String(input).toLowerCase(); // Convertir todo a minúsculas primero
-  return input.replace(/\b\w/g, l => l.toUpperCase());
+  
+  return input
+    .toLowerCase()
+    .replace(/(?:^|\s|-)\p{L}/gu, match => match.toUpperCase());
 }
 
 
