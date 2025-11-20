@@ -131,7 +131,7 @@ switch ($action) {
     // Microsoft Graph
     // -------------------------------
     case 'searchMicrosoftUser':
-        $displayName = $data['displayName'] ?? ($data['data']['studentName'] ?? '');
+        $displayName = $data['displayName'] ?? ($data['studentName'] ?? '');
         responseJson($studentsController->searchMicrosoftUser($displayName));
         break;
 

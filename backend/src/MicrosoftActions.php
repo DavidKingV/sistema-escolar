@@ -151,40 +151,62 @@ class MicrosoftActions{
         return $response['value'];
     }
 
-    public static function getStudentByName($access_token, $studentName){
-        $client = new Client();
+    public static function getStudentByName($access_token, $studentName)
+{
+    $client = new Client();
 
-        try{
-            $userData = $client->get('https://graph.microsoft.com/v1.0/users/?$search="displayName:'.$studentName.'"&$select=id,displayName,mail', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $access_token,
-                    'ConsistencyLevel' => 'eventual'
-                ]
-            ]);
-            $userDataRes = json_decode($userData->getBody()->getContents());
-            $firstUser = $userDataRes->value[0] ?? null;
-
-            $id = $firstUser->id ?? null;
-            $displayName = $firstUser->displayName ?? null;
-            $mail = $firstUser->mail ?? null;
-
-            if ($displayName != null && $id != null && $userDataRes->value != null) {
-                return ['success' => true, 'id' => $id, 'displayName' => $displayName, 'mail' => $mail, 'error' => null];
-            }else{
-                return ['success' => false, 'displayName' => null, 'id' => null, 'error' => 'No se encontraron coincidencias de este nombre con alguna cuenta de Microsoft, el usuario será solo local'];
-            }
-            
-        }catch (\GuzzleHttp\Exception\ClientException $e) {
-            if ($e->getResponse()->getStatusCode() == 401) {
-                $errorMessage = 'Error: ' . $e->getMessage();
-                return ['success' => false, 'displayName' => null, 'id' => null, 'error' => $errorMessage];
-            } else {
-                // maneja otros códigos de error si es necesario
-                $errorMessage = 'Error: ' . $e->getMessage();
-                return ['success' => false, 'displayName' => null, 'id' => null, 'error' => $errorMessage];
-            }
-        }
+    // 🔥 Evita llamada errónea
+    if (!trim($studentName)) {
+        return [
+            'success' => false,
+            'error'   => 'El nombre está vacío',
+            'id' => null,
+            'displayName' => null,
+            'mail' => null
+        ];
     }
+
+    try {
+        // Codifica correctamente toda la cadena
+        $search = urlencode('"displayName:' . $studentName . '"');
+
+        $url = "https://graph.microsoft.com/v1.0/users/?\$search=$search&\$select=id,displayName,mail";
+
+        $userData = $client->get($url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $access_token,
+                'ConsistencyLevel' => 'eventual'
+            ]
+        ]);
+
+        $userDataRes = json_decode($userData->getBody()->getContents());
+        $firstUser = $userDataRes->value[0] ?? null;
+
+        if ($firstUser) {
+            return [
+                'success' => true,
+                'id' => $firstUser->id,
+                'displayName' => $firstUser->displayName,
+                'mail' => $firstUser->mail,
+                'error' => null
+            ];
+        }
+
+        return [
+            'success' => false,
+            'error' => 'No se encontraron coincidencias',
+            'id' => null,
+            'displayName' => null
+        ];
+
+    } catch (\GuzzleHttp\Exception\ClientException $e) {
+        return [
+            'success' => false,
+            'error' => 'Error: ' . $e->getMessage()
+        ];
+    }
+}
+    
 
 }
 
