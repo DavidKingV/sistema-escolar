@@ -132,12 +132,13 @@ $(function () {
         minimumInputLength: 2, // empieza a buscar con 2 caracteres
         ajax: {
             url: '../../backend/students/routes.php',
+            method: 'POST',
             dataType: 'json',
             delay: 250,
             data: function (params) {
                 isLoading = true; // empieza carga
                 return {
-                    displayName: params.term, // término que el usuario escribe
+                    studentName: params.term, // término que el usuario escribe
                     action: 'searchMicrosoftUser'
                 };
             },
