@@ -157,7 +157,6 @@ const AddPayment = async (serializedForm) => {
         } catch (e) {
           infoAlert('Pago registrado, pero falló el envío del comprobante.');
         }
-        successAlert(escapeHtml(response.message || 'Pago registrado.'));
       } else {
         successAlert(escapeHtml(response.message || 'Pago registrado.'));
       }
@@ -490,6 +489,11 @@ $(document).ready(function () {
       }
     } else if (concept === 'Bordado') {
       $("#paymentMonth").val(null).trigger('change').prop('disabled', true);
+      $('#subjectConceptDiv').prop('hidden', true);
+      $("#subjectConcept").prop("disabled", true).val(null).trigger('change');
+      $("#childSubjectName").prop("disabled", true);
+      $('#careerName').prop("disabled", true);
+      $("#todayDate").prop('checked', true);
     } else {
       $("#paymentMonth").val(0).trigger('change').prop('disabled', false);
       $('#subjectConceptDiv').prop('hidden', true);
