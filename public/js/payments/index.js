@@ -157,6 +157,7 @@ const AddPayment = async (serializedForm) => {
         } catch (e) {
           infoAlert('Pago registrado, pero falló el envío del comprobante.');
         }
+        successAlert(escapeHtml(response.message || 'Pago registrado.'));
       } else {
         successAlert(escapeHtml(response.message || 'Pago registrado.'));
       }
