@@ -85,6 +85,9 @@ switch ($action) {
         parse_str($data['studentData'] ?? '', $studentDataArray);
         responseJson($studentsController->addStudent($studentDataArray));
         break;
+    case 'getStudentsNames':
+        responseJson($studentsController->getStudentsNames());
+        break;
 
     case 'updateStudent':
         parse_str($data['studentData'] ?? '', $studentDataArray);
