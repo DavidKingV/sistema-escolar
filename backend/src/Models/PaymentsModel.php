@@ -51,7 +51,7 @@ class PaymentsModel{
 
             $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("issisiiisis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword);
+            $stmt->bind_param("isiisiiisis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
@@ -85,7 +85,7 @@ class PaymentsModel{
                     $response = array("success" => true, "message" => "Pago registrado exitosamente", "paymentId" => $paymentId);
                 }
             } else {
-                $response = array("success" => false, "message" => "Error al registrar el pago");
+                $response = array("success" => false, "message" => "Error al registrar el pago". $stmt->error);
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud de pago");
