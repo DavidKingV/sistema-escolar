@@ -74,7 +74,7 @@ const requestJson = async (url, action, payload = {}) => {
 const getStudentsNames = async () => {
   try {
     showLoader();
-    const students = await requestJson(studentsPath, 'getSubjectsNames');
+    const students = await requestJson(studentsPath, 'getStudentsNames');
 
     if (!Array.isArray(students) || students.length === 0) return;
 
