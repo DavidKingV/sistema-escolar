@@ -88,6 +88,10 @@ switch ($action) {
     case 'getStudentsNames':
         responseJson($studentsController->getStudentsNames());
         break;
+    
+    case 'getStudentsUsers':
+        responseJson($studentsController->getStudentsUsers());
+        break;
 
     case 'updateStudent':
         parse_str($data['studentData'] ?? '', $studentDataArray);
@@ -146,6 +150,10 @@ switch ($action) {
             $parsed['displayName'] ?? '',
             $parsed['mail'] ?? ''
         ));
+        break;
+
+    case 'getStudentsMicrosoftUsers':
+        responseJson($studentsController->getMicrosoftStudentsUsers());
         break;
 
     default:
