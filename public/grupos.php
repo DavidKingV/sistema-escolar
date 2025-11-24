@@ -38,8 +38,7 @@
                                     <th class="text-center">Carrera</th>
                                     <th class="text-center">Clave</th>
                                     <th class="text-center">Nombre</th>
-                                    <th class="text-center">Fecha inicio</th>
-                                    <th class="text-center">Fecha termino</th>
+                                    <th class="text-center">Miembros</th>   
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>

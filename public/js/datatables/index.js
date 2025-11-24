@@ -453,8 +453,11 @@ function initializeGroupsDataTable() {
             { "data": "id_carreer", "className": "text-center" },
             { "data": "key", "className": "text-center" },
             { "data": "name", "className": "text-center" },
-            { "data": "startDate", "className": "text-center" },
-            { "data": "endDate", "className": "text-center" },
+            { "data": "members", "render": function(data, type, row) {
+                return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembros</a></span>`;
+            },
+                "className": "text-center" 
+            },
             {
                 "data": "actions",
                 "render": function(data, type, row) {

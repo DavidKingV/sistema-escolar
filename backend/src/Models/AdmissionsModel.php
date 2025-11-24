@@ -71,4 +71,33 @@ class AdmissionsModel {
         }
     }
 
+    public function deleteAdmission($id) {
+        try {
+            $stmt = $this->connection->prepare("DELETE FROM registrationApplications WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                return [
+                    "success" => true,
+                    "message" => "Solicitud de inscripción eliminada correctamente"
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "No se encontró la solicitud de inscripción o ya fue eliminada"
+                ];
+            }
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al eliminar la solicitud: " . $e->getMessage()
+            ];
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
+
 }

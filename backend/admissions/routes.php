@@ -30,6 +30,15 @@ if(!isset($data['action'])){
             responseJson($result);
             break;
 
+        case 'deleteAdmission':
+            if (!isset($data['id'])) {
+                responseJson(['error' => 'ID not specified']);
+                exit;
+            }
+            $result = $admissions->deleteAdmission($data['id']);
+            responseJson($result);
+            break;
+
         default:
             responseJson(['error' => 'Unknown action']);
             break;
