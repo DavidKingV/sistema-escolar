@@ -2,6 +2,9 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\MicrosoftActions;
+use Vendor\Schoolarsystem\PermissionHelper;
 
 class PracticalHoursModel{
     private $connection;
@@ -254,19 +257,35 @@ class PracticalHoursModel{
         }
     }
 
-    public function getStudentlHoursData($studentId) {
-        try{
-            $sql = "SELECT practical_hours.*, practical_hours_status.status FROM practical_hours LEFT JOIN practical_hours_status ON practical_hours.status_id = practical_hours_status.id WHERE id_student = ? ORDER BY date DESC";
+    public function getStudentHoursData($studentId) {
+        $VerifySession = auth::check();
+        $isAdmin       = $VerifySession['isAdmin'] ?? false;
+        $userPerms     = $VerifySession['permissions'] ?? [];
+
+        try {
+            $sql = "
+                SELECT 
+                    ph.id,
+                    ph.date,
+                    ph.start,
+                    ph.end,
+                    ph.hours,
+                    COALESCE(phs.status, 'Pendiente') AS status
+                FROM practical_hours ph
+                LEFT JOIN practical_hours_status phs ON ph.status_id = phs.id
+                WHERE ph.id_student = ?
+                ORDER BY ph.date DESC
+            ";
 
             $stmt = $this->connection->prepare($sql);
             if (!$stmt) {
-                throw new Exception("Error preparando sentencia para SELECT en practical_hours: " . $this->connection->error);
+                throw new Exception("Error preparando sentencia: " . $this->connection->error);
             }
 
             $stmt->bind_param('i', $studentId);
 
             if (!$stmt->execute()) {
-                throw new Exception("Error ejecutando sentencia para SELECT " . $stmt->error);
+                throw new Exception("Error ejecutando sentencia: " . $stmt->error);
             }
 
             $result = $stmt->get_result();
@@ -274,20 +293,19 @@ class PracticalHoursModel{
 
             $data = [];
 
-            while($row = $result->fetch_assoc()){
-                
-                $data[] =[
-                        'success' => true,
-                        'date' => $row['date'],
-                        'start' => $row['start'],
-                        'end' => $row['end'],
-                        'status' => $row['status'] ?? 'Pendiente',
-                        'hours' => $row['hours']
-                    ];
+            // Evaluar permiso una sola vez
+            $canDelete = PermissionHelper::canAccess(['delete_practical_hours'], $userPerms, $isAdmin);
+
+            while ($row = $result->fetch_assoc()) {
+                $row['actions'] = $canDelete;
+                $data[] = $row;
             }
 
-            return $data;
-            
+            return [
+                'success' => true,
+                'data' => $data
+            ];
+
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -295,4 +313,41 @@ class PracticalHoursModel{
             ];
         }
     }
+
+    public function deleteHour($hourId) {
+        try {
+            $sql = "DELETE FROM practical_hours WHERE id = ?";
+            $stmt = $this->connection->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Error preparando sentencia para DELETE en practical_hours: " . $this->connection->error);
+            }
+
+            $stmt->bind_param('i', $hourId);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error ejecutando sentencia para DELETE en practical_hours: " . $stmt->error);
+            }
+
+            $result = $stmt->affected_rows;
+            $stmt->close();
+
+            if ($result > 0) {
+                return [
+                    'success' => true,
+                    'message' => 'Hora eliminada correctamente'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No se encontró la hora a eliminar'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
 }

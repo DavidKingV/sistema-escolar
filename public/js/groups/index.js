@@ -5,10 +5,15 @@ import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } fro
 
 initializeGroupsDataTable();
 
-$("#groupsTable").on("click", ".editGroup", function() {
+const showLoader = () => $("#globalLoader").fadeIn(200);
+
+$("#groupsTable").on("click", ".editGroup", async function() {
     let groupId = $(this).data("id");
+    showLoader();
     if (groupId) {
-        GetDataGroupEdit(groupId);
+        await $.post('modals/GroupsEditModal.php', { groupId: groupId }, function (data) {
+            $('#modalBodyEditGroup').html(data);
+        });
     }else{
         Swal.fire({
             icon: 'error',

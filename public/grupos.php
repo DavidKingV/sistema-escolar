@@ -15,7 +15,13 @@
     <title>Grupos</title>
 </head>
 <body>
-
+    <div id="globalLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(33,37,41,0.5); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    </div>
       
     <div id="content">
         <div class="container-fluid">
@@ -59,75 +65,13 @@
 <div class="modal fade modal-lg" id="GroupsEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="GroupsEditModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="GroupsEditModalLabel">Editar Grupo</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="updateGroup">
-            <div class="row g-2">
-                <div class="col-md hidden">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="idGroupDB" name="idGroupDB" readonly>
-                    <label for="idGroupDB">ID</label>
-                    </div>
-                    <input type="text" class="form-control hidden" id="idCarreerHidden" name="idCarreerHidden" readonly>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">                   
-                    <select class="form-select" id="carreerNameGroupEdit" name="carreerNameGroupEdit"  aria-label="Floating label select example">
-                        <option selected value="0">Carrera</option>   
-                    </select>
-                    <label for="floatingSelect">Selecciona</label>
-                    </div>
-                    <label id="carreerNameGroupEdit-error" class="error text-bg-danger" for="carreerNameGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="keyGroupEdit" name="keyGroupEdit" value="">
-                    <label for="keyGroupEdit">Clave del grupo</label>
-                    </div>
-                    <label id="keyGroupEdit-error" class="error text-bg-danger" for="keyGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="nameGroupEdit" name="nameGroupEdit" value="">
-                    <label for="nameGroupEdit">Nombre</label>
-                    </div>
-                    <label id="nameGroupEdit-error" class="error text-bg-danger" for="nameGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="date" class="form-control" id="startDateEdit" name="startDateEdit" value="">
-                    <label for="startDateEdit">Fecha de Inicio</label>
-                    </div>
-                    <label id="startDateEdit-error" class="error text-bg-danger" for="startDateEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="date" class="form-control" id="endDateEdit" name="endDateEdit" value="">
-                    <label for="endDateEdit">Fecha de Termino</label>
-                    </div>
-                    <label id="endDateEdit-error" class="error text-bg-danger" for="endDateEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>
-            </div>
-            <div class="row g-2 py-1">
-                <div class="col-md">
-                    <div class="form-floating">
-                    <input type="text" class="form-control" id="descriptionGroupEdit" name="descriptionGroupEdit" value="">
-                    <label for="descriptionGroupEdit">Descripción</label>
-                    </div>
-                    <label id="descriptionGroupEdit-error" class="error text-bg-danger" for="descriptionGroupEdit" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                </div>                
-            </div>
-            </div>        
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </form>
-            </div>
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="GroupsEditModalLabel">Editar Grupo</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modalBodyEditGroup">
+        
+        </div>
     </div>
   </div>
 </div>
