@@ -77,6 +77,9 @@ switch ($action) {
     case 'verifyGroupStudent':
         responseJson($studentsController->verifyGroupStudent($data['studentIdGroup'] ?? null));
         break;
+    case 'verifyToken':
+        responseJson($studentsController->verifyTokenStudent($data['studentId'] ?? null, $data['token'] ?? ''));
+        break;
 
     // -------------------------------
     // POST (form-data / JSON)
@@ -132,6 +135,10 @@ switch ($action) {
     case 'addStudentGroup':
         parse_str($data['studentGroupData'] ?? '', $groupData);
         responseJson($studentsController->addStudentGroup($groupData));
+        break;
+
+    case 'getStudentName':
+        responseJson($studentsController->getStudentName($data['studentId'] ?? null));
         break;
 
     // -------------------------------

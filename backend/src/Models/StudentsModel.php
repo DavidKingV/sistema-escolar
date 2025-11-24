@@ -966,4 +966,43 @@ class StudentsModel{
             }
         }
     }
+
+    public function verifyTokenStudent($studentId, $token){
+        $VerifySession = auth::check();
+        if(!$VerifySession['success']){
+            return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
+        }
+
+        $secretKey = $_ENV['KEY'];
+
+        // Asegurar que el token venga completo
+        $token = urldecode($token);
+
+        // Decodificar
+        $decodedToken = JWT::decode($token, new Key($secretKey, 'HS256'));
+
+        // El token debe contener el mismo studentId
+        if ($decodedToken->studentId != $studentId) {
+            return [
+                "success" => true,
+                "valid"   => false,
+                "message" => "Token inválido",
+                "token"   => $decodedToken
+            ];
+        }
+
+        // Validar estudiante
+        $sql = "SELECT * FROM students WHERE id = ?";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param('i', $studentId);
+        $stmt->execute();
+        $query = $stmt->get_result();
+
+        if($query->num_rows > 0){
+            return ["success" => true, "valid" => true, "message" => "Token válido", "token" => $decodedToken];
+        }
+
+        return ["success" => true, "valid" => false, "message" => "Token inválido"];
+    }
+
 }

@@ -3,7 +3,9 @@ import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStu
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner } from '../utils/alerts.js';
 
-$(function () {
+$(async function () {
+    showLoader();
+
     let urlParams = new URLSearchParams(window.location.search);
     let studentIdGroup = urlParams.get('student'); 
     let token = urlParams.get('encode');
@@ -13,39 +15,45 @@ $(function () {
    
 
     if (studentIdGroup) {
-        VerifyToken(studentIdGroup, token)
-        .then((response) => {
-            if(response){
-                VerifyGroupStudent(studentIdGroup).then((response) => {
-                    if(response){
-                        InitializeStudentGrades(studentIdGroup);
-                        HideTab("#alertDisplay");
-                        RenderAlertMessage("El alumno ya tiene un grupo asignado", "info", "#studentGroupDetails");
-                        
-                        localStorage.setItem('studentIdJTW', studentIdGroup);
-                        var studentIdJTW = localStorage.getItem('studentIdJTW');
-                        
-                        if(!studentIdJTW){
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'ID del estudiante no proporcionado',
-                                text: 'Por favor proporciona un ID válido para asignar un usuario.'
-                            }).then((result) => {
-                                if(result.isConfirmed){
-                                    window.location.href = '../alumnos.php';
-                                }
-                            });
-                        }
-
-                        $(window).on('beforeunload', function() {
-                            console.log("Limpiando el localStorage");
-                            localStorage.removeItem('studentIdJTW');
-                        });
-
+        try {
+            const tokenValid = await VerifyToken(studentIdGroup, token);
+            if (tokenValid) {
+                const groupExists = await VerifyGroupStudent(studentIdGroup);
+                if (groupExists) {
+                    const table = await InitializeStudentGrades(studentIdGroup);
+                    HideTab("#alertDisplay");
+                    RenderAlertMessage("El alumno ya tiene un grupo asignado", "info", "#studentGroupDetails");
+                    
+                    localStorage.setItem('studentIdJTW', studentIdGroup);
+                    var studentIdJTW = localStorage.getItem('studentIdJTW');
+                    
+                    if(!studentIdJTW){
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ID del estudiante no proporcionado',
+                            text: 'Por favor proporciona un ID válido para asignar un usuario.'
+                        }).then((result) => {
+                            if(result.isConfirmed){
+                                window.location.href = '../alumnos.php';
+                            }
+                        })
                     }
-                });
+
+                    if(table){
+                        hideLoader();
+                    }
+
+                    $(window).on('beforeunload', function() {
+                        console.log("Limpiando el localStorage");
+                        localStorage.removeItem('studentIdJTW');
+                    });
+                }
             }
-        });
+        } catch (err) {
+            console.error(err);
+        }finally {
+            hideLoader();
+        }
     
     } else {
         Swal.fire({
@@ -55,7 +63,10 @@ $(function () {
         });
     }
 
-    initializeSubjectChangeListener(".subjectName");
+    const select = await initializeSubjectChangeListener(".subjectName");
+    if(select){
+        hideLoader();
+    }
 });
 
 const VerifyGroupStudent = async (studentIdGroup) => {
@@ -181,4 +192,12 @@ const GetSubjectsNames = async (carrerId) => {
         console.error('Error al procesar los datos:', error.message);
     } 
    
+};
+
+const showLoader = () => {
+  $("#globalLoader").fadeIn(200);
+};
+
+const hideLoader = () => {
+  $("#globalLoader").fadeOut(200);
 };
