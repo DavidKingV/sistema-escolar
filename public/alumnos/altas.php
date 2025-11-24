@@ -38,6 +38,7 @@
                 <form id="addStudents">
                     <div class="row">
                         <!-- Nombre completo -->
+                         <?php if (isset($_SESSION["adnanhussainturki/microsoft"]["accessToken"])) { ?>
                         <div class="col-md-12 mb-3">
                             <label for="microsoftUser" class="form-label">
                                 <i class="fas fa-id-card"></i> Buscar Usuario Microsoft <span class="text-danger">*</span>
@@ -45,7 +46,7 @@
                             <select class="form-control" id="microsoftUser" name="microsoftUser" required>
                                 <option value="0">Selecciona un usuario Microsoft...</option>
                             </select>
-                        </div>
+                        </div>                        
                          <!-- Usuario Microsoft (oculto por defecto) -->
                         <div class="col-md-12 mb-3" id="microsoftDiv" style="display: none;">
                             <div class="alert alert-success" role="alert">
@@ -56,6 +57,7 @@
                                 <input type="text" readonly class="form-control-plaintext" id="microsoftEmail" name="microsoftEmail">
                             </div>
                         </div>
+                        <?php } ?>
                         <!-- Nombre completo -->
                         <div class="col-md-6 mb-3">
                             <label for="studentName" class="form-label">
