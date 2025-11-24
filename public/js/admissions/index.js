@@ -13,6 +13,10 @@ $(function() {
                 if (!data) return "";
                 return `<button class="btn btn-success btn-circle approveStudent" data-id="${row.id}">
                             <i class="bi bi-check2-circle"></i>
+                        </button>
+                        <br>
+                        <button class="btn btn-danger btn-circle deleteApplication" data-id="${row.id}">
+                            <i class="bi bi-trash-fill"></i>
                         </button>`;
             },
             "className": "text-center"
@@ -36,14 +40,16 @@ $(function() {
             "data": "lastNames", 
             "render": function (data) {
                 return data || '';
-            }
+            },
+            "className": "text-center",
         },
         { 
             "data": "gender", 
             "render": function (data) {
                 return data || '';
             },
-            "className": "text-center"
+            "className": "text-center",
+            "visible": false   // ⬅️ OCULTA LA COLUMNA COMPLETAMENTE
         },
         { 
             "data": "birthday", 
@@ -57,7 +63,8 @@ $(function() {
             "render": function (data) {
                 return data || '';
             },
-            "className": "text-center"
+            "className": "text-center",
+            "visible": false   // ⬅️ OCULTA LA COLUMNA COMPLETAMENTE
         },
         { 
             "data": "nationality", 
@@ -85,14 +92,16 @@ $(function() {
             "render": function (data) {
                 return data || '';
             },
-            "className": "text-center"
+            "className": "text-center",
+            "visible": false   // ⬅️ OCULTA LA COLUMNA COMPLETAMENTE
         },
         { 
             "data": "adress", 
             "render": function (data) {
                 return data || '';
             },
-            "className": "text-center"
+            "className": "text-center",
+            "visible": false   // ⬅️ OCULTA LA COLUMNA COMPLETAMENTE
         },
         { 
             "data": "phone", 
@@ -113,7 +122,8 @@ $(function() {
             "render": function (data) {
                 return data || '';
             },
-            "className": "text-center"
+            "className": "text-center",
+            "visible": false   // ⬅️ OCULTA LA COLUMNA COMPLETAMENTE
         },
         { 
             "data": "program", 
@@ -221,6 +231,26 @@ $("#newAdmissionsTable").on("click", ".approveStudent", function(e) {
                 $('#newAdmissionsTable').DataTable().ajax.reload();
             } else {
                 errorAlert(data.error || 'Error al aprobar la solicitud');
+            }
+        })
+        .catch(() => {
+            errorAlert('Error al conectar con el servidor.');
+        });
+    });
+});
+
+$("#newAdmissionsTable").on("click", ".deleteApplication", function(e) {
+    e.preventDefault();
+    let admissionId = $(this).data("id");
+
+    confirmAlert('¿Seguro que desea eliminar esta solicitud?', 'Sí', 'No', function() { 
+        sendFetch(callback, 'POST', { action: 'deleteAdmission', id: admissionId })
+        .then(data => {
+            if (data.success) {
+                successAlertAuto('Solicitud eliminada con éxito');
+                $('#newAdmissionsTable').DataTable().ajax.reload();
+            } else {
+                errorAlert(data.error || 'Error al eliminar la solicitud');
             }
         })
         .catch(() => {

@@ -149,7 +149,7 @@ class GroupsModel{
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $sql = "SELECT carreers.nombre as nombre_carrera, groups.* FROM groups INNER JOIN carreers ON groups.id_carreer = carreers.id";
+        $sql = "SELECT carreers.nombre AS nombre_carrera, groups.*, COUNT(students.id) AS members FROM groups INNER JOIN carreers ON groups.id_carreer = carreers.id LEFT JOIN students ON students.id_group = groups.id GROUP BY groups.id;";
         $result = $this->connection->query($sql);
 
         if(!$result){
@@ -167,7 +167,8 @@ class GroupsModel{
                     "key" => $row['clave'],
                     "name" => $row['nombre'],
                     "startDate" => $row['fecha_inicio'],
-                    "endDate" => $row['fecha_termino']
+                    "endDate" => $row['fecha_termino'],
+                    "members" => $row['members']
                 ];
 
                 if (PermissionHelper::canAccess(['edit_groups', 'delete_groups'], $userPerms, $isAdmin)) {

@@ -32,12 +32,12 @@
                    <table class="table table-striped table-hover" id="newAdmissionsTable">
                         <thead>
                             <tr>
-                                <th class="text-center">Aprobar</th>
+                                <th class="text-center">Acción</th>
                                 <th class="text-center">No. Control</th>
                                 <th class="text-center">Nombre(s)</th>
                                 <th class="text-center">Apellidos</th>
                                 <th class="text-center">Género</th>
-                                <th class="text-center">Fecha de nacimiento</th>
+                                <th class="text-center">Fecha Nac.</th>
                                 <th class="text-center">Lugar de nacimiento</th>
                                 <th class="text-center">Nacionalidad</th>
                                 <th class="text-center">CURP</th>
