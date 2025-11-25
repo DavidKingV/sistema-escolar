@@ -78,13 +78,7 @@ $date = $_POST['date'] ?? NULL;
 
         loadingAlert();
 
-        sendFetch(api, 'POST', { action: 'addEvent', eventData })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
+        sendFetch(api, 'POST', { action: 'addEvent', eventData })                
                 .then(data => {
                     if (data.success) {
                         successAlertAuto(data.message);
