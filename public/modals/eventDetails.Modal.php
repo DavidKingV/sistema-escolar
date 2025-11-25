@@ -77,7 +77,7 @@ $dateTime = $_POST['dateTime'] ?? null;
 </form>
 
 <script type="module">    
-    import { errorAlert, successAlert, successAlertNoReload, infoAlert, loadingSpinner, loadingAlert, selectAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
+    import { errorAlert, successAlert, successAlertNoReload, infoAlert, loadingSpinner, loadingAlert, selectAlert, warningAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
     import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
 
@@ -90,15 +90,10 @@ $dateTime = $_POST['dateTime'] ?? null;
         const $format = 'h:mm A';
         const $totalHours = $('#totalHours');
         
-        sendFetch(api, 'POST', { action: 'getEventDetails', eventId: eventId })
-                .then(async response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }                    
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
+        sendFetch(api, 'POST', { action: 'getEventDetails', eventId: eventId })                
                 .then(async data => {
-                    if (data.success) {                                                
+                    if (data.success && data.data !== null) {             
+                        console.log(data.data);                                   
                         $start.val(data.data.start);
                         $end.val(data.data.end);
                         // Remover placeholders y mostrar inputs
@@ -106,7 +101,11 @@ $dateTime = $_POST['dateTime'] ?? null;
                         $("#start, #end").removeClass("d-none");
                         
                         await calcularHoras($start.val(), $end.val(), $totalHours, $format);
-                    } else {
+                    }else if (data.success && data.data === null){
+                        infoAlert(data.message);
+                        $('#eventDetails').modal('hide');
+                    }
+                    else {
                         errorAlert(data.message);
                         $('#eventDetails').modal('hide');
                     }
@@ -206,13 +205,7 @@ $dateTime = $_POST['dateTime'] ?? null;
 
     const confirmHours = async (data) => {
         loadingAlert();
-        sendFetch(api, 'POST', { action: 'confirmHours', hoursData: data })
-                .then(async response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }                    
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
+        sendFetch(api, 'POST', { action: 'confirmHours', hoursData: data })                
                 .then(async data => {
                     if (data.success) {                                             
                         successAlertNoReload(data.message);                        

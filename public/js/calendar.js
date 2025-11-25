@@ -54,9 +54,10 @@ $(function() {
             end: 'prev,next today dayGridMonth,dayGridWeek,listWeek'
         },
         dateClick: async  function(info) {
+            loadingSpinner(true, '#addEventModalBody');
             $("#addEventModalLabel").html('Agregar alumno para el '+info.dateStr+'');
             $("#addEventModal").modal('show');
-            $.post('../modals/addEvent.Modal.php', { date: info.dateStr }, function (data) {
+            await $.post('../modals/addEvent.Modal.php', { date: info.dateStr }, function (data) {
                 $('#addEventModalBody').html(data);
             });
         },

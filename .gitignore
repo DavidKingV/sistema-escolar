@@ -2,4 +2,4 @@
 git rm --cached '*/error_log' error_log
 composer.lock
 vendor/
-backend/models/calendario-alumnos.json
+backend/src/models/calendario-alumnos.json
