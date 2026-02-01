@@ -122,12 +122,6 @@ $studentId = $_POST['id'] ?? NULL;
         loadingAlert();
         try{
             sendFetch(callback, 'POST', { action: 'addStudentHours', data })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                        }
-                        return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                    })
                     .then(data => {
                         if (data.success) {
                             $("#addHoursModal").modal('hide');
