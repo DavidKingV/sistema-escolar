@@ -94,8 +94,8 @@ class GroupsController{
         return $this->groups->addStudentGroup($groupId, $studentId);
     }
 
-    public function deleteStudentGroup($studentId){
-        return $this->groups->deleteStudentGroup($studentId);
+    public function deleteStudentGroup($groupId, $studentId){
+        return $this->groups->deleteStudentGroup($groupId, $studentId);
     }
 
     public function getGroupCareer($studentId){
