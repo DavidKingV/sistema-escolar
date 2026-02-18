@@ -16,7 +16,7 @@ class GroupsModel{
     public function getNoGroupStudentsList($search = '', $page = 1, $limit = 30){
         try {
             // Query base
-            $sql = "SELECT id, nombre FROM students";
+            $sql = "SELECT id, nombre FROM students WHERE 1=1";
             $params = [];
             $types = "";
             
