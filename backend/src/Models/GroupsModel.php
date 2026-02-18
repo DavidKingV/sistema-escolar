@@ -16,7 +16,7 @@ class GroupsModel{
     public function getNoGroupStudentsList($search = '', $page = 1, $limit = 30){
         try {
             // Query base
-            $sql = "SELECT a.id, a.nombre FROM students a LEFT JOIN student_groups sg ON a.id = sg.student_id WHERE sg.student_id IS NULL";
+            $sql = "SELECT id, nombre FROM students";
             $params = [];
             $types = "";
             
