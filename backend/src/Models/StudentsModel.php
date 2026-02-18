@@ -195,7 +195,16 @@ class StudentsModel{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $sql = "SELECT groups.nombre as nombre_grupo, students.* FROM students LEFT JOIN groups ON students.id_group = groups.id";
+            $sql = "SELECT 
+    s.*,
+    g.nombre AS nombre_grupo,
+    g.clave AS clave_grupo
+FROM students s
+LEFT JOIN student_groups sg 
+    ON s.id = sg.student_id AND sg.is_primary = TRUE
+LEFT JOIN groups g 
+    ON sg.group_id = g.id;
+";
             $query = $this->connection->query($sql);
 
             if(!$query){
@@ -220,6 +229,7 @@ class StudentsModel{
                             'phone'           => $row['telefono'],
                             'email'           => $row['email'],
                             'group_name'      => $row['nombre_grupo'],
+                            'group_key'       => $row['clave_grupo'],
                             'academicalStatus'=> $row['academical_status']
                         ];
 

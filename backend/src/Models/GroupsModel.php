@@ -245,7 +245,7 @@ WHERE sg.group_id = ?;";
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $sql = "SELECT id, nombre FROM students WHERE id_group IS NULL";
+        $sql = "SELECT id, nombre FROM students";
         $result = $this->connection->query($sql);
 
         if(!$result){
@@ -450,6 +450,165 @@ WHERE sg.group_id = ?;";
     }
 
     public function addStudentGroup($groupId, $studentId){
+    $VerifySession = auth::check();
+    if(!$VerifySession['success']){
+        return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    }
+
+    if(!is_array($studentId) || empty($studentId)){
+        $this->connection->close();
+        return array("success" => false, "message" => "No se proporcionaron estudiantes válidos");
+    }
+
+    // Sanitizar IDs
+    $ids = array_values(array_unique(array_map('intval', $studentId)));
+    $ids = array_filter($ids, fn($v) => $v > 0);
+
+    if (empty($ids)) {
+        $this->connection->close();
+        return array("success" => false, "message" => "No se proporcionaron estudiantes válidos");
+    }
+
+    $ids_str = implode(',', $ids);
+    $inserted = 0;
+
+    try {
+        // Transacción para atomicidad (evita race conditions)
+        $this->connection->begin_transaction();
+
+        /**
+         * 1) Excluir alumnos que ya están en ESTE grupo
+         *    (esto cumple exactamente tu requisito: "comprobar que el alumno no esté ya en el grupo")
+         */
+        $alreadySql = "SELECT student_id
+                       FROM student_groups
+                       WHERE student_id IN ($ids_str)
+                         AND group_id = ?";
+        $stmtAlready = $this->connection->prepare($alreadySql);
+        if (!$stmtAlready) {
+            throw new Exception("Error preparando verificación de duplicados");
+        }
+        $stmtAlready->bind_param('i', $groupId);
+        $stmtAlready->execute();
+        $resAlready = $stmtAlready->get_result();
+
+        $alreadyInGroup = [];
+        while ($row = $resAlready->fetch_assoc()) {
+            $alreadyInGroup[] = (int)$row['student_id'];
+        }
+        $stmtAlready->close();
+
+        // Quitar los que ya están en el grupo
+        if (!empty($alreadyInGroup)) {
+            $ids = array_values(array_diff($ids, $alreadyInGroup));
+            if (empty($ids)) {
+                $this->connection->commit();
+                $this->connection->close();
+                return ["success" => false, "message" => "Todos los estudiantes ya pertenecen a este grupo"];
+            }
+            $ids_str = implode(',', $ids);
+        }
+
+        /**
+         * 2) Detectar quién ya tiene primary
+         */
+        $checkSql = "SELECT DISTINCT student_id
+                     FROM student_groups
+                     WHERE student_id IN ($ids_str)
+                       AND is_primary = TRUE";
+        $result = $this->connection->query($checkSql);
+
+        $studentsWithPrimary = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $studentsWithPrimary[] = (int)$row['student_id'];
+            }
+        }
+
+        // 3) Separar alumnos
+        $primaryStudents = array_values(array_diff($ids, $studentsWithPrimary)); // sin primary -> serán primary
+        $secondaryStudents = array_values($studentsWithPrimary);                 // con primary -> serán secondary
+
+        /**
+         * 4) Insertar PRIMARY (para los que no tienen)
+         *    - IMPORTANTE enterprise: antes, neutralizamos cualquier primary existente
+         *      (por seguridad ante concurrencia o datos sucios).
+         *    - Insertamos con INSERT IGNORE para no “actualizar” sin querer.
+         */
+        if (!empty($primaryStudents)) {
+            $primaryIdsStr = implode(',', $primaryStudents);
+
+            // Asegura 1 solo primary por alumno (aunque por lógica no deberían tener, esto blinda el sistema)
+            $sqlUnsetPrimary = "UPDATE student_groups
+                                SET is_primary = FALSE
+                                WHERE student_id IN ($primaryIdsStr)
+                                  AND is_primary = TRUE";
+            if (!$this->connection->query($sqlUnsetPrimary)) {
+                throw new Exception("Error actualizando primary existente");
+            }
+
+            $sqlPrimary = "INSERT IGNORE INTO student_groups (student_id, group_id, is_primary)
+                           SELECT id AS student_id, ? AS group_id, TRUE AS is_primary
+                           FROM students
+                           WHERE id IN ($primaryIdsStr)";
+            $stmt1 = $this->connection->prepare($sqlPrimary);
+            if (!$stmt1) {
+                throw new Exception("Error preparando inserción primary");
+            }
+            $stmt1->bind_param('i', $groupId);
+            $stmt1->execute();
+            $inserted += $stmt1->affected_rows;
+            $stmt1->close();
+        }
+
+        /**
+         * 5) Insertar SECONDARY (para los que ya tienen primary)
+         *    Igual: INSERT IGNORE para no modificar lo existente.
+         */
+        if (!empty($secondaryStudents)) {
+            $secondaryIdsStr = implode(',', $secondaryStudents);
+
+            $sqlSecondary = "INSERT IGNORE INTO student_groups (student_id, group_id, is_primary)
+                             SELECT id AS student_id, ? AS group_id, FALSE AS is_primary
+                             FROM students
+                             WHERE id IN ($secondaryIdsStr)";
+            $stmt2 = $this->connection->prepare($sqlSecondary);
+            if (!$stmt2) {
+                throw new Exception("Error preparando inserción secondary");
+            }
+            $stmt2->bind_param('i', $groupId);
+            $stmt2->execute();
+            $inserted += $stmt2->affected_rows;
+            $stmt2->close();
+        }
+
+        $this->connection->commit();
+        $this->connection->close();
+
+        if ($inserted > 0) {
+            $skipped = !empty($alreadyInGroup) ? count($alreadyInGroup) : 0;
+            $msg = "Estudiantes agregados correctamente (se asignaron primarios/secundarios según correspondía)";
+            if ($skipped > 0) {
+                $msg .= ". Omitidos $skipped porque ya pertenecían al grupo.";
+            }
+            return ["success" => true, "message" => $msg];
+        }
+
+        return ["success" => false, "message" => "No se pudieron agregar los estudiantes al grupo"];
+
+    } catch (Exception $e) {
+        // rollback seguro
+        if ($this->connection && $this->connection->errno === 0) {
+            // si la conexión sigue viva
+            $this->connection->rollback();
+        }
+        $this->connection->close();
+        return ["success" => false, "message" => "Error al agregar estudiantes al grupo: " . $e->getMessage()];
+    }
+}
+
+
+    public function addStudentGroupold($groupId, $studentId){
         $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");

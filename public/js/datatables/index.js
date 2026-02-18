@@ -27,8 +27,8 @@ function initializeStudentDataTable() {
             { "data": "name", "className": "text-center py-2" },
             { "data": "no_control", "className": "text-center" },
             { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},
+            { "data": "group_key", "className": "text-center", "defaultContent": "No asignado"},    
             { "data": "phone", "className": "text-center" },
-            { "data": "email", "className": "text-center" },
             { 
                 "data": "academicalStatus",
                 "className": "text-center",
