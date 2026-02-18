@@ -35,8 +35,8 @@
                                 <th class="text-center">Nombre</th>
                                 <th class="text-center">No. Control</th>
                                 <th class="text-center">Programa</th>
+                                <th class="text-center">Clave Grupo</th>
                                 <th class="text-center">Teléfono</th>
-                                <th class="text-center">Email</th>
                                 <th class="text-center">Estatus</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
