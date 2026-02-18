@@ -242,6 +242,6 @@
 <script src="js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="js/students/index.js"></script>
+<script type="module" src="js/students/index.js?v=1.1"></script>
 <!--<script type="module" src="public/js/students.js"></script>-->
 <script type="module" src="js/utils/sessions.js"></script>

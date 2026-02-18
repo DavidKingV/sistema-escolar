@@ -214,7 +214,7 @@ $('#studentTable').on('click', '.editStudent', function() {
     }
 });
 
-$('#studentTable').on('click', '#deleteStudent', function() {
+$('#studentTable').on('click', '.deleteStudent', function() {
 
     const studentId = $(this).data('id');
     if(studentId){
