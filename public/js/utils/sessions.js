@@ -1,7 +1,7 @@
 import { confirmCloseSession, loadingAlert, successAlert, errorAlert } from './alerts.js';
 import { enviarPeticionAjax } from './ajax.js';
 
-var phpPath = '../backend/login/routes.php';
+var phpPath = '/backend/login/routes.php';
 
 function openInNewWindow(url) {
     const newWindow = window.open(url, '_blank', 'width=800,height=600');
@@ -33,7 +33,7 @@ $("#endSession").click(function(e){
                             }
                         }, false);
                     }
-                    window.location.href = "http://localhost:8080/CONTROL%20ESCOLAR%20NUEVO/index.php?sesion=close";
+                    window.location.href = "/public/index.php?sesion=close";
                 } else {
                     errorAlert(data.message);
                 }

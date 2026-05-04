@@ -1,7 +1,16 @@
 <?php
 require_once(__DIR__.'/../backend/vendor/autoload.php');
+include __DIR__.'/../backend/login/index.php';
 
 use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\DBConnection;
+
+if(isset($_GET['admin']) && $_GET['admin'] === 'false'){
+    $loginControl = new LoginControl(new DBConnection());
+    $loginControl->logout();
+    header('Location: index.php?session=closed');
+    exit();
+}
 
 session_start();
 

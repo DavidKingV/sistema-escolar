@@ -36,9 +36,11 @@ export function capitalizeAll(input) {
 }
 
 export function capitalizeAllWords(input) {
-    if(!input) return input;
-    input = String(input); // Asegurar que sea una cadena de texto
-    return input.replace(/\b\w/g, l => l.toUpperCase());
+  if (!input) return input;
+  
+  return input
+    .toLowerCase()
+    .replace(/(?:^|\s|-)\p{L}/gu, match => match.toUpperCase());
 }
 
 

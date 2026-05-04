@@ -11,7 +11,8 @@ $(function() {
         { "data": "total_hours", "className": "text-center" },
         { "data": "date", "className": "text-center" },        
         {"data": null, "render": function(data, type, row) {
-            return `<button data-id="`+row.studentId+`" class="btn btn-info btn-circle addHours" data-bs-toggle="modal" data-bs-target="#addHoursModal"><i class="bi bi-plus-square"></i></button> <button data-id="`+row.studentId+`" data-total="`+row.total_hours+`" class="btn btn-primary btn-circle seeTotal" data-bs-toggle="modal" data-bs-target="#seeTotalModal"><i class="bi bi-eye-fill"></i></button> 
+            return `<button data-id="`+row.studentId+`" class="btn btn-info btn-circle addHours" data-bs-toggle="modal" data-bs-target="#addHoursModal"><i class="bi bi-plus-square"></i></button> 
+            <button data-id="`+row.studentId+`" data-total="`+row.total_hours+`" class="btn btn-primary btn-circle seeTotal" data-bs-toggle="modal" data-bs-target="#seeTotalModal"><i class="bi bi-eye-fill"></i></button> 
             <button id="generateReport" data-id="`+row.studentId+`" class="btn btn-success btn-circle"><i class="bi bi-file-earmark-check-fill"></i></button>`; 
             },"className": "text-center"
         }

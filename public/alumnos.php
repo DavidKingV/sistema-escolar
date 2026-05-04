@@ -1,25 +1,4 @@
-<?php
-require_once(__DIR__.'/../backend/vendor/autoload.php');
-
-use Vendor\Schoolarsystem\auth;
-use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\userData;
-use Vendor\Schoolarsystem\MicrosoftActions;
-use Vendor\Schoolarsystem\loadEnv;
-
-session_start();
-
-loadEnv::cargar();
-$VerifySession = auth::check();
-
-$dbConnection = new DBConnection();
-$connection = $dbConnection->getConnection();
-
-if (!$VerifySession['success']) {
-    header('Location: index.php?sesion=expired');
-    exit();
-}
-?>
+<?php include_once __DIR__.'/../backend/views/mainMenu.php';?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -35,8 +14,6 @@ if (!$VerifySession['success']) {
     <title>Alumnos</title>
 </head>
 <body>
-
-<?php include __DIR__.'/../backend/views/mainMenu.php'; ?>
 <!-- Content -->
 <div id="content">
     <div class="container-fluid">
@@ -58,8 +35,8 @@ if (!$VerifySession['success']) {
                                 <th class="text-center">Nombre</th>
                                 <th class="text-center">No. Control</th>
                                 <th class="text-center">Programa</th>
+                                <th class="text-center">Clave Grupo</th>
                                 <th class="text-center">Teléfono</th>
-                                <th class="text-center">Email</th>
                                 <th class="text-center">Estatus</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
@@ -265,6 +242,6 @@ if (!$VerifySession['success']) {
 <script src="js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="js/students/index.js"></script>
+<script type="module" src="js/students/index.js?v=1.1"></script>
 <!--<script type="module" src="public/js/students.js"></script>-->
 <script type="module" src="js/utils/sessions.js"></script>

@@ -143,4 +143,11 @@ class StudentsController{
         return $this->students->searchMicrosoftUser($displayName);
     }
 
+    public function assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail){
+        return $this->students->assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail);
+    }
+
+    public function verifyTokenStudent($studentId, $studentSecretKey){
+        return $this->students->verifyTokenStudent($studentId, $studentSecretKey);
+    }
 }

@@ -27,8 +27,8 @@ function initializeStudentDataTable() {
             { "data": "name", "className": "text-center py-2" },
             { "data": "no_control", "className": "text-center" },
             { "data": "group_name", "className": "text-center", "defaultContent": "No asignado"},
+            { "data": "group_key", "className": "text-center", "defaultContent": "No asignado"},    
             { "data": "phone", "className": "text-center" },
-            { "data": "email", "className": "text-center" },
             { 
                 "data": "academicalStatus",
                 "className": "text-center",
@@ -103,7 +103,7 @@ function initializeStudentsUsersTable() {
         },
         "columns": [
             // Define las columnas
-            { "data": "id", "className": "text-center" },
+            //{ "data": "id", "className": "text-center" },
             { "data": "name", "className": "text-center" },
             { "data": "user", "className": "text-center", "defaultContent": "No asignado"},
             {
@@ -133,6 +133,13 @@ function initializeStudentsUsersTable() {
                     }
                     return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle addUserStudents" data-bs-toggle="modal" data-bs-target="#StutentUserModal"><i class="bi bi-arrow-up-square-fill"></i></button>';
                 
+                },
+                "className": "text-center"
+            },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<button data-id="'+row.id+'" data-name="'+row.name+'" class="btn btn-primary btn-circle toMicrosoft" data-bs-toggle="modal" data-bs-target="#toMicrosoftModal">Asociar cuenta Microsoft</button>';            
                 },
                 "className": "text-center"
             }
@@ -446,8 +453,11 @@ function initializeGroupsDataTable() {
             { "data": "id_carreer", "className": "text-center" },
             { "data": "key", "className": "text-center" },
             { "data": "name", "className": "text-center" },
-            { "data": "startDate", "className": "text-center" },
-            { "data": "endDate", "className": "text-center" },
+            { "data": "members", "render": function(data, type, row) {
+                return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembros</a></span>`;
+            },
+                "className": "text-center" 
+            },
             {
                 "data": "actions",
                 "render": function(data, type, row) {
@@ -521,7 +531,7 @@ function initializeGroupsStudentsDataTable(groupId) {
         {
             "data": null,
             "render": function(data, type, row) {
-                return '</button><button data-id="'+row.student_id+'" class="btn btn-danger btn-circle deleteGroupStudent"><i class="bi bi-trash-fill"></i></button>';
+                return '</button><button data-id="'+row.student_id+'" data-group="'+row.id_group+'" class="btn btn-danger btn-circle deleteGroupStudent"><i class="bi bi-trash-fill"></i></button>';
                         
             },
             "className": "text-center"

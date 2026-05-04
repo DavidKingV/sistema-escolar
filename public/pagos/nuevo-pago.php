@@ -1,3 +1,4 @@
+<?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +16,14 @@
 </head>
 <body>
 
-    <?php include_once __DIR__.'/../../backend/views/mainMenu.php'; ?>
+
+    <div id="globalLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(33,37,41,0.5); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    </div>
       
     <div id="content">
         <div class="container-fluid">
@@ -140,7 +148,30 @@
                                     <option selected value="0">Concepto</option>
                                     <option value="Inscripción">Inscripción</option>
                                     <option value="Mensualidad">Mensualidad</option>
+                                    <option value="Nivelación">Nivelación</option>
+                                    <option value="Examen Extraordinario">Examen Extraordinario</option>
+                                    <option value="Constancia de Estudios">Constancia de Estudios</option>
+                                    <option value="Bordado">Bordado</option>
                                 </select>
+                            </div>
+                            <div class="col-md" id="subjectConceptDiv" hidden>
+                                <label for="subjectConcept">Materia</label>
+                                <label id="subjectConcept-error" class="error text-bg-danger" for="subjectConcept" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <select class="form-select" id="subjectConcept" name="subjectConcept" aria-label="Floating label select example">
+                                    <option selected value="0">Asignatura (solo para Examen Extraordinario)</option>
+                                </select>
+                            </div>
+                            <div class="col-md" id="childSubjectDiv" style="display: none;">
+                                <label for="childSubjectName">SubMateria</label>
+                                <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <select class="form-select" id="childSubjectName" name="childSubjectName" aria-label="Floating label select example">
+                                    <option selected value="0">Asignatura (solo para Examen Extraordinario)</option>
+                                </select>
+                            </div>
+                            <div class="col-md" id="careerDiv" hidden>
+                                <label for="careerName">Carrera</label>
+                                <label id="careerName-error" class="error text-bg-danger" for="careerName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                                <input type="text" class="form-control" id="careerName" name="careerName">
                             </div>
                             <div class="col-md">
                                 <label for="paymentMonth">Mes</label>                                
@@ -210,7 +241,19 @@
                                     <option value="1" data-id="1">Factura</option>
                                 </select>
                             </div>
-                        </div>                        
+                        </div>    
+                        <div class="row g-2 py-2">
+                            <div class="col-md">
+                                <label for="paymentComments">Comentarios</label>
+                                <textarea type="text" class="form-control" id="paymentComments" name="paymentComments" placeholder="Comentarios sobre el pago"></textarea>
+                            </div>
+                        </div>
+                        <div class="row g-2 py-2">
+                            <div class="col-md">
+                                <label for="toEmail">Enviar por email</label>
+                                <input class="form-check-input" type="checkbox" id="toEmail" name="toEmail" checked>   
+                            </div> 
+                        </div>                    
                         <div class="row g-2 py-4">
                             <div class="col-md">
                                 <button type="submit" class="btn btn-primary">Registrar pago</button>
@@ -248,6 +291,6 @@
 <script src="../js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="../js/payments/index.js"></script>
+<script type="module" src="../js/payments/index.js?version=2"></script>
 <script type="module" src="../js/utils/sessions.js"></script>
 

@@ -92,6 +92,22 @@ class PaymentsController{
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
+        $paymentConcept = $paymentDataArray['paymentConcept'];
+
+        if (!empty($paymentDataArray['subjectConcept'])) {
+            // subjectConcept está definido y no vacío
+            $paymentConcept .= ' ' . $paymentDataArray['subjectConcept'];
+            
+            if (!empty($paymentDataArray['childSubjectName'])) {
+                $paymentConcept .= '-' . $paymentDataArray['childSubjectName'];
+            }
+        } else {
+            // subjectConcept no definido o vacío → usar paymentMonth
+            if (!empty($paymentDataArray['paymentMonth'])) {
+                $paymentConcept .= ' ' . $paymentDataArray['paymentMonth'];
+            }
+        }
+
         $date = $paymentDataArray['paymentDate'] ?? date('Y-m-d');
         $extra = $paymentDataArray['paymentExtra'] ?? 0;
         $registredBy = $_SESSION['userId'] ?? NULL;
@@ -106,10 +122,11 @@ class PaymentsController{
             $date,
             $paymentDataArray['paymentMethod'],
             $isInvoice,
-            $paymentDataArray['paymentConcept'],
+            $paymentConcept,
             $paymentDataArray['paymentPrice'],
             $extra,
             $paymentDataArray['paymentTotal'],
+            $paymentDataArray['paymentComments'] ?? '',
             $registredBy
         );
     }
@@ -168,5 +185,21 @@ class PaymentsController{
         }
         return $this->payments->checkIfPaymentMade($studentId, $paymentDay);
     
+    }
+
+    public function sendPaymentReceipt($studentId, $paymentId){
+        $verifySession = auth::check();
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->sendPaymentReceipt($studentId, $paymentId);
+    }
+
+    public function sendPaymentByEmail($studentId, $paymentId){
+        $verifySession = auth::check();
+        if(!$verifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+        return $this->payments->sendPaymentByEmail($studentId, $paymentId);
     }
 }

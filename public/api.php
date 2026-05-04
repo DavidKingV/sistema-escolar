@@ -125,5 +125,10 @@ if(!isset($data['action'])){
             $makeOverId = $data['makeOverId'] ?? null;
             responseJson($grades->getMakeOverGrades($makeOverId));
             break;
+
+        case 'getGroupCareer':
+            $studentId = $data['studentId'] ?? null;
+            responseJson($groups->getGroupCareer($studentId));
+            break;
     }
 }

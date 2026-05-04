@@ -1,10 +1,9 @@
 <?php
 require __DIR__.'/../../backend/vendor/autoload.php';
+include __DIR__.'/../../backend/views/mainMenu.php';
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\PermissionHelper;
-
-session_start();
 
 $VerifySession = auth::check();
 
@@ -32,8 +31,6 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     <title>Detalles del grupo</title>
 </head>
 <body>
-
-    <?php include __DIR__.'/../../backend/views/mainMenu.php'; ?>
       
     <div id="content">
         <div class="container-fluid">

@@ -195,7 +195,16 @@ class StudentsModel{
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
-            $sql = "SELECT groups.nombre as nombre_grupo, students.* FROM students LEFT JOIN groups ON students.id_group = groups.id";
+            $sql = "SELECT 
+    s.*,
+    g.nombre AS nombre_grupo,
+    g.clave AS clave_grupo
+FROM students s
+LEFT JOIN student_groups sg 
+    ON s.id = sg.student_id AND sg.is_primary = TRUE
+LEFT JOIN groups g 
+    ON sg.group_id = g.id;
+";
             $query = $this->connection->query($sql);
 
             if(!$query){
@@ -220,6 +229,7 @@ class StudentsModel{
                             'phone'           => $row['telefono'],
                             'email'           => $row['email'],
                             'group_name'      => $row['nombre_grupo'],
+                            'group_key'       => $row['clave_grupo'],
                             'academicalStatus'=> $row['academical_status']
                         ];
 
@@ -287,9 +297,12 @@ class StudentsModel{
             if($studentDataArray['controlSepNumber'] === ''){
                 $studentDataArray['controlSepNumber'] = NULL;
             }
+
+            $studentPhone = $studentDataArray['countryCode'] . $studentDataArray['studentPhone'];
+
             $sql = "INSERT INTO students (no_control, noControlSep, nombre, genero, nacimiento, estado_civil, nacionalidad, curp, telefono, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('ssssssssss', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail']);
+            $stmt->bind_param('ssssssssss', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentPhone, $studentDataArray['studentEmail']);
             $stmt->execute();
 
             if($stmt->affected_rows > 0){
@@ -933,4 +946,73 @@ class StudentsModel{
                 }
             }
     }
+
+    public function assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail){
+        $VerifySession = auth::check();
+        if(!$VerifySession['success']){
+            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }else{
+            $sql = "INSERT INTO microsoft_students (id, student_id, displayName, mail) VALUES (?, ?, ?, ?)";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param('siss', $microsoftUserId, $studentId, $microsoftDisplayName, $microsoftEmail);
+            $stmt->execute();
+
+            if($stmt->affected_rows > 0){
+                $stmt->close();
+                
+                //se elimina el usuario local si existe
+                $sqlDeleteLocalUser = "DELETE FROM login_students WHERE student_id = ?";
+                $stmtDelete = $this->connection->prepare($sqlDeleteLocalUser);
+                $stmtDelete->bind_param('i', $studentId);
+                $stmtDelete->execute();
+                $stmtDelete->close();
+
+                $this->connection->close();
+                return array("success" => true, "message" => "Usuario de Microsoft asignado correctamente");
+            }else{
+                $stmt->close();
+                $this->connection->close();
+                return array("success" => false, "message" => "Error al asignar el usuario de Microsoft, por favor intente de nuevo más tarde");
+            }
+        }
+    }
+
+    public function verifyTokenStudent($studentId, $token){
+        $VerifySession = auth::check();
+        if(!$VerifySession['success']){
+            return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
+        }
+
+        $secretKey = $_ENV['KEY'];
+
+        // Asegurar que el token venga completo
+        $token = urldecode($token);
+
+        // Decodificar
+        $decodedToken = JWT::decode($token, new Key($secretKey, 'HS256'));
+
+        // El token debe contener el mismo studentId
+        if ($decodedToken->studentId != $studentId) {
+            return [
+                "success" => true,
+                "valid"   => false,
+                "message" => "Token inválido",
+                "token"   => $decodedToken
+            ];
+        }
+
+        // Validar estudiante
+        $sql = "SELECT * FROM students WHERE id = ?";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param('i', $studentId);
+        $stmt->execute();
+        $query = $stmt->get_result();
+
+        if($query->num_rows > 0){
+            return ["success" => true, "valid" => true, "message" => "Token válido", "token" => $decodedToken];
+        }
+
+        return ["success" => true, "valid" => false, "message" => "Token inválido"];
+    }
+
 }

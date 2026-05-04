@@ -38,6 +38,10 @@ class PracticalHoursController{
     }
 
     public function getStudentlHoursData($studentId){
-        return $this->practicalHours->getStudentlHoursData($studentId);
+        return $this->practicalHours->getStudentHoursData($studentId);
+    }
+
+    public function deleteHour($hourId){
+        return $this->practicalHours->deleteHour($hourId);
     }
 }

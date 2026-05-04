@@ -34,6 +34,11 @@ return [
         'add_groups',
         'edit_groups',
         'delete_groups',
+        'manage_payments',
+        'add_payments',
+        'approve_admissions',
+        'delete_practical_hours',
+        'edit_practical_hours',
         // etc...
     ]
 ];

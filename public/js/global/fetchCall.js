@@ -11,7 +11,8 @@ export function sendFetch(url, method, data) {
         options.body = JSON.stringify(data);
     }
 
-    return fetch(url, options);
+    return fetch(url, options)
+        .then(response => response.json()); 
 }
 
 

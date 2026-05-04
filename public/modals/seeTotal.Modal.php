@@ -26,10 +26,6 @@ $studentId = $_POST['id'] ?? NULL;
 $totalHours = $_POST['total'] ?? NULL;
 
 ?>
-
-<p class="placeholder-glow">
-    <span class="placeholder col-12" id="placeholderStudent"><h3 id="studentNameH"></h3></span>
-</p></div>
 <div>
     <div class="text"><h5> Total de horas practicas: <?php echo $totalHours ?></h5></div>
     <hr class="border-top">
@@ -49,47 +45,77 @@ $totalHours = $_POST['total'] ?? NULL;
 </div>
 
 <script type="module">
-    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, selectAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
+    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert, confirmAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
     import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
     import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/dataTables.js';
 
     const callback = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
+    const apiStudents = '<?php echo $_ENV['BASE_URL_BACKEND']; ?>/students/routes.php';
     const studentId = '<?php echo $studentId; ?>';
 
-    $(function() {
+    $(async function() {
 
-        initializeDataTable('#studentHoursDataTable', callback, {studentId: studentId, action: 'getStudentlHoursData' }, [
+        await initializeDataTable('#studentHoursDataTable', callback, {studentId: studentId, action: 'getStudentlHoursData' }, [
         { "data": "date", "className": "text-center" },
         { "data": "hours", "className": "text-center" },
-        { "data": "status", "className": "text-center" },             
+        { "data": "status", "className": "text-center" }, 
+        { 
+            "data": "actions",
+            "render": function(data, type, row) {
+                if (!data) return "";
+                return `<button data-id="`+row.id+`" class="btn btn-danger btn-circle deleteHour"><i class="bi bi-trash-fill"></i></button>`;
+            },
+            "className": "text-center"
+        },            
         ]);    
 
-        getStudentName(studentId);
+        await getStudentName(studentId);
 
     });
 
     const getStudentName = async (studentId) => {
-    try{
-        sendFetch(callback, 'POST', { action: 'getStudentName', studentId: studentId })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
+        try{
+            sendFetch(apiStudents, 'POST', { action: 'getStudentName', studentId: studentId })                
                 .then(data => {
                     if (data.success) {
-                        $("#studentNameH").text(data.studentName);
+                        $("#seeTotalModalLabel").text(data.studentName);
                         $("#placeholderStudent").attr("class", "studentName");
                     } else {
                         errorAlert(data.message);
                     }
-                });     
-    }catch(error){
-        errorAlert(error);
+                })
+            .catch(error => {
+                console.error('Error:', error);
+                return { success: false, message: error}; // Asegúrate de que se devuelve en caso de error
+            });  
+        }catch(error){
+            errorAlert(error);
+        }
     }
-}
+
+    $("#studentHoursDataTable").on("click", ".deleteHour", function(){        
+        let hourId = $(this).data("id");
+
+        confirmAlert('¿Estás seguro de eliminar esta hora?', 'Sí, eliminar', 'Cancelar')
+        .then((result) => {
+            if (result.isConfirmed) {
+                sendFetch(callback, 'POST', { action: 'deleteHour', hourId: hourId })                
+                .then(data => {
+                    if (data.success) {
+                        successAlert(data.message);
+                        $('#studentHoursDataTable').DataTable().ajax.reload();
+                    } else {
+                        errorAlert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    return { success: false, message: error}; // Asegúrate de que se devuelve en caso de error
+                });  
+            }
+        });
+    });
 
 
 </script>

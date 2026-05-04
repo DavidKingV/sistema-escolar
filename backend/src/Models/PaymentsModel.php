@@ -4,6 +4,8 @@ namespace Vendor\Schoolarsystem\Models;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Models\FacturapiModel;
 use Vendor\Schoolarsystem\Models\StudentsModel;
+use Vendor\Schoolarsystem\Models\EmailsModel;
+use Vendor\Schoolarsystem\Helpers\RandomPasswords;
 use Facturapi\Facturapi;
 use mysqli_sql_exception;
 
@@ -11,11 +13,15 @@ class PaymentsModel{
     private $connection;
     private $facturapiModel;
     private $studentsModel;
+    private $emailModel;
+    private $passwordsHelper;
 
     public function __construct(DBConnection $dbConnection) {
         $this->connection = $dbConnection->getConnection();
         $this->facturapiModel = new FacturapiModel($dbConnection);
         $this->studentsModel = new StudentsModel($dbConnection);
+        $this->emailModel = new EmailsModel();
+        $this->passwordsHelper = new RandomPasswords();
     }
 
     public function verifyTaxData($studentId){
@@ -39,11 +45,13 @@ class PaymentsModel{
         return $response;
     }
 
-    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy){
+    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy){
         try {
-            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, registred_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
+
+            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("issisiiii", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $registredBy);
+            $stmt->bind_param("isiisiiisis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
@@ -74,10 +82,10 @@ class PaymentsModel{
                         $response = array("success" => false, "message" => "Pago registrado pero error al generar la factura: " . $invoiceResponse['message']);
                     }
                 }else{
-                    $response = array("success" => true, "message" => "Pago registrado exitosamente");
+                    $response = array("success" => true, "message" => "Pago registrado exitosamente", "paymentId" => $paymentId);
                 }
             } else {
-                $response = array("success" => false, "message" => "Error al registrar el pago");
+                $response = array("success" => false, "message" => "Error al registrar el pago". $stmt->error);
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud de pago");
@@ -160,7 +168,7 @@ class PaymentsModel{
                     "concept" => $row['concept']
                 );
             } else {
-                $response = array("success" => false, "message" => "No se encontraron pagos pendientes");
+                $response = array("success" => true, "message" => "No se encontraron pagos");
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud");
@@ -194,7 +202,7 @@ class PaymentsModel{
 
     public function getPaymentHistory($studentId){
         try {
-            $sql = "SELECT concept, total, payment_date FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
+            $sql = "SELECT id, id_student, concept, total, payment_date FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("i", $studentId);
             $stmt->execute();
@@ -204,6 +212,8 @@ class PaymentsModel{
             
             while($row = $result->fetch_assoc()){
                 $response[] = [
+                    "id" => $row['id'],
+                    "id_student" => $row['id_student'],
                     "concept" => $row['concept'],
                     "amount" => $row['total'],
                     "payment_date" => $row['payment_date']
@@ -239,7 +249,7 @@ class PaymentsModel{
 FROM students_payments
 WHERE id_student = ?
   AND YEAR(payment_date) = YEAR(CURDATE())
-  AND MONTH(payment_date) = MONTH(CURDATE())
+  AND MONTH(payment_date) = MONTH(CURDATE()) AND concept LIKE 'Mensualidad%'
 ORDER BY payment_date ASC
 LIMIT 1;";
             $stmt = $this->connection->prepare($sql);
@@ -260,7 +270,7 @@ LIMIT 1;";
                     )
                 );
             }else{
-                $response = array("success" => false, "message" => "No se han encontrado pagos para este mes");
+                $response = array("success" => true, "message" => "No se han encontrado pagos para este mes, se podrian aplicar recargos.", "data" => ["status" => "PENDING"] );
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud");
@@ -271,5 +281,82 @@ LIMIT 1;";
         }
         return $response;
     }
+
+
+
+    public function sendPaymentReceipt($studentId, $paymentId){
+        try {
+            // Obtener datos del pago
+            $sql = "SELECT sp.*, sd.email, sd.nombre AS student_name
+                    FROM students_payments sp
+                    JOIN students sd ON sp.id_student = sd.id
+                    WHERE sp.id = ? AND sp.id_student = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("ii", $paymentId, $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                return array("success" => false, "message" => "Pago no encontrado");
+            }
+
+            $paymentData = $result->fetch_assoc();
+
+            $sendReceiptEmail = $this->emailModel->SendPaymentEmail(
+                $paymentData['id'],
+                $paymentData,
+                "https://controlescolar.esmefis.edu.mx/my-receipt.php?id={$paymentData['id']}",
+                $paymentData['password'],
+                $paymentData['email']
+            );
+
+            if ($sendReceiptEmail['success']) {
+                return array("success" => true, "message" => "Comprobante enviado exitosamente");
+            } else {
+                return array("success" => false, "message" => "Error al enviar el comprobante: " . $sendReceiptEmail['message']);
+            }
+
+
+        } catch (mysqli_sql_exception $e) {
+            return array("success" => false, "message" => "Error al procesar la solicitud");
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
+
+
+
+    public function getReceiptDetailsData($receiptId){
+        try {
+            $sql = "SELECT students_payments.*, students.nombre AS student_name, students.email AS student_email
+                    FROM students_payments
+                    JOIN students ON students_payments.id_student = students.id
+                    WHERE students_payments.id = ?";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("i", $receiptId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                return array("success" => false, "message" => "Recibo no encontrado");
+            }
+
+            return array("success" => true, "data" => $result);
+
+        } catch (mysqli_sql_exception $e) {
+            return array("success" => false, "message" => "Error al procesar la solicitud");
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
+
+    public function sendPaymentByEmail($studentId, $paymentId){
+        return $this->sendPaymentReceipt($studentId, $paymentId);
+    }
+
 }
 ?>
