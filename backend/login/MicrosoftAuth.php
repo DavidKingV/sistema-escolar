@@ -25,9 +25,9 @@ try {
     $user = (new User);
 
     if($tokens->access_token) {
-        
+        $baseUrl = $_ENV['BASE_URL'] ?? '.';
         echo "<script>
-             window.opener.postMessage({ MiAccto: '{$tokens->access_token}' }, '*');
+             window.opener.postMessage({ MiAccto: '{$tokens->access_token}', redirect: '{$baseUrl}/dashboard.php' }, '*');
             window.close();
         </script>";
         

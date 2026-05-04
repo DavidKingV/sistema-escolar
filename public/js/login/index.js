@@ -16,7 +16,7 @@ function login(data){
                 showConfirmButton: false,
                 timer: 1500
             }).then(function(){
-                window.location.href = 'dashboard.php';
+                window.location.href = response.redirect || 'dashboard.php';
             });
         }else{
             Swal.fire({
@@ -38,7 +38,7 @@ $("#openInNewWindow").on("click", function(event) {
 window.addEventListener('message', function(event) {
     if (event.data.MiAccto) {
         // Redirigir a inicio.php
-        window.location.href = 'dashboard.php';
+        window.location.href = event.data.redirect || 'dashboard.php';
     } else if (event.data.error) {
         // Manejar errores de autenticación
         alert('Authentication failed');

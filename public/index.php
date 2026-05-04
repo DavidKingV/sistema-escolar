@@ -4,11 +4,15 @@ include __DIR__.'/../backend/login/index.php';
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\loadEnv;
+
+loadEnv::cargar();
+$baseUrl = $_ENV['BASE_URL'] ?? '.';
 
 if(isset($_GET['admin']) && $_GET['admin'] === 'false'){
     $loginControl = new LoginControl(new DBConnection());
     $loginControl->logout();
-    header('Location: index.php?session=closed');
+    header("Location: $baseUrl/index.php?session=closed");
     exit();
 }
 
@@ -19,7 +23,7 @@ $VerifySession = auth::check();
 $userId = $VerifySession['userId'] ?? NULL;
 
 if ($VerifySession['success'] && $userId != NULL) {
-  header('Location: dashboard.php?session=restored');
+  header("Location: $baseUrl/dashboard.php?session=restored");
   exit();
 }
 ?>

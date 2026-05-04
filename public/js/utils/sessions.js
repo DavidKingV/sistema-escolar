@@ -28,12 +28,13 @@ $("#endSession").click(function(e){
 
                         window.addEventListener('message', function(event) {
                             if (event.data.success) {
-                                window.location.href = "/index.php";
+                                window.location.href = data.microsoft_redirect || "/index.php";
                                 successAlert(event.data.message);
                             }
                         }, false);
+                    } else {
+                        window.location.href = data.redirect || "/public/index.php?sesion=close";
                     }
-                    window.location.href = "/public/index.php?sesion=close";
                 } else {
                     errorAlert(data.message);
                 }
