@@ -211,6 +211,13 @@ class PracticalHoursModel{
             }
         } catch (Exception $e) {
             $this->connection->rollback();
+            $errorCode = $e->getCode();
+            if ($errorCode == 1062) {
+                return [
+                    'success' => false,
+                    'message' => 'Ya existen horas registradas para este alumno en la fecha seleccionada'
+                ];
+            }
             return [
                 'success' => false,
                 'message' => $e->getMessage()
