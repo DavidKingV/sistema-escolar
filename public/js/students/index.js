@@ -3,7 +3,7 @@ import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStu
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { sendFetch } from '../global/fetchCall.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
-import { validateForm, capitalizeAllWords, capitalizeAll } from '../global/validate/index.js';
+import { validateForm, capitalizeAllWords, capitalizeAll, inputLowerCase } from '../global/validate/index.js';
 
 initializeStudentDataTable();
 initializeStudentsUsersTable();
@@ -18,6 +18,10 @@ $(function () {
         this.value = capitalizeAll(this.value);
     });
 
+    $("#studentEmail").on("input", function() {
+        this.value = inputLowerCase(this.value);
+    });
+
     validateForm('#addStudents', {
         studentName: {
             required: true,
@@ -26,6 +30,7 @@ $(function () {
         controlNumber: {
             required: true,
             minlength: 3,
+            noSpace: true
         },
         controlSepNumber: {
             required: {
@@ -34,6 +39,7 @@ $(function () {
                     return !$("#noExtraData").is(":checked");
                 }
             },
+            noSpace: true
         },
         studentGender: {
             required: true,
