@@ -25,8 +25,8 @@ class PracticalHoursController{
         return $this->practicalHours->confirmHours($hoursData);
     }
 
-    public function deteleEvent($hoursData){
-        return $this->practicalHours->deteleEvent($hoursData);
+    public function deleteEvent($hoursData){
+        return $this->practicalHours->deleteEvent($hoursData);
     }
 
     public function studentsHours(){
