@@ -9,11 +9,11 @@ $(function () {
   const calendarEl = document.getElementById("calendar");
 
   window.calendar = new FullCalendar.Calendar(calendarEl, {
-    googleCalendarApiKey: "AIzaSyCcaxsGuPO_EsFmAHGd3Ox0W83iJP4zdBI",
+    googleCalendarApiKey: "AIzaSyAZYDsaS_Gv_8vievQAPLB4Cd8D6K2AoAM",
 
     eventSources: [
       {
-        googleCalendarId: "somefiaf1776@gmail.com",
+        googleCalendarId: "atencion-alumnos@esmefis.edu.mx",
         color: "#f9cb7d",
         display: "block",
         textColor: "#0951f5",
