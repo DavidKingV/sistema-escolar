@@ -229,34 +229,49 @@ $dateTime = $_POST['dateTime'] ?? null;
     }
 
     const deleteEvent = async (data) => {
-        selectAlert('Por favor selecciona el motivo de la cancelación', 'Selecciona', {
-            '2': 'Falta de asistencia',
-            '3': 'Falta de notificada',
-            '4': 'Otro'
-        }, "Confirmar",
+        selectAlert(
+            'Por favor selecciona el motivo de la cancelación',
+            'Selecciona',
+            {
+                '1': 'Falta de asistencia',
+                '2': 'Falta de notificada',
+                '3': 'Otro'
+            },
+            "Confirmar",
             async (result) => {
 
                 data += `&deleteRazon=${result}`;
+
                 loadingAlert();
-                sendFetch(api, 'POST', { action: 'deteleEvent', hoursData: data })
-                    .then(async response => {
-                        if (!response.ok) {
-                            throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                        }
-                        return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                    })
+
+                sendFetch(api, 'POST', {
+                    action: 'deleteEvent',
+                    hoursData: data
+                })
                     .then(async data => {
+
                         if (data.success) {
+
                             successAlert(data.message);
+
                             $('#eventDetails').modal('hide');
+
                             window.calendar.refetchEvents();
+
                         } else {
-                            if (data.error != null) infoAlert(data.error);
+
+                            if (data.error != null)
+                                infoAlert(data.error);
+
                             errorAlert(data.message);
                         }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        errorAlert(err.message);
                     });
-            })
-
+            }
+        );
     }
 
     function reCalcularHoras() {

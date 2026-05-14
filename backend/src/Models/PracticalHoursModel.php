@@ -144,7 +144,7 @@ class PracticalHoursModel{
         }
     }
 
-    public function deteleEvent($hoursData) {
+    public function deleteEvent($hoursData) {
         $this->connection->begin_transaction();
         try {
             $sql = "UPDATE practical_hours SET status_id = ?, hours = 0 WHERE googleCalendarId = ?";

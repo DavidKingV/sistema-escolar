@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../backend/vendor/autoload.php';
+require __DIR__ . '/../backend/vendor/autoload.php';
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Controllers\StudentsController;
@@ -19,7 +19,8 @@ $groups = new GroupsController($connection);
 
 $grades = new GradesController($connection);
 
-function responseJson($data) {
+function responseJson($data)
+{
     header('Content-Type: application/json');
     echo json_encode($data);
 }
@@ -31,12 +32,12 @@ if ($data === null) {
     $data = $_POST;
 }
 
-if(!isset($data['action'])){
+if (!isset($data['action'])) {
     responseJson(['error' => 'Action not specified']);
     exit;
-}else{
+} else {
     switch ($data['action']) {
-        
+
         case 'updateStatus':
             $statusData = $data['statusData'] ?? null;
             parse_str($statusData, $statusData);
@@ -60,7 +61,7 @@ if(!isset($data['action'])){
             $subjectId = $data['subjectId'] ?? null;
             responseJson($subjects->getChildSubject($subjectId));
             break;
-        case'subjectsListTable':
+        case 'subjectsListTable':
             $careerId = $data['careerId'] ?? null;
             responseJson($subjects->subjectsListTable($careerId));
             break;
@@ -83,8 +84,8 @@ if(!isset($data['action'])){
             $studentId = $data['studentId'] ?? null;
             responseJson($practicalHours->getStudentlHoursData($studentId));
             break;
-        case 'getEventDetails' :
-            $eventId = $data['eventId'] ?? null;            
+        case 'getEventDetails':
+            $eventId = $data['eventId'] ?? null;
             responseJson($practicalHours->getEventDetails($eventId));
             break;
         case 'confirmHours':
@@ -97,10 +98,10 @@ if(!isset($data['action'])){
             parse_str($hoursData, $hoursData);
             responseJson($practicalHours->addStudentHours($hoursData));
             break;
-        case 'deteleEvent':
+        case 'deleteEvent':
             $hoursData = $data['hoursData'] ?? null;
             parse_str($hoursData, $hoursData);
-            responseJson($practicalHours->deteleEvent($hoursData));
+            responseJson($practicalHours->deleteEvent($hoursData));
             break;
 
         case 'getNoGroupStudentsList':
