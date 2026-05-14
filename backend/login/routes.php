@@ -45,6 +45,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
                 //se genera un cookie con el token
                 setcookie("auth", $jwt, time() + ($lifeTime), "/", "", 1, 1);
 
+                $login['redirect'] = ($_ENV['BASE_URL'] ?? '.') . '/dashboard.php';
                 header('Content-Type: application/json');
                 echo json_encode($login);
 
@@ -269,6 +270,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'logout':
             $control = new LoginControl($connection);
             $logout = $control -> logout();
+
+            $logout['redirect'] = ($_ENV['BASE_URL'] ?? '.') . '/index.php?sesion=close';
+            $logout['microsoft_redirect'] = ($_ENV['BASE_URL'] ?? '.') . '/index.php';
 
             header('Content-Type: application/json');
             echo json_encode($logout);

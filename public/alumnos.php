@@ -57,7 +57,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="statusModalLabel">Editar estatus del alumno</h1>
+        <h1 class="modal-title fs-5" id="statusModalLabel"></h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="edit_paciente">
@@ -242,6 +242,6 @@
 <script src="js/global/mainMenu.js"></script>
 
 <!-- Custom JS -->
-<script type="module" src="js/students/index.js?v=1.1"></script>
+<script type="module" src="js/students/index.js"></script>
 <!--<script type="module" src="public/js/students.js"></script>-->
 <script type="module" src="js/utils/sessions.js"></script>
