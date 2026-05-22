@@ -8,17 +8,30 @@ use Vendor\Schoolarsystem\Helpers\NumbersToLetters;
 $payments = new PaymentsModel(new DBConnection());
 $toLetters = new NumbersToLetters();
 
+// Mapeo de métodos de pago
+$paymentMethodLabels = [
+  1 => 'Efectivo',
+  3 => 'Transferencia bancaria',
+  4 => 'Tarjeta de crédito',
+  28 => 'Tarjeta de débito',
+];
+
+$paymentInvoiceLabels = [
+  0 => 'Recibo',
+  1 => 'Factura',
+];
+
 // Validar y sanitizar el parámetro 'id'
 $receiptId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$receiptId) {
-    die("ID de recibo inválido");
+  die("ID de recibo inválido");
 }
 
 $result = $payments->getReceiptDetailsData($receiptId);
 
 if (!$result['success']) {
-    die("No se encontraron datos para el recibo.");
+  die("No se encontraron datos para el recibo.");
 }
 
 $dataResult = $result['data'];
@@ -26,12 +39,12 @@ $rows = [];
 
 // Almacenar todos los registros en un arreglo
 while ($row = $dataResult->fetch_assoc()) {
-    $rows[] = $row;
+  $rows[] = $row;
 }
 
 // Verificar que se haya obtenido al menos un registro
 if (empty($rows)) {
-    die("El recibo no tiene datos de detalles.");
+  die("El recibo no tiene datos de detalles.");
 }
 
 // Usar la primera fila para datos generales (si estos se encuentran en cada registro)
@@ -41,6 +54,13 @@ $headerData = $rows[0];
 $formattedTotal = "$" . number_format($headerData['total'], 2);
 $letterTotal = $toLetters->convertirEurosEnLetras($headerData['total']);
 $formattedDate = date("d-m-Y", strtotime($headerData['payment_date']));
+
+// FIX: mapear el entero a una etiqueta legible
+$paymentMethodId = (int) ($headerData['payment_method'] ?? 0);
+$paymentMethodLabel = $paymentMethodLabels[$paymentMethodId] ?? "Método #$paymentMethodId";
+
+$paymentInvoiceId = (int) ($headerData['invoice'] ?? 0);
+$paymentInvoiceLabel = $paymentInvoiceLabels[$paymentInvoiceId] ?? "Tipo #$paymentInvoiceId";
 
 // Armar la plantilla HTML del PDF
 $pdf = '<!DOCTYPE html>
@@ -66,7 +86,7 @@ $pdf = '<!DOCTYPE html>
         <div><span>PACIENTE: </span> ' . $headerData['student_name'] . '</div>
         <div><span>FECHA DE CREACIÓN: </span> ' . $formattedDate . '</div>
         <div><span>FECHA DE IMPRESIÓN: </span> ' . date("d-m-Y") . '</div>
-        <div><span>METODO DE PAGO: </span> ' . $headerData['payment_method'] . '/' . $headerData['tipo'] . '</div>
+        <div><span>MÉTODO DE PAGO: </span> ' . $paymentMethodLabel . '/' . $paymentInvoiceLabel . '</div>
       </div>
     </header>
     <main>
@@ -83,7 +103,7 @@ $pdf = '<!DOCTYPE html>
 
 // Recorrer el arreglo de filas para generar cada línea del detalle
 foreach ($rows as $row) {
-    $pdf .= '<tr>
+  $pdf .= '<tr>
                 <td class="desc">' . $row['concept'] . '</td>
                 <td class="unit">' . $row['cost'] . '</td>
                 <td class="unit">' . $row['extra'] . '</td>
