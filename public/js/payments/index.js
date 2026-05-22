@@ -204,30 +204,57 @@ const VerifyMonthlyPayment = async (studentId) => {
 
     // Inicializar DataTable con renderers seguros
     initializeDataTable(
-      '#paymentHistoryTable',
+      "#paymentHistoryTable",
       phpPath,
-      { action: 'GetPaymentHistory', studentId },
+      { action: "GetPaymentHistory", studentId },
       [
-        { data: 'concept', className: 'text-center', render: (d) => escapeHtml(d) },
-        { data: 'amount', className: 'text-center', render: (d) => $.fn.dataTable.render.number(',', '.', 2, '$').display(d) },
-        { data: 'payment_date', className: 'text-center', render: (d) => escapeHtml(d) },
+        {
+          data: "concept",
+          className: "text-center",
+          render: (d) => escapeHtml(d),
+        },
+        {
+          data: "amount",
+          className: "text-center",
+          render: (d) =>
+            $.fn.dataTable.render.number(",", ".", 2, "$").display(d),
+        },
+        {
+          data: "payment_date",
+          className: "text-center",
+          render: (d) => escapeHtml(d),
+        },
+        {
+          data: "payment_method",
+          className: "text-center",
+          render: (d) => {
+            const methods = {
+              1: "Efectivo",
+              3: "Transferencia bancaria",
+              4: "Tarjeta de crédito",
+              28: "Tarjeta de débito",
+            };
+
+            return escapeHtml(methods[String(d)] || "Desconocido");
+          },
+        },
         {
           data: null,
-          className: 'text-center',
+          className: "text-center",
           orderable: false,
           render: (_, __, row) => {
-            const pid = escapeHtml(String(row.id ?? ''));
-            const sid = escapeHtml(String(row.id_student ?? ''));
+            const pid = escapeHtml(String(row.id ?? ""));
+            const sid = escapeHtml(String(row.id_student ?? ""));
             return `<button class="btn btn-sm btn-primary sendPayment" data-id="${pid}" data-student="${sid}">Enviar</button>`;
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
 
     showLoadedContent();
     await SurchargeForLatePayment(response.payment_day, studentId);
   } catch (error) {
-    errorAlert('Ocurrió un error inesperado al verificar el pago mensual.');
+    errorAlert("Ocurrió un error inesperado al verificar el pago mensual.");
   } finally {
     //Swal.close?.();
   }
