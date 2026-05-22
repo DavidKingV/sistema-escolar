@@ -9,14 +9,16 @@ use Vendor\Schoolarsystem\Helpers\RandomPasswords;
 use Facturapi\Facturapi;
 use mysqli_sql_exception;
 
-class PaymentsModel{
+class PaymentsModel
+{
     private $connection;
     private $facturapiModel;
     private $studentsModel;
     private $emailModel;
     private $passwordsHelper;
 
-    public function __construct(DBConnection $dbConnection) {
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection->getConnection();
         $this->facturapiModel = new FacturapiModel($dbConnection);
         $this->studentsModel = new StudentsModel($dbConnection);
@@ -24,7 +26,8 @@ class PaymentsModel{
         $this->passwordsHelper = new RandomPasswords();
     }
 
-    public function verifyTaxData($studentId){
+    public function verifyTaxData($studentId)
+    {
         try {
             $sql = "SELECT * FROM invoice_data WHERE id_student = ?";
             $stmt = $this->connection->prepare($sql);
@@ -45,7 +48,8 @@ class PaymentsModel{
         return $response;
     }
 
-    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy){
+    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy)
+    {
         try {
             $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
 
@@ -73,19 +77,19 @@ class PaymentsModel{
                     ],
                     'email' => $studentMail,
                 ];
-                
-                if($isInvoice){
+
+                if ($isInvoice) {
                     $invoiceResponse = $this->facturapiModel->createReceipt($paymentData, $paymentId);
-                    if($invoiceResponse['success']){
+                    if ($invoiceResponse['success']) {
                         $response = array("success" => true, "message" => "Pago e invoice registrados exitosamente", "invoiceId" => $invoiceResponse['receipt']);
-                    }else{
+                    } else {
                         $response = array("success" => false, "message" => "Pago registrado pero error al generar la factura: " . $invoiceResponse['message']);
                     }
-                }else{
+                } else {
                     $response = array("success" => true, "message" => "Pago registrado exitosamente", "paymentId" => $paymentId);
                 }
             } else {
-                $response = array("success" => false, "message" => "Error al registrar el pago". $stmt->error);
+                $response = array("success" => false, "message" => "Error al registrar el pago" . $stmt->error);
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud de pago");
@@ -97,7 +101,8 @@ class PaymentsModel{
         return $response;
     }
 
-    public function getStudentsPayMount(){
+    public function getStudentsPayMount()
+    {
         try {
             $sql = "SELECT students.id, students.nombre, students_payments_amounts.monthly_amount FROM students LEFT JOIN students_payments_amounts ON students.id = students_payments_amounts.id_student ORDER BY id;";
             $stmt = $this->connection->prepare($sql);
@@ -105,11 +110,11 @@ class PaymentsModel{
             $result = $stmt->get_result();
 
             $response = array();
-            if(!$result){
+            if (!$result) {
                 $response = array("success" => false, "message" => "Error al obtener los grupos");
-            }else{
-                if($result->num_rows > 0){
-                    while($row = $result->fetch_assoc()){
+            } else {
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
                         $response[] = array(
                             "success" => true,
                             "id" => $row['id'],
@@ -117,7 +122,7 @@ class PaymentsModel{
                             "amount" => $row['monthly_amount']
                         );
                     }
-                }else{
+                } else {
                     $response = array("success" => false, "message" => "No se encontraron grupos");
                 }
             }
@@ -131,7 +136,8 @@ class PaymentsModel{
         return $response;
     }
 
-    public function setStudentPayMount($studentId, $amount){
+    public function setStudentPayMount($studentId, $amount)
+    {
         try {
             $sql = "INSERT INTO students_payments_amounts (id_student, monthly_amount) VALUES (?, ?) ON DUPLICATE KEY UPDATE monthly_amount = ?";
             $stmt = $this->connection->prepare($sql);
@@ -151,7 +157,8 @@ class PaymentsModel{
         return $response;
     }
 
-    public function verifyMonthlyPayment($studentId){
+    public function verifyMonthlyPayment($studentId)
+    {
         try {
             $sql = "SELECT * FROM payments_dates WHERE id_student = ?";
             $stmt = $this->connection->prepare($sql);
@@ -180,7 +187,8 @@ class PaymentsModel{
         return $response;
     }
 
-    public function savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount){
+    public function savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount)
+    {
         try {
             $sql = "INSERT INTO payments_dates (id_student, payment_day, concept, amount) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE payment_day = ?, concept = ?, amount = ?";
             $stmt = $this->connection->prepare($sql);
@@ -189,7 +197,7 @@ class PaymentsModel{
 
             $response = ($stmt->affected_rows > 0)
                 ? array("success" => true, "message" => "Día de pago guardado/actualizado exitosamente")
-                : array("success" => false, "message" => "Error al actualizar el día de pago");
+                : array("success" => false, "message" => "Error al definir/actualizar el día de pago");
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => $e->getMessage());
         } finally {
@@ -200,29 +208,31 @@ class PaymentsModel{
         return $response;
     }
 
-    public function getPaymentHistory($studentId){
+    public function getPaymentHistory($studentId)
+    {
         try {
-            $sql = "SELECT id, id_student, concept, total, payment_date FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
+            $sql = "SELECT id, id_student, concept, total, payment_date, payment_method FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("i", $studentId);
             $stmt->execute();
             $result = $stmt->get_result();
 
             $response = [];
-            
-            while($row = $result->fetch_assoc()){
+
+            while ($row = $result->fetch_assoc()) {
                 $response[] = [
                     "id" => $row['id'],
                     "id_student" => $row['id_student'],
                     "concept" => $row['concept'],
                     "amount" => $row['total'],
-                    "payment_date" => $row['payment_date']
+                    "payment_date" => $row['payment_date'],
+                    "payment_method" => $row['payment_method'] ?? null
                 ];
             }
-              
+
             return !empty($response)
-            ? ['success' => true, 'data' => $response]
-            : ['success' => false, 'message' => 'No se encontraron pagos'];
+                ? ['success' => true, 'data' => $response]
+                : ['success' => false, 'message' => 'No se encontraron pagos'];
 
         } catch (mysqli_sql_exception $e) {
             $response = ["success" => false, "message" => "Error al procesar la solicitud"];
@@ -232,10 +242,11 @@ class PaymentsModel{
             }
         }
         return $response;
-    
+
     }
 
-    public function checkIfPaymentMade($studentId, $paymentDay){
+    public function checkIfPaymentMade($studentId, $paymentDay)
+    {
         try {
             $sql = "SELECT 
     id_student,
@@ -257,7 +268,7 @@ LIMIT 1;";
             $stmt->execute();
             $result = $stmt->get_result();
 
-            if($result->num_rows > 0){
+            if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $response = array(
                     "success" => true,
@@ -269,8 +280,8 @@ LIMIT 1;";
                         "extra" => $row['extra']
                     )
                 );
-            }else{
-                $response = array("success" => true, "message" => "No se han encontrado pagos para este mes, se podrian aplicar recargos.", "data" => ["status" => "PENDING"] );
+            } else {
+                $response = array("success" => true, "message" => "No se han encontrado pagos para este mes, se podrian aplicar recargos.", "data" => ["status" => "PENDING"]);
             }
         } catch (mysqli_sql_exception $e) {
             $response = array("success" => false, "message" => "Error al procesar la solicitud");
@@ -284,7 +295,8 @@ LIMIT 1;";
 
 
 
-    public function sendPaymentReceipt($studentId, $paymentId){
+    public function sendPaymentReceipt($studentId, $paymentId)
+    {
         try {
             // Obtener datos del pago
             $sql = "SELECT sp.*, sd.email, sd.nombre AS student_name
@@ -328,7 +340,8 @@ LIMIT 1;";
 
 
 
-    public function getReceiptDetailsData($receiptId){
+    public function getReceiptDetailsData($receiptId)
+    {
         try {
             $sql = "SELECT students_payments.*, students.nombre AS student_name, students.email AS student_email
                     FROM students_payments
@@ -354,7 +367,8 @@ LIMIT 1;";
         }
     }
 
-    public function sendPaymentByEmail($studentId, $paymentId){
+    public function sendPaymentByEmail($studentId, $paymentId)
+    {
         return $this->sendPaymentReceipt($studentId, $paymentId);
     }
 
