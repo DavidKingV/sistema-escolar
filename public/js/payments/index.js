@@ -79,6 +79,31 @@ const requestJson = async (url, action, payload = {}) => {
 };
 
 // =======================
+// Variable global para snapshot
+// =======================
+let originalPaymentData = {};
+
+const hasPaymentChanges = () => {
+  const currentData = getCurrentPaymentFormData();
+
+  return Object.keys(originalPaymentData).some(
+    (key) => currentData[key] !== originalPaymentData[key],
+  );
+};
+
+const observePaymentChanges = () => {
+  $("#updatePaymentStudent")
+    .find("input, textarea, select")
+    .off("input change")
+    .on("input change", () => {
+      setTimeout(() => {
+        const changed = hasPaymentChanges();
+        $("#savePaymentChanges").prop("disabled", !changed);
+      }, 0);
+    });
+};
+
+// =======================
 // Flujo: Estudiantes
 // =======================
 const getStudentsNames = async () => {
@@ -196,6 +221,32 @@ const AddPayment = async (serializedForm) => {
     }
   } catch (err) {
     errorAlert("Error inesperado al registrar el pago.");
+  }
+};
+
+const UpdatePayment = async (serializedForm) => {
+  try {
+    const resp = await enviarPeticionAjaxAction(
+      phpPath,
+      "POST",
+      "UpdatePayment",
+      serializedForm,
+    );
+
+    const response = typeof resp === "string" ? JSON.parse(resp) : resp;
+
+    if (response.success) {
+      successAlert(response.message);
+
+      $("#studentPaymentEditModal").modal("hide");
+
+      $("#paymentHistoryStudentTable").DataTable().ajax.reload(null, false);
+      $("#studentPaymentsModal").modal("show");
+    } else {
+      errorAlert(response.message || "No se pudo actualizar.");
+    }
+  } catch (error) {
+    errorAlert("Error inesperado al actualizar el pago.");
   }
 };
 
@@ -329,20 +380,227 @@ const VerifyMonthlyPayment = async (studentId) => {
   }
 };
 
+const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
+  try {
+    if (!isValidId(studentId)) {
+      infoAlert("Estudiante inválido.");
+      return;
+    }
+
+    const response = await requestJson(phpPath, "VerifyMonthlyPayment", {
+      studentId,
+    });
+
+    if (!response.success) {
+      infoAlert(
+        escapeHtml(response.message || "No hay configuración de pago."),
+      );
+      return;
+    }
+
+    if (action === "view") {
+      $("#idStudentDB").val(studentId);
+
+      // Inicializar DataTable con renderers seguros
+      initializeDataTable(
+        "#paymentHistoryStudentTable",
+        phpPath,
+        { action: "GetPaymentHistory", studentId },
+        [
+          {
+            data: "concept",
+            className: "text-center",
+            render: (d) => escapeHtml(d),
+          },
+          {
+            data: "amount",
+            className: "text-center",
+            render: (d) =>
+              $.fn.dataTable.render.number(",", ".", 2, "$").display(d),
+          },
+          {
+            data: "payment_date",
+            className: "text-center",
+            render: (d) => escapeHtml(d),
+          },
+          {
+            data: "payment_method",
+            className: "text-center",
+            render: (d) => {
+              const methods = {
+                1: "Efectivo",
+                3: "Transferencia bancaria",
+                4: "Tarjeta de crédito",
+                28: "Tarjeta de débito",
+              };
+
+              return escapeHtml(methods[String(d)] || "Desconocido");
+            },
+          },
+          {
+            data: "invoice",
+            className: "text-center",
+            render: (d, _, row) => {
+              const invoiceStatus = {
+                0: "Sin valor fiscal",
+                1: "Cambio por factura",
+              };
+
+              const status = Number(d);
+
+              // Texto seguro
+              const label = escapeHtml(invoiceStatus[status] || "Desconocido");
+
+              // Si es 0, agregar botón
+              if (status === 0) {
+                return `
+                <div class="d-flex flex-column align-items-center gap-1">
+                  <span>${label}</span>
+                  <button 
+                    class="btn btn-sm btn-success generateInvoice"
+                    data-id="${escapeHtml(String(row.id ?? ""))}">
+                    Generar
+                  </button>
+                </div>
+              `;
+              }
+              return label;
+            },
+          },
+          {
+            data: "status",
+            className: "text-center",
+            render: function (data, type, row) {
+              const statuses = {
+                confirmed: { label: "Confirmado", badge: "text-bg-success" },
+                pending: { label: "Pendiente", badge: "text-bg-primary" },
+                cancelled: { label: "Cancelado", badge: "text-bg-warning" },
+              };
+
+              const status = statuses[String(data)];
+
+              if (status)
+                return `<span class="badge ${status.badge}" data-status="${data}">${status.label}</span>`;
+              else
+                return `<span class="badge text-bg-secondary" data-status="${data}">Desconocido</span>`;
+            },
+          },
+          {
+            data: null,
+            className: "text-center",
+            orderable: false,
+            render: (_, __, row) => {
+              const pid = escapeHtml(String(row.id ?? ""));
+              const sid = escapeHtml(String(row.id_student ?? ""));
+              const date = escapeHtml(String(row.payment_date ?? ""));
+
+              return `
+              <div class="dropdown">
+                  <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      <i class="bi bi-list"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <a class="dropdown-item editStudentPayment" href="#" data-id="${pid}" data-student-id="${sid}" data-payment-date="${date}" data-bs-toggle="modal" data-bs-target="#studentPaymentEditModal">
+                          <i class="bi bi-pencil-square"></i> Editar
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item deleteStudentPayment" href="#" data-id="${pid}">
+                          <i class="bi bi-trash-fill"></i> Eliminar
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item sendPayment" href="#" data-id="${pid}" data-student="${sid}">
+                          <i class="bi bi-envelope"></i> Enviar
+                        </a>
+                      </li>
+                  </ul>
+              </div>
+            `;
+            },
+          },
+        ],
+      );
+    } else {
+      const paymentResponse = await requestJson(phpPath, "GetPaymentHistory", {
+        studentId,
+        paymentId,
+      });
+
+      // Validar respuesta
+      if (
+        !paymentResponse.success ||
+        !Array.isArray(paymentResponse.data) ||
+        paymentResponse.data.length === 0
+      ) {
+        infoAlert("No se encontró el pago.");
+        return;
+      }
+
+      // Obtener el primer pago
+      const paymentData = paymentResponse.data[0];
+
+      // Pintar datos
+      $("#idPayment").val(sanitize(paymentData.id));
+      $("#paymentConcept").text(sanitize(paymentData.concept));
+      $("#paymentPrice").val(sanitize(paymentData.cost));
+
+      const extraValue = parseFloat(sanitize(paymentData.extra)) || 0;
+      const isZero = extraValue === 0;
+
+      $("#paymentExtra").val(extraValue.toFixed(2));
+      $("#paymentExtraCkeck").prop("checked", isZero);
+      $("#paymentExtra").prop("disabled", isZero);
+
+      $("#paymentExtra").val(sanitize(paymentData.extra));
+      $("#paymentTotal").val(sanitize(paymentData.amount));
+      $("#paymentMethod")
+        .val(sanitize(paymentData.payment_method))
+        .trigger("change");
+      $("#paymentComments").val(sanitize(paymentData.comments ?? ""));
+
+      const invoiceLabels = { 0: "Recibo", 1: "Factura" };
+      const invoiceKey = parseInt(paymentData.invoice);
+      $("#paymentInvoice").text(invoiceLabels[invoiceKey] ?? "Desconocido");
+
+      if (paymentData.status === "cancelled") {
+        $("#cancelReceipt").prop("hidden", true);
+      } else {
+        $("#cancelReceipt").prop("hidden", false);
+      }
+
+      setTimeout(() => {
+        originalPaymentData = getCurrentPaymentFormData();
+        $("#savePaymentChanges").prop("disabled", true);
+      }, 0);
+    }
+  } catch (error) {
+    errorAlert("Ocurrió un error inesperado al verificar el pago mensual.");
+  } finally {
+    Swal.close?.();
+  }
+};
+
 const sendPaymentByEmail = async (studentId, paymentId) => {
   try {
     if (!isValidId(studentId) || !isValidId(paymentId)) {
       return errorAlert("Identificador inválido");
     }
+
     loadingAlert();
+
     const response = await requestJson(phpPath, "SendPaymentByEmail", {
       studentId,
       paymentId,
     });
-    response.success
-      ? successAlert(escapeHtml(response.message))
-      : errorAlert(escapeHtml(response.message));
-  } catch {
+
+    if (response.success) {
+      successAlert(escapeHtml(response.message));
+    } else {
+      errorAlert(escapeHtml(response.message));
+    }
+  } catch (error) {
     errorAlert("Ocurrió un error inesperado al enviar el comprobante");
   } finally {
     // Swal.close?.();
@@ -730,7 +988,12 @@ $(document).ready(function () {
   );
 
   // Carga inicial
-  getStudentsNames();
+  if ($("#studentName").length) {
+    getStudentsNames();
+  }
+
+  observePaymentChanges();
+
   toggleInputOnCheckboxChange($("#todayDate"), $("#paymentDate"));
   toggleInputOnCheckboxChange($("#paymentExtraCkeck"), $("#paymentExtra"));
   $("#paymentTotal").val("0.00");
@@ -750,6 +1013,16 @@ $(document).ready(function () {
     const studentId = $(this).data("student");
     await sendPaymentByEmail(studentId, paymentId);
   });
+
+  $("#paymentHistoryStudentTable").on(
+    "click",
+    ".sendPayment",
+    async function () {
+      const paymentId = $(this).data("id");
+      const studentId = $(this).data("student");
+      await sendPaymentByEmail(studentId, paymentId);
+    },
+  );
 
   $("#paymentMethod, #paymentExtra, #paymentPrice, #paymentExtraCkeck").on(
     "input change blur",
@@ -776,6 +1049,239 @@ $(document).ready(function () {
     }
   });
 
+  $("#studentPaymentTable").on("click", ".viewPayments", async function () {
+    const studentId = $(this).data("id");
+    const studentName = $(this).data("name");
+
+    $("#studentPaymentsModalLabel").html(
+      `Historial de pagos del alumno: <strong>${studentName}</strong>`,
+    );
+
+    $("#studentPaymentsModal").data("student-name", studentName);
+    $("#studentPaymentsModal").modal("show");
+
+    $("#studentPaymentsModal").one("shown.bs.modal", async function () {
+      await VerifyPaymentsForStudent(null, studentId, "view");
+    });
+  });
+
+  $("#paymentHistoryStudentTable").on(
+    "click",
+    ".editStudentPayment",
+    async function () {
+      const paymentId = $(this).data("id");
+      const studentId = $(this).data("student-id");
+      const paymentDate = $(this).data("payment-date");
+
+      const studentName =
+        $("#studentPaymentsModal").data("student-name") || "Alumno";
+
+      const formattedDate = formatFullDate(paymentDate);
+
+      $("#studentPaymentEditModalLabel").html(
+        `Editar pago de <strong>${studentName}</strong> del día <strong>${formattedDate}</strong>`,
+      );
+      $("#studentPaymentEditModal").modal("show");
+
+      await VerifyPaymentsForStudent(paymentId, studentId, "edit");
+    },
+  );
+
+  $("#updatePaymentStudent").on("submit", async function (e) {
+    e.preventDefault();
+
+    const data = $(this).serialize();
+
+    if ($(this).valid()) {
+      await UpdatePayment(data);
+    } else {
+      infoAlert("Por favor, complete todos los campos requeridos.");
+    }
+  });
+
+  $("#paymentHistoryStudentTable").on(
+    "click",
+    ".deleteStudentPayment",
+    async function () {
+      const paymentId = $(this).data("id");
+
+      // obtener instancia del modal
+      const paymentsModalEl = document.getElementById("studentPaymentsModal");
+
+      const paymentsModal = bootstrap.Modal.getInstance(paymentsModalEl);
+
+      // cerrar modal antes del swal
+      paymentsModal.hide();
+
+      const result = await Swal.fire({
+        title: "Eliminar pago",
+        text: "Ingresa tu contraseña para continuar",
+        input: "password",
+        inputPlaceholder: "Contraseña",
+        inputAttributes: {
+          autocapitalize: "off",
+          autocorrect: "off",
+        },
+        showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#d33",
+        allowOutsideClick: false,
+        inputValidator: (value) => {
+          if (!value) {
+            return "Debes ingresar tu contraseña";
+          }
+        },
+      });
+
+      // si cancela -> reabrir modal
+      if (!result.isConfirmed) {
+        paymentsModal.show();
+
+        return;
+      }
+
+      try {
+        loadingAlert();
+
+        const response = await requestJson(phpPath, "DeletePayment", {
+          paymentId,
+          password: result.value,
+        });
+
+        if (response.success) {
+          successAlert(response.message);
+
+          $("#paymentHistoryStudentTable").DataTable().ajax.reload(null, false);
+        } else {
+          errorAlert(response.message);
+        }
+      } catch (error) {
+        errorAlert("Error al eliminar el pago");
+      } finally {
+        // volver a abrir modal
+        paymentsModal.show();
+      }
+    },
+  );
+
+  let suppressPaymentsModalReopen = false;
+
+  $("#studentPaymentEditModal").on("hidden.bs.modal", function () {
+    if (suppressPaymentsModalReopen) return;
+    $("#studentPaymentsModal").modal("show");
+  });
+
+  $("#cancelReceipt").on("click", async function () {
+    const paymentId = $("#idPayment").val();
+
+    const editModalEl = document.getElementById("studentPaymentEditModal");
+    const editModal = bootstrap.Modal.getInstance(editModalEl);
+
+    suppressPaymentsModalReopen = true;
+    editModal.hide();
+
+    await new Promise((resolve) =>
+      $(editModalEl).one("hidden.bs.modal", resolve),
+    );
+
+    const result = await Swal.fire({
+      title: "Cancelar recibo",
+      text: "Ingresa tu contraseña para continuar",
+      input: "password",
+      inputPlaceholder: "Contraseña",
+      inputAttributes: { autocapitalize: "off", autocorrect: "off" },
+      showCancelButton: true,
+      confirmButtonText: "Continuar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33",
+      allowOutsideClick: false,
+      inputValidator: (value) => {
+        if (!value) return "Debes ingresar tu contraseña";
+      },
+    });
+
+    if (!result.isConfirmed) {
+      suppressPaymentsModalReopen = false;
+      editModal.show();
+      return;
+    }
+
+    try {
+      loadingAlert();
+
+      const authResponse = await requestJson(phpPath, "VerifyPassword", {
+        password: result.value,
+      });
+
+      Swal.close();
+
+      if (!authResponse.success) {
+        errorAlert(authResponse.message || "Contraseña incorrecta.");
+        suppressPaymentsModalReopen = false;
+        editModal.show();
+        return;
+      }
+
+      const cancelModalEl = document.getElementById("cancelReceiptModal");
+      const cancelModal = new bootstrap.Modal(cancelModalEl);
+
+      $("#cancelReason").val("");
+      $("#cancelReasonError").addClass("d-none");
+      cancelModal.show();
+
+      $("#cancelReasonBack")
+        .off("click")
+        .on("click", () => {
+          cancelModal.hide();
+          suppressPaymentsModalReopen = false;
+          editModal.show();
+        });
+
+      $("#confirmCancelReceipt")
+        .off("click")
+        .on("click", async () => {
+          const reason = $("#cancelReason").val().trim();
+
+          if (!reason) {
+            $("#cancelReasonError").removeClass("d-none");
+            return;
+          }
+
+          $("#cancelReasonError").addClass("d-none");
+          cancelModal.hide();
+          loadingAlert();
+
+          try {
+            const response = await requestJson(phpPath, "CancelPayment", {
+              paymentId,
+              comments: reason,
+            });
+
+            if (response.success) {
+              successAlert(response.message);
+              $("#cancelReceipt").prop("hidden", true);
+              $("#paymentHistoryStudentTable")
+                .DataTable()
+                .ajax.reload(null, false);
+            } else {
+              errorAlert(response.message);
+            }
+          } catch {
+            errorAlert("Error al cancelar el recibo.");
+          } finally {
+            suppressPaymentsModalReopen = false;
+            editModal.show();
+          }
+        });
+    } catch {
+      Swal.close();
+      errorAlert("Error inesperado.");
+      suppressPaymentsModalReopen = false;
+      editModal.show();
+    }
+  });
+
   // Botones guardar/actualizar día de pago (unificado)
   $("#savePaymentDays").on("click", () => handlePaymentDayAction("save"));
   $("#updatePaymentDays").on("click", () => handlePaymentDayAction("update"));
@@ -790,3 +1296,42 @@ const resetPaymentDaysForm = () => {
     $("#paymentDaysCard").prop("hidden", true);
   } catch {}
 };
+
+// =======================
+// Formateo de fechas para mostrar en modales (ej. "Lunes 1 de Enero del 2024")
+// =======================
+const formatFullDate = (dateString) => {
+  if (!dateString) return "Fecha inválida";
+
+  const date = new Date(dateString);
+
+  let formatted = new Intl.DateTimeFormat("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+
+  formatted = formatted.replace(/ de (\d{4})$/, " del $1");
+
+  return capitalizeFirstLetter(formatted);
+};
+
+// =======================
+// Normaliza números para comparar "100" === "100.00" correctamente
+// =======================
+const normalizeValue = (val) => {
+  const num = parseFloat(val);
+  return isNaN(num) ? (val ?? "").trim() : String(num);
+};
+
+// =======================
+// Helper para obtener datos actuales del formulario de edición (para snapshot/compare)
+// =======================
+const getCurrentPaymentFormData = () => ({
+  price: normalizeValue($("#paymentPrice").val()),
+  extra: normalizeValue($("#paymentExtra").val()),
+  total: normalizeValue($("#paymentTotal").val()),
+  method: $("#paymentMethod").val()?.trim(),
+  comments: $("#paymentComments").val()?.trim(),
+});
