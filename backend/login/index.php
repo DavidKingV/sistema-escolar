@@ -1,17 +1,20 @@
 <?php
-require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Vendor\Schoolarsystem\loadEnv;
 use Vendor\Schoolarsystem\DBConnection;
 
-class LoginControl{
+class LoginControl
+{
     private $connection;
 
-    public function __construct(DBConnection $dbConnection) {
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection->getConnection();
     }
 
-    public function indexLogin($user, $pass) {
+    public function indexLogin($user, $pass)
+    {
         // Verificar si el usuario existe en la base de datos
         $sql = "SELECT id, password, hashed_password FROM login_users WHERE user = ?";
         $stmt = $this->connection->prepare($sql);
@@ -19,12 +22,12 @@ class LoginControl{
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
-    
+
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
             $stored_password = $row['password'];
             $stored_hashed_password = $row['hashed_password'];
-    
+
             if ($stored_hashed_password === null && $stored_password === $pass) {
                 // La contraseña no está hashada en la base de datos, pero coincide con la contraseña original
                 // Actualizar la contraseña con su versión hashada
@@ -34,7 +37,7 @@ class LoginControl{
                 $stmt_update->bind_param("si", $new_hashed_password, $row['id']);
                 $stmt_update->execute();
                 $stmt_update->close();
-                
+
                 return array("success" => true, "message" => "Inicio de sesión exitoso (y contraseña actualizada)", "userId" => $row['id']);
             } elseif ($stored_hashed_password !== null && password_verify($pass, $stored_hashed_password)) {
                 // La contraseña está hashada en la base de datos y coincide con la contraseña proporcionada
@@ -49,12 +52,13 @@ class LoginControl{
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    public function logout() {
+    public function logout()
+    {
         session_start();
 
         if (!isset($_SESSION["adnanhussainturki/microsoft"])) {
             session_unset();
-            session_destroy();  
+            session_destroy();
 
             // Eliminar todas las cookies
             foreach ($_COOKIE as $key => $value) {
@@ -64,22 +68,23 @@ class LoginControl{
             return array("success" => true, "microsoftLogout" => false, "message" => "Sesión cerrada");
         } else {
             session_unset();
-            session_destroy();  
+            session_destroy();
 
             return array("success" => true, "microsoftLogout" => true, "message" => "Cerrando sesión de Microsoft");
         }
     }
 
-    public function VerifySession($jwt){
+    public function VerifySession($jwt)
+    {
         cargarVariablesEnv();
         $secret_key = $_ENV['KEY'];
         // Verificar si hay una sesión de PHP iniciada y si hay una cookie con el JWT
-        if(isset($_SESSION['userId']) && isset($_COOKIE['auth'])){
+        if (isset($_SESSION['userId']) && isset($_COOKIE['auth'])) {
             try {
                 // Decodificar el JWT proporcionado en la cookie
-                $decoded = JWT::decode($jwt, new Key($secret_key, 'HS256'));      
+                $decoded = JWT::decode($jwt, new Key($secret_key, 'HS256'));
                 // Verificar si el JWT decodificado coincide con la sesión de PHP
-                if($_SESSION['userId'] == $decoded->userId) {
+                if ($_SESSION['userId'] == $decoded->userId) {
                     return array("success" => true, "message" => "Sesión válida", "userId" => $decoded->userId);
                 } else {
                     return array("success" => false, "message" => "Sesión inválida");
@@ -88,7 +93,7 @@ class LoginControl{
                 return array("success" => false, "message" => "Sesión inválida");
             }
         }
-    
+
         // Si no se encontró una sesión de PHP y un JWT válido simultáneamente, devolver un error
         return array("success" => false, "message" => "Sesión inválidaaaa");
     }
@@ -118,12 +123,12 @@ class LoginControl{
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
-    
+
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
             $stored_password = $row['password'];
             $stored_hashed_password = $row['hashed_password'];
-    
+
             if ($stored_hashed_password === null && $stored_password === $password) {
                 // La contraseña no está hashada en la base de datos, pero coincide con la contraseña original
                 // Actualizar la contraseña con su versión hashada
@@ -133,7 +138,7 @@ class LoginControl{
                 $stmt_update->bind_param("si", $new_hashed_password, $user_id);
                 $stmt_update->execute();
                 $stmt_update->close();
-                
+
                 return array("status" => "success", "message" => "Contraseña actualizada");
             } elseif ($stored_hashed_password !== null && password_verify($password, $stored_hashed_password)) {
                 // La contraseña está hashada en la base de datos y coincide con la contraseña proporcionada
@@ -147,17 +152,88 @@ class LoginControl{
             return array("status" => "error", "message" => "Usuario no encontrado");
         }
     }*/
-    
+
+    public function verifyUserPassword($userId, $password)
+    {
+        $sql = "
+            SELECT password, hashed_password
+            FROM login_users
+            WHERE id = ?
+        ";
+
+        $stmt = $this->connection->prepare($sql);
+
+        $stmt->bind_param("i", $userId);
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $stmt->close();
+
+        if ($result->num_rows <= 0) {
+            return false;
+        }
+
+        $row = $result->fetch_assoc();
+
+        $storedPassword = $row['password'];
+        $storedHashedPassword = $row['hashed_password'];
+
+        // compatibilidad vieja
+        if (
+            $storedHashedPassword === null &&
+            $storedPassword === $password
+        ) {
+
+            // actualizar hash automáticamente
+            $newHash = password_hash($password, PASSWORD_DEFAULT);
+
+            $sqlUpdate = "
+                UPDATE login_users
+                SET hashed_password = ?
+                WHERE id = ?
+            ";
+
+            $stmtUpdate = $this->connection->prepare($sqlUpdate);
+
+            $stmtUpdate->bind_param(
+                "si",
+                $newHash,
+                $userId
+            );
+
+            $stmtUpdate->execute();
+
+            $stmtUpdate->close();
+
+            return true;
+        }
+
+        // password moderna hashada
+        if (
+            $storedHashedPassword !== null &&
+            password_verify($password, $storedHashedPassword)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
 }
 
-class UsersControl{
+class UsersControl
+{
     private $con;
 
-    public function __construct($con){
+    public function __construct($con)
+    {
         $this->con = $con;
     }
 
-    public function GetCurrentUserData($userId) {
+    public function GetCurrentUserData($userId)
+    {
         // Obtener los datos del usuario actual
         $sql = "SELECT * FROM data_users WHERE id = ?";
         $stmt = $this->con->prepare($sql);
@@ -165,7 +241,7 @@ class UsersControl{
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
-    
+
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
             return array("success" => true, "userName" => $row['nombre'], "email" => $row['email'], "phone" => $row['telefono']);
@@ -175,25 +251,28 @@ class UsersControl{
     }
 }
 
-class ProductsControl{
+class ProductsControl
+{
     private $con;
 
-    public function __construct($con){
+    public function __construct($con)
+    {
         $this->con = $con;
     }
 
-    public function getProducts() {
+    public function getProducts()
+    {
         //verificar si hay una sesion valida con el cookie  
-        if(isset($_COOKIE['auth'])){
+        if (isset($_COOKIE['auth'])) {
             cargarVariablesEnv();
             $secret_key = $_ENV['KEY'];
             $jwt = $_COOKIE['auth'];
             $decoded = JWT::decode($jwt, new Key($secret_key, 'HS256'));
             $user_id = $decoded->user_id;
             $control = new UsersControl($this->con);
-            $user = $control -> GetCurrentUserData($user_id);
+            $user = $control->GetCurrentUserData($user_id);
 
-            if($user['status'] === 'success'){
+            if ($user['status'] === 'success') {
                 $sql = "SELECT id_facturapi, sku, nombre, price, unit_name FROM products";
                 $result = $this->con->query($sql);
 
@@ -209,37 +288,38 @@ class ProductsControl{
                                 "sku" => $row['sku'],
                                 "nombre" => $row['nombre'],
                                 "price" => $row['price'],
-                                "unit_name" => $row['unit_name'],                                
+                                "unit_name" => $row['unit_name'],
                             );
                         }
                     } else {
                         return array("status" => "error", "message" => "No se encontraron productos");
                     }
-                    
+
                     // Cerrar la conexión a la base de datos
                     $this->con->close();
-                    
+
                     // Devolver los datos en el formato esperado por DataTables
                     return $products;
                 }
-            }else{
+            } else {
                 return array("status" => "error", "message" => "Sesión inválida");
             }
-        }else{
+        } else {
             return array("status" => "error", "message" => "Sesión inválida");
         }
-        
+
     }
-    
 
-    public function addProduct($data) {
 
-        if($data['sku'] !== ' ' || $data['sku'] !== ''){
+    public function addProduct($data)
+    {
+
+        if ($data['sku'] !== ' ' || $data['sku'] !== '') {
             $sku = $data['sku'];
-        }else{
+        } else {
             $sku = ' ';
         }
-        
+
         // Agregar un producto a la base de datos
         $sql = "INSERT INTO products (id_facturapi, sku, nombre, price, unit_name) VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->con->prepare($sql);
@@ -256,7 +336,8 @@ class ProductsControl{
 
     }
 
-    public function deleteProduct($id_facturapi) {
+    public function deleteProduct($id_facturapi)
+    {
         // Eliminar un producto de la base de datos
         $sql = "DELETE FROM products WHERE id_facturapi = ?";
         $stmt = $this->con->prepare($sql);
@@ -272,17 +353,18 @@ class ProductsControl{
         }
     }
 
-    public function GetPriceProduct($id_facturapi){
+    public function GetPriceProduct($id_facturapi)
+    {
         //verificar si hay una sesion valida con la funcion VerifySessionCookie 
         $control = new LoginControl($this->con);
-        $result = $control -> VerifySessionCookie($_COOKIE['auth']);
-        
-        if($result['status'] === 'success'){
+        $result = $control->VerifySessionCookie($_COOKIE['auth']);
+
+        if ($result['status'] === 'success') {
 
             $factur_api = new FacturapiServices();
-            $result_facturapi = $factur_api -> getProduct($id_facturapi);
+            $result_facturapi = $factur_api->getProduct($id_facturapi);
 
-            if(isset($result_facturapi->data->id)){
+            if (isset($result_facturapi->data->id)) {
                 $tax_include = $result_facturapi->data->tax_included;
                 $taxability = $result_facturapi->data->taxability;
 
@@ -292,81 +374,84 @@ class ProductsControl{
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $stmt->close();
-            
+
                 if ($result->num_rows > 0) {
                     $row = $result->fetch_assoc();
                     return array("status" => "success", "price" => $row['price'], "product_name" => $row['nombre'], "tax_include" => $tax_include, "taxability" => $taxability);
                 } else {
                     return array("status" => "error", "message" => "Producto no encontrado");
                 }
-            }else{
+            } else {
                 return array("status" => "error", "message" => "Producto no encontrado en Facturapi");
             }
 
-            
-        }else{
+
+        } else {
             return $result;
         }
-        
+
     }
 
-    public function GetProduct($id_facturapi){
+    public function GetProduct($id_facturapi)
+    {
         //verificar si hay una sesion valida con la funcion VerifySessionCookie 
         $control = new LoginControl($this->con);
-        $result = $control -> VerifySessionCookie($_COOKIE['auth']);
-        
-        if($result['status'] === 'success'){
+        $result = $control->VerifySessionCookie($_COOKIE['auth']);
+
+        if ($result['status'] === 'success') {
             $sql = "SELECT id FROM products WHERE id_facturapi = ?";
             $stmt = $this->con->prepare($sql);
             $stmt->bind_param("s", $id_facturapi);
             $stmt->execute();
             $result = $stmt->get_result();
             $stmt->close();
-        
+
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 return array("status" => "success", "id_db" => $row['id']);
             } else {
                 return array("status" => "error", "message" => "Producto no encontrado");
             }
-        }else{
+        } else {
             return $result;
         }
-        
+
     }
 
-    public function getDataEditProduct($id_facturapi){
+    public function getDataEditProduct($id_facturapi)
+    {
         //verificar si hay una sesion valida con la funcion VerifySessionCookie 
         $control = new LoginControl($this->con);
-        $result = $control -> VerifySessionCookie($_COOKIE['auth']);
-        
-        if($result['status'] === 'success'){
+        $result = $control->VerifySessionCookie($_COOKIE['auth']);
+
+        if ($result['status'] === 'success') {
             $sql = "SELECT id_facturapi, sku, nombre, price FROM products WHERE id_facturapi = ?";
             $stmt = $this->con->prepare($sql);
             $stmt->bind_param("s", $id_facturapi);
             $stmt->execute();
             $result = $stmt->get_result();
             $stmt->close();
-        
+
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 return array("status" => "success", "id_facturapi" => $row['id_facturapi'], "sku" => $row['sku'], "nombre" => $row['nombre'], "price" => $row['price']);
             } else {
                 return array("status" => "error", "message" => "Producto no encontrado");
             }
-        }else{
+        } else {
             return $result;
         }
-        
+
     }
 
-    public function editProduct($data){
+    public function editProduct($data)
+    {
         //verificar si hay una sesion valida con la funcion VerifySessionCookie 
         $control = new LoginControl($this->con);
-        $result = $control -> VerifySessionCookie($_COOKIE['auth']);
-        
-        if($result['status'] === 'success'){
-            
+        $result = $control->VerifySessionCookie($_COOKIE['auth']);
+
+        if ($result['status'] === 'success') {
+
             // Editar un producto en la base de datos
             $sql = "UPDATE products SET sku = ?, nombre = ?, price = ? WHERE id_facturapi = ?";
             $stmt = $this->con->prepare($sql);
@@ -374,37 +459,40 @@ class ProductsControl{
             $stmt->execute();
             $rowsAffected = $stmt->affected_rows;
             $stmt->close();
-    
+
             if ($rowsAffected > 0) {
                 return array("status" => "success", "message" => "Producto editado");
             } else {
                 return array("status" => "error", "message" => "Error al editar el producto");
             }
-        }else{
+        } else {
             return $result;
         }
-        
+
     }
 
-    
+
 }
 
-class ClientsControl{
+class ClientsControl
+{
     private $con;
 
-    public function __construct($con){
+    public function __construct($con)
+    {
         $this->con = $con;
     }
 
-    public function getClients() {
+    public function getClients()
+    {
         $control = new LoginControl($this->con);
-        $result = $control -> VerifySessionCookie($_COOKIE['auth']);
-        
-        if($result['status'] === 'success'){
+        $result = $control->VerifySessionCookie($_COOKIE['auth']);
+
+        if ($result['status'] === 'success') {
             $sql = "SELECT * FROM costumers";
-            $stmt = $this->con->prepare($sql);            
+            $stmt = $this->con->prepare($sql);
             $stmt->execute();
-    
+
             $result = $stmt->get_result();
             $stmt->close();
 
@@ -426,45 +514,46 @@ class ClientsControl{
                 } else {
                     return array("status" => "error", "message" => "No se encontraron clientes");
                 }
-                
+
                 // Cerrar la conexión a la base de datos
                 $this->con->close();
-                
+
                 // Devolver los datos en el formato esperado por DataTables
                 return $clients;
             }
-        }else{
+        } else {
             return $result;
         }
-        
+
     }
 
-    public function GetNameCostumers(){
+    public function GetNameCostumers()
+    {
         $control = new LoginControl($this->con);
-        $result = $control -> VerifySessionCookie($_COOKIE['auth']);
-        
-        if($result['status'] === 'success'){
+        $result = $control->VerifySessionCookie($_COOKIE['auth']);
+
+        if ($result['status'] === 'success') {
             $stmt = $this->con->prepare("SELECT id, name FROM costumers");
             $stmt->execute();
             $result = $stmt->get_result();
             $clients = array();
             if ($result->num_rows > 0) {
 
-                while($row=$result->fetch_array()){
-                    $names=($row['name']);
-                    $id=($row['id']);
+                while ($row = $result->fetch_array()) {
+                    $names = ($row['name']);
+                    $id = ($row['id']);
                     $clients[] = array('label' => $names, 'value' => $names, 'id' => $id);
-                   }
-                
+                }
+
             } else {
                 return array("status" => "error", "message" => "No se encontraron clientes");
             }
-            
+
             // Devolver los datos en el formato esperado por DataTables
             return $clients;
-        }else{
+        } else {
             return $result;
         }
     }
-    
+
 }
