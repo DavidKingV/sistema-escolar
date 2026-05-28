@@ -29,7 +29,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Agregar nuevo pago</h2>
-                <a href="#" class="btn btn-secondary">
+                <a href="../pagos/pagos.php" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver a la lista
                 </a>
             </div>
@@ -110,6 +110,7 @@
                                             <th>Monto</th>
                                             <th>Fecha de registro</th>
                                             <th>Método de pago</th>
+                                            <th>Estatus</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>

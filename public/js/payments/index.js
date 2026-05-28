@@ -290,6 +290,24 @@ const VerifyMonthlyPayment = async (studentId) => {
           },
         },
         {
+          data: "status",
+          className: "text-center",
+          render: function (data, type, row) {
+            const statuses = {
+              confirmed: { label: "Confirmado", badge: "text-bg-success" },
+              pending: { label: "Pendiente", badge: "text-bg-primary" },
+              cancelled: { label: "Cancelado", badge: "text-bg-warning" },
+            };
+
+            const status = statuses[String(data)];
+
+            if (status)
+              return `<span class="badge ${status.badge}" data-status="${data}">${status.label}</span>`;
+            else
+              return `<span class="badge text-bg-secondary" data-status="${data}">Desconocido</span>`;
+          },
+        },
+        {
           data: null,
           className: "text-center",
           orderable: false,
