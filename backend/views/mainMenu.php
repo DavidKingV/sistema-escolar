@@ -176,7 +176,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                 </li>
                 <?php endif; ?>
                 <li class="nav-item">
-                    <a href="<?php echo $_ENV['BASE_URL']; ?>/pagos.php" class="list-group-item list-group-item-action sidebar-link">
+                    <a href="<?php echo $_ENV['BASE_URL']; ?>/pagos/pagos.php" class="list-group-item list-group-item-action sidebar-link">
                         <i class="fas fa-plus-circle"></i> Lista de pagos
                     </a>
                 </li>

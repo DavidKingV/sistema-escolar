@@ -133,6 +133,22 @@ $pdf .= '<tr>
 // Generación del PDF usando mPDF
 $mpdf = new \Mpdf\Mpdf();
 
+if (isset($headerData['status'])) {
+  $watermarks = [
+    'confirmed' => 'CONFIRMADO',
+    'pending' => 'PENDIENTE',
+    'cancelled' => 'CANCELADO',
+  ];
+
+  $status = strtolower($headerData['status']);
+
+  if (array_key_exists($status, $watermarks)) {
+    $mpdf->SetWatermarkText($watermarks[$status]);
+    $mpdf->watermarkTextAlpha = 0.1;
+    $mpdf->showWatermarkText = true;
+  }
+}
+
 /*if (isset($headerData['status']) && strtolower($headerData['status']) === 'canceled') {
   $watermark = new \Mpdf\WatermarkText(
     'CANCELADO',

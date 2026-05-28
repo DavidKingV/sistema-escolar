@@ -52,10 +52,11 @@ class PaymentsModel
     {
         try {
             $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
+            $estatus = $isInvoice ? 'pending' : 'confirmed';
 
-            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("isiisiiisis", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword);
+            $stmt->bind_param("isiisiiisiss", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword, $estatus);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
@@ -99,6 +100,139 @@ class PaymentsModel
             }
         }
         return $response;
+    }
+
+    public function updatePayment(
+        $paymentId,
+        $cost,
+        $extra,
+        $total,
+        $method,
+        $comments
+    ) {
+        try {
+
+            $sql = "
+            UPDATE students_payments 
+            SET
+                cost = ?,
+                extra = ?,
+                total = ?,
+                payment_method = ?,
+                comments = ?
+            WHERE id = ?
+        ";
+
+            $stmt = $this->connection->prepare($sql);
+
+            $stmt->bind_param(
+                "sdissi",
+                $cost,
+                $extra,
+                $total,
+                $method,
+                $comments,
+                $paymentId
+            );
+
+            $stmt->execute();
+
+            if ($stmt->affected_rows >= 0) {
+                return [
+                    "success" => true,
+                    "message" => "Pago actualizado correctamente"
+                ];
+            }
+
+            return [
+                "success" => false,
+                "message" => "No se realizaron cambios"
+            ];
+
+        } catch (mysqli_sql_exception $e) {
+
+            return [
+                "success" => false,
+                "message" => "Error al actualizar el pago"
+            ];
+
+        } finally {
+
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
+
+    public function softDeletePayment($paymentId)
+    {
+        try {
+
+            $sql = "UPDATE students_payments
+                SET isDeleted = 1
+                WHERE id = ?";
+
+            $stmt = $this->connection->prepare($sql);
+
+            $stmt->bind_param("i", $paymentId);
+
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+
+                return [
+                    "success" => true,
+                    "message" => "Pago eliminado correctamente"
+                ];
+
+            }
+
+            return [
+                "success" => false,
+                "message" => "No se pudo eliminar"
+            ];
+
+        } catch (mysqli_sql_exception $e) {
+
+            return [
+                "success" => false,
+                "message" => "Error al eliminar el pago"
+            ];
+
+        }
+    }
+
+    public function cancelPayment($paymentId, $comments)
+    {
+        try {
+            $sql = "UPDATE students_payments
+                SET status    = 'cancelled',
+                    comments  = ?
+                WHERE id      = ?
+                  AND isDeleted = 0";
+
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("si", $comments, $paymentId);
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                return [
+                    "success" => true,
+                    "message" => "Recibo cancelado correctamente."
+                ];
+            }
+
+            return [
+                "success" => false,
+                "message" => "No se pudo cancelar el recibo."
+            ];
+
+        } catch (mysqli_sql_exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al cancelar el recibo."
+            ];
+        }
     }
 
     public function getStudentsPayMount()
@@ -208,25 +342,64 @@ class PaymentsModel
         return $response;
     }
 
-    public function getPaymentHistory($studentId)
+    public function getPaymentHistory($studentId, $paymentId = null)
     {
         try {
-            $sql = "SELECT id, id_student, concept, total, payment_date, payment_method FROM students_payments WHERE id_student = ? ORDER BY payment_date DESC";
+
+            $sql = "
+                SELECT 
+                    id,
+                    id_student,
+                    payment_date,
+                    payment_method,
+                    invoice,
+                    concept,
+                    cost,
+                    extra,
+                    total,
+                    comments,
+                    status
+                FROM students_payments
+                WHERE id_student = ?
+                AND isDeleted = 0
+            ";
+
+            $types = "i";
+            $params = [$studentId];
+
+            // Si viene paymentId, agregar filtro
+            if (!empty($paymentId)) {
+                $sql .= " AND id = ?";
+                $types .= "i";
+                $params[] = $paymentId;
+            }
+
+            $sql .= " ORDER BY payment_date DESC";
+
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("i", $studentId);
+
+            $stmt->bind_param($types, ...$params);
+
             $stmt->execute();
+
             $result = $stmt->get_result();
 
             $response = [];
 
             while ($row = $result->fetch_assoc()) {
+
                 $response[] = [
                     "id" => $row['id'],
                     "id_student" => $row['id_student'],
-                    "concept" => $row['concept'],
-                    "amount" => $row['total'],
                     "payment_date" => $row['payment_date'],
-                    "payment_method" => $row['payment_method'] ?? null
+                    "payment_method" => $row['payment_method'],
+                    "invoice" => $row['invoice'],
+                    "concept" => $row['concept'],
+                    "cost" => $row['cost'],
+                    "extra" => $row['extra'] ?? null,
+                    "amount" => $row['total'],
+                    "comments" => $row['comments'],
+                    "status" => $row['status']
                 ];
             }
 
@@ -235,34 +408,40 @@ class PaymentsModel
                 : ['success' => false, 'message' => 'No se encontraron pagos'];
 
         } catch (mysqli_sql_exception $e) {
-            $response = ["success" => false, "message" => "Error al procesar la solicitud"];
+
+            return [
+                "success" => false,
+                "message" => "Error al procesar la solicitud"
+            ];
+
         } finally {
+
             if (isset($stmt)) {
                 $stmt->close();
             }
         }
-        return $response;
-
     }
 
     public function checkIfPaymentMade($studentId, $paymentDay)
     {
         try {
             $sql = "SELECT 
-    id_student,
-    payment_date,
-    total,
-    CASE 
-        WHEN DAY(payment_date) <= ? THEN 'ON_TIME'
-        ELSE 'EXTEMPORANEO'
-    END AS status,
-    extra
-FROM students_payments
-WHERE id_student = ?
-  AND YEAR(payment_date) = YEAR(CURDATE())
-  AND MONTH(payment_date) = MONTH(CURDATE()) AND concept LIKE 'Mensualidad%'
-ORDER BY payment_date ASC
-LIMIT 1;";
+                id_student,
+                payment_date,
+                total,
+                CASE 
+                    WHEN DAY(payment_date) <= ? THEN 'ON_TIME'
+                    ELSE 'EXTEMPORANEO'
+                END AS status,
+                extra
+                FROM students_payments
+                WHERE id_student = ?
+                    AND isDeleted = 0
+                    AND YEAR(payment_date) = YEAR(CURDATE())
+                    AND MONTH(payment_date) = MONTH(CURDATE()) AND concept LIKE 'Mensualidad%'
+                ORDER BY payment_date ASC
+                LIMIT 1;"
+            ;
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("si", $paymentDay, $studentId);
             $stmt->execute();
@@ -298,18 +477,36 @@ LIMIT 1;";
     public function sendPaymentReceipt($studentId, $paymentId)
     {
         try {
+
             // Obtener datos del pago
             $sql = "SELECT sp.*, sd.email, sd.nombre AS student_name
-                    FROM students_payments sp
-                    JOIN students sd ON sp.id_student = sd.id
-                    WHERE sp.id = ? AND sp.id_student = ?";
+                FROM students_payments sp
+                JOIN students sd ON sp.id_student = sd.id
+                WHERE sp.id = ? 
+                AND sp.id_student = ?
+                AND sp.isDeleted = 0";
+
             $stmt = $this->connection->prepare($sql);
+
+            if (!$stmt) {
+                return [
+                    "success" => false,
+                    "message" => "Error al preparar la consulta"
+                ];
+            }
+
             $stmt->bind_param("ii", $paymentId, $studentId);
+
             $stmt->execute();
+
             $result = $stmt->get_result();
 
             if ($result->num_rows === 0) {
-                return array("success" => false, "message" => "Pago no encontrado");
+
+                return [
+                    "success" => false,
+                    "message" => "Pago no encontrado"
+                ];
             }
 
             $paymentData = $result->fetch_assoc();
@@ -322,15 +519,33 @@ LIMIT 1;";
                 $paymentData['email']
             );
 
-            if ($sendReceiptEmail['success']) {
-                return array("success" => true, "message" => "Comprobante enviado exitosamente");
-            } else {
-                return array("success" => false, "message" => "Error al enviar el comprobante: " . $sendReceiptEmail['message']);
+            if (
+                isset($sendReceiptEmail['success']) &&
+                $sendReceiptEmail['success']
+            ) {
+
+                return [
+                    "success" => true,
+                    "message" => "Comprobante enviado exitosamente"
+                ];
             }
 
-
-        } catch (mysqli_sql_exception $e) {
-            return array("success" => false, "message" => "Error al procesar la solicitud");
+            return [
+                "success" => false,
+                "message" =>
+                    "Error al enviar el comprobante: " .
+                    ($sendReceiptEmail['message'] ?? 'Error desconocido')
+            ];
+        } catch (\mysqli_sql_exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error SQL al procesar la solicitud"
+            ];
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error interno del servidor"
+            ];
         } finally {
             if (isset($stmt)) {
                 $stmt->close();
