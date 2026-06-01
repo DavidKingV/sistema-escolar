@@ -158,14 +158,6 @@ class EmailsModel
 
             $productos = [];
             $products = is_array($paymentData['concept']) ? $paymentData['concept'] : [$paymentData['concept']];
-            $products = is_array($paymentData['concept'])
-                ? $paymentData['concept']
-                : [
-                    implode(' ', array_filter([
-                        $paymentData['concept'],
-                        $paymentData['concept_month'],
-                    ]))
-                ];
             $subtotals = is_array($paymentData['total']) ? $paymentData['total'] : [$paymentData['total']];
 
             foreach ($products as $i => $producto) {

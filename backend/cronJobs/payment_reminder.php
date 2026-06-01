@@ -98,7 +98,7 @@ function enviarRecordatorio(
     $paymentDate = $diaLimitePago . ' de ' . $meses[(int) date('m')] . ' de ' . date('Y');
 
     $paymentData = [
-        'concept' => ["Recordatorio de pago: {$concept}"],
+        'concept' => ["$concept " . date('Y')],
         'total' => [$amount],
         'email' => $email,
     ];
