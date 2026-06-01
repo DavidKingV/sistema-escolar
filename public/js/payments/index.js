@@ -311,9 +311,27 @@ const VerifyMonthlyPayment = async (studentId) => {
       { action: "GetPaymentHistory", studentId },
       [
         {
-          data: "concept",
+          data: null,
           className: "text-center",
-          render: (d) => escapeHtml(d),
+          render: (row) => {
+            let concept = row.concept;
+
+            if (row.concept_subject) {
+              concept += ` - Materia: ${row.concept_subject}`;
+            }
+
+            if (row.concept_subject_child) {
+              concept += ` | Submateria: ${row.concept_subject_child}`;
+            }
+
+            if (row.concept_carreer) {
+              concept += ` | ${row.concept_carreer}`;
+            }
+
+            concept += ` ${row.concept_month}`;
+
+            return escapeHtml(concept);
+          },
         },
         {
           data: "amount",
@@ -408,9 +426,27 @@ const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
         { action: "GetPaymentHistory", studentId },
         [
           {
-            data: "concept",
+            data: null,
             className: "text-center",
-            render: (d) => escapeHtml(d),
+            render: (row) => {
+              let concept = row.concept;
+
+              if (row.concept_subject) {
+                concept += ` - Materia: ${row.concept_subject}`;
+              }
+
+              if (row.concept_subject_child) {
+                concept += ` | Submateria: ${row.concept_subject_child}`;
+              }
+
+              if (row.concept_carreer) {
+                concept += ` | ${row.concept_carreer}`;
+              }
+
+              concept += ` ${row.concept_month}`;
+
+              return escapeHtml(concept);
+            },
           },
           {
             data: "amount",
@@ -540,10 +576,23 @@ const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
 
       // Obtener el primer pago
       const paymentData = paymentResponse.data[0];
+      const fullConcept = [
+        paymentData.concept,
+        paymentData.concept_subject
+          ? `- Materia: ${paymentData.concept_subject}`
+          : null,
+        paymentData.concept_subject_child
+          ? `| Submateria: ${paymentData.concept_subject_child}`
+          : null,
+        paymentData.concept_carreer ? `| ${paymentData.concept_carreer}` : null,
+        paymentData.concept_month,
+      ]
+        .filter(Boolean)
+        .join(" ");
 
       // Pintar datos
       $("#idPayment").val(sanitize(paymentData.id));
-      $("#paymentConcept").text(sanitize(paymentData.concept));
+      $("#paymentConcept").text(sanitize(fullConcept));
       $("#paymentPrice").val(sanitize(paymentData.cost));
 
       const extraValue = parseFloat(sanitize(paymentData.extra)) || 0;
@@ -887,7 +936,6 @@ $(document).ready(function () {
           $("#careerDiv").prop("hidden", false);
           $("#careerName").val(escapeHtml(response.careerName));
           $("#careerName").prop("readonly", true);
-          // $("#paymentMonth").val(null).trigger("change").prop("disabled", true);
           getSubjectsList($("#subjectConcept"), response.careerId);
           $("#subjectConcept").prop("disabled", false);
         } else {
@@ -904,7 +952,6 @@ $(document).ready(function () {
         if (response.success) {
           $("#subjectConceptDiv").prop("hidden", true);
           $("#careerDiv").prop("hidden", false);
-          // $("#paymentMonth").val(null).trigger("change").prop("disabled", true);
           $("#careerName").val(escapeHtml(response.careerName));
           $("#careerName").prop("readonly", true);
         } else {
@@ -913,21 +960,13 @@ $(document).ready(function () {
       } else {
         ensureStudentSelected();
       }
-    } else if (concept === "Bordado") {
-      // $("#paymentMonth").val(null).trigger("change").prop("disabled", true);
-      $("#subjectConceptDiv").prop("hidden", true);
-      $("#subjectConcept").prop("disabled", true).val(null).trigger("change");
-      $("#childSubjectName").prop("disabled", true);
-      $("#careerName").prop("readonly", true);
-      $("#todayDate").prop("checked", true);
     } else {
       // $("#paymentMonth").val(0).trigger("change").prop("disabled", false);
       $("#subjectConceptDiv").prop("hidden", true);
       $("#subjectConcept").prop("disabled", true).val(null).trigger("change");
       $("#childSubjectName").prop("disabled", true);
       $("#careerDiv").prop("hidden", true);
-      $("#careerName").prop("readonly", true);
-      $("#subjectConcept").val(null).trigger("change");
+      $("#careerName").prop("readonly", true).val("");
     }
   });
 

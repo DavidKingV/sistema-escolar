@@ -76,7 +76,15 @@ class EmailsModel
             // Definir una función personalizada para formatear números como moneda
             $products = is_array($paymentData['concept'])
                 ? $paymentData['concept']
-                : [$paymentData['concept']];
+                : [
+                    implode(' ', array_filter([
+                        $paymentData['concept'],
+                        $paymentData['concept_subject'] ? '- Materia: ' . $paymentData['concept_subject'] : null,
+                        $paymentData['concept_subject_child'] ? '| Submateria: ' . $paymentData['concept_subject_child'] : null,
+                        $paymentData['concept_carreer'] ? '| ' . $paymentData['concept_carreer'] : null,
+                        $paymentData['concept_month'],
+                    ]))
+                ];
 
             $subtotals = is_array($paymentData['total'])
                 ? $paymentData['total']
@@ -150,6 +158,14 @@ class EmailsModel
 
             $productos = [];
             $products = is_array($paymentData['concept']) ? $paymentData['concept'] : [$paymentData['concept']];
+            $products = is_array($paymentData['concept'])
+                ? $paymentData['concept']
+                : [
+                    implode(' ', array_filter([
+                        $paymentData['concept'],
+                        $paymentData['concept_month'],
+                    ]))
+                ];
             $subtotals = is_array($paymentData['total']) ? $paymentData['total'] : [$paymentData['total']];
 
             foreach ($products as $i => $producto) {

@@ -48,15 +48,15 @@ class PaymentsModel
         return $response;
     }
 
-    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy)
+    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $concept_subject, $concept_subject_child, $concept_carreer, $concept_month, $cost, $extra, $total, $comments, $registredBy)
     {
         try {
             $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
             $estatus = $isInvoice ? 'pending' : 'confirmed';
 
-            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, concept_subject, concept_subject_child, concept_carreer, concept_month, cost, extra, total, comments, registred_by, password, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("isiisiiisiss", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword, $estatus);
+            $stmt->bind_param("isiisssssiiisiss", $studentId, $date, $paymentMethod, $isInvoice, $concept, $concept_subject, $concept_subject_child, $concept_carreer, $concept_month, $cost, $extra, $total, $comments, $registredBy, $randomPassword, $estatus);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
@@ -354,6 +354,10 @@ class PaymentsModel
                     payment_method,
                     invoice,
                     concept,
+                    concept_subject,
+                    concept_subject_child,
+                    concept_carreer,
+                    concept_month,
                     cost,
                     extra,
                     total,
@@ -395,6 +399,10 @@ class PaymentsModel
                     "payment_method" => $row['payment_method'],
                     "invoice" => $row['invoice'],
                     "concept" => $row['concept'],
+                    "concept_subject" => $row['concept_subject'] ?? null,
+                    "concept_subject_child" => $row['concept_subject_child'] ?? null,
+                    "concept_carreer" => $row['concept_carreer'] ?? null,
+                    "concept_month" => $row['concept_month'],
                     "cost" => $row['cost'],
                     "extra" => $row['extra'] ?? null,
                     "amount" => $row['total'],

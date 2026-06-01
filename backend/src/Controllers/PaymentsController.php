@@ -131,62 +131,16 @@ class PaymentsController
         }
 
         $concept = trim($paymentDataArray['paymentConcept']);
-
-        $career = trim($paymentDataArray['careerName'] ?? '');
-        $month = trim($paymentDataArray['paymentMonth'] ?? '');
+        $concept_subject = !empty($paymentDataArray['subjectConcept']) ? trim($paymentDataArray['subjectConcept']) : NULL;
+        $concept_subject_child = !empty($paymentDataArray['childSubjectName']) ? trim($paymentDataArray['childSubjectName']) : NULL;
+        $concept_carreer = !empty($paymentDataArray['careerName']) ? trim($paymentDataArray['careerName']) : NULL;
+        $concept_month = trim($paymentDataArray['paymentMonth']);
         $date = !empty($paymentDataArray['paymentDate'])
             ? $paymentDataArray['paymentDate']
             : date('Y-m-d');
 
         $year = date('Y', strtotime($date));
-        $subject = trim($paymentDataArray['subjectConcept'] ?? '');
-        $childSubject = trim($paymentDataArray['childSubjectName'] ?? '');
-
-        switch ($concept) {
-
-            case 'Inscripción':
-                $paymentConcept =
-                    "$concept - $career $month $year";
-                break;
-
-            case 'Mensualidad':
-                $paymentConcept =
-                    "$concept - $career $month $year";
-                break;
-
-            case 'Nivelación':
-                $paymentConcept =
-                    "$concept - $month $year";
-                break;
-
-            case 'Examen Extraordinario':
-
-                $paymentConcept =
-                    "$concept - Materia: $subject";
-
-                if (!empty($childSubject)) {
-                    $paymentConcept .= " | $childSubject";
-                }
-
-                $paymentConcept .=
-                    " | $career $month $year";
-
-                break;
-
-            case 'Constancia de Estudios':
-                $paymentConcept =
-                    "$concept - $career $month $year";
-                break;
-
-            case 'Bordado':
-                $paymentConcept =
-                    "$concept - $month $year";
-                break;
-
-            default:
-                $paymentConcept = $concept;
-                break;
-        }
+        $concept_month = "$concept_month $year";
 
         $extra = $paymentDataArray['paymentExtra'] ?? 0;
         $registredBy = $_SESSION['userId'] ?? NULL;
@@ -201,7 +155,11 @@ class PaymentsController
             $date,
             $paymentDataArray['paymentMethod'],
             $isInvoice,
-            $paymentConcept = preg_replace('/\s+/', ' ', trim($paymentConcept)),
+            $concept,
+            $concept_subject,
+            $concept_subject_child,
+            $concept_carreer,
+            $concept_month = preg_replace('/\s+/', ' ', trim($concept_month)),
             $paymentDataArray['paymentPrice'],
             $extra,
             $paymentDataArray['paymentTotal'],

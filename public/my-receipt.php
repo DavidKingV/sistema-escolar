@@ -104,7 +104,13 @@ $pdf = '<!DOCTYPE html>
 // Recorrer el arreglo de filas para generar cada línea del detalle
 foreach ($rows as $row) {
   $pdf .= '<tr>
-                <td class="desc">' . $row['concept'] . '</td>
+                <td class="desc">' . implode(' ', array_filter([
+      $row['concept'],
+      $row['concept_subject'] ? '- Materia: ' . $row['concept_subject'] : null,
+      $row['concept_subject_child'] ? '| Submateria: ' . $row['concept_subject_child'] : null,
+      $row['concept_carreer'] ? '| ' . $row['concept_carreer'] : null,
+      $row['concept_month'],
+    ])) . '</td>
                 <td class="unit">' . $row['cost'] . '</td>
                 <td class="unit">' . $row['extra'] . '</td>
                 <td class="qty">' . $row['total'] . '</td>
