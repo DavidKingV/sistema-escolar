@@ -615,8 +615,10 @@ const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
 
       if (paymentData.status === "cancelled") {
         $("#cancelReceipt").prop("hidden", true);
+        $("#savePaymentChanges").prop("hidden", true);
       } else {
         $("#cancelReceipt").prop("hidden", false);
+        $("#savePaymentChanges").prop("hidden", false);
       }
 
       setTimeout(() => {
@@ -1300,6 +1302,7 @@ $(document).ready(function () {
             if (response.success) {
               successAlert(response.message);
               $("#cancelReceipt").prop("hidden", true);
+              $("#savePaymentChanges").prop("hidden", true);
               $("#paymentHistoryStudentTable")
                 .DataTable()
                 .ajax.reload(null, false);
