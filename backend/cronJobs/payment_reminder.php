@@ -1,5 +1,11 @@
 <?php
 
+// Bloquear ejecución si no es CLI
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit('Acceso no permitido.');
+}
+
 date_default_timezone_set('America/Mexico_City');
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -10,31 +16,17 @@ use Vendor\Schoolarsystem\Models\StudentsModel;
 use Vendor\Schoolarsystem\Models\PaymentsModel;
 use Vendor\Schoolarsystem\Models\EmailsModel;
 
-// Cargar variables de entorno
 $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
 $dotenv->load();
 
-// ─── Conexión ─────────────────────────────────────────────────────────────────
 $db = new DBConnection();
-
-// ─── Modelos (directo, sin pasar por Controllers ni auth) ────────────────────
 $studentsModel = new StudentsModel($db);
 $paymentsModel = new PaymentsModel($db);
 $emailModel = new EmailsModel();
 
-// ─── Helpers internos ─────────────────────────────────────────────────────────
-
-/**
- * Verifica si el alumno ya pagó su mensualidad en el mes actual.
- * Reutiliza getPaymentHistory() y filtra por concepto "mensualidad" y mes vigente.
- */
 function alumnoYaPago(array $paymentHistory): bool
 {
-    if (!($paymentHistory['success'] ?? false)) {
-        return false;
-    }
-
-    if (empty($paymentHistory['data'])) {
+    if (!($paymentHistory['success'] ?? false) || empty($paymentHistory['data'])) {
         return false;
     }
 
@@ -42,13 +34,10 @@ function alumnoYaPago(array $paymentHistory): bool
     $anioActual = (int) date('Y');
 
     foreach ($paymentHistory['data'] as $pago) {
-        if (stripos($pago['concept'], 'mensualidad') === false) {
+        if (stripos($pago['concept'], 'mensualidad') === false)
             continue;
-        }
-
-        if (empty($pago['payment_date'])) {
+        if (empty($pago['payment_date']))
             continue;
-        }
 
         $fechaPago = new DateTime($pago['payment_date']);
         if (
@@ -63,10 +52,6 @@ function alumnoYaPago(array $paymentHistory): bool
     return false;
 }
 
-/**
- * Envía el correo de recordatorio (reutiliza SendPaymentEmail adaptado).
- * Construye el $paymentData mínimo que necesita la plantilla.
- */
 function enviarRecordatorio(
     EmailsModel $emailModel,
     string $email,
@@ -74,7 +59,8 @@ function enviarRecordatorio(
     string $concept,
     float $amount,
     int $diasRestantes,
-    int $diaLimitePago
+    int $diaLimitePago,
+    DateTime $fechaObjetivo
 ): array {
 
     $asunto = $diasRestantes === 1
@@ -95,10 +81,15 @@ function enviarRecordatorio(
         11 => 'noviembre',
         12 => 'diciembre'
     ];
-    $paymentDate = $diaLimitePago . ' de ' . $meses[(int) date('m')] . ' de ' . date('Y');
+
+    // Mes y año del vencimiento real
+    $mesVencimiento = (int) $fechaObjetivo->format('n');
+    $anioVencimiento = (int) $fechaObjetivo->format('Y');
+
+    $paymentDate = $diaLimitePago . ' de ' . $meses[$mesVencimiento] . ' de ' . $anioVencimiento;
 
     $paymentData = [
-        'concept' => ["$concept " . date('Y')],
+        'concept' => ["{$concept} " . $meses[$mesVencimiento] . " {$anioVencimiento}"],
         'total' => [$amount],
         'email' => $email,
     ];
@@ -113,7 +104,6 @@ function enviarRecordatorio(
     );
 }
 
-// ─── Lógica principal del cron ────────────────────────────────────────────────
 function runPaymentReminders(
     StudentsModel $studentsModel,
     PaymentsModel $paymentsModel,
@@ -123,23 +113,20 @@ function runPaymentReminders(
 
     $hoy = new DateTime();
     $fechaObjetivo = (clone $hoy)->modify("+{$diasParaVencimiento} days");
-
     $diaObjetivo = (int) $fechaObjetivo->format('j');
 
-    echo "[" . $hoy->format('Y-m-d H:i:s') . "] Iniciando recordatorio ({$diasParaVencimiento} días)...\n";
-    echo "  Buscando alumnos con vencimiento el {$fechaObjetivo->format('d/m/Y')}...\n";
+    echo "[" . $hoy->format('Y-m-d H:i:s') . "] Recordatorio {$diasParaVencimiento} día(s) antes — vencimiento el {$fechaObjetivo->format('d/m/Y')}...\n";
 
     $students = $studentsModel->getStudentsForCron();
 
     if (empty($students) || !isset($students[0]['studentId'])) {
-        echo "No se encontraron alumnos o hubo un error al obtenerlos.\n";
+        echo "  Sin alumnos registrados.\n\n";
         return;
     }
 
     foreach ($students as $student) {
-        if (!($student['success'] ?? false)) {
+        if (!($student['success'] ?? false))
             continue;
-        }
 
         $studentId = $student['studentId'];
         $studentName = $student['name'];
@@ -147,20 +134,16 @@ function runPaymentReminders(
 
         $paymentInfo = $paymentsModel->verifyMonthlyPayment($studentId);
 
-        if (!($paymentInfo['success'] ?? false) || !isset($paymentInfo['payment_day'])) {
+        if (!($paymentInfo['success'] ?? false) || !isset($paymentInfo['payment_day']))
             continue;
-        }
 
         $diaLimitePago = (int) $paymentInfo['payment_day'];
         $montoPagar = (float) $paymentInfo['monthly_amount'];
         $concepto = $paymentInfo['concept'] ?? 'Mensualidad';
 
-        // 3. Comparar día de pago contra la fecha objetivo (respeta cruce de mes)
-        if ($diaLimitePago !== $diaObjetivo) {
+        if ($diaLimitePago !== $diaObjetivo)
             continue;
-        }
 
-        // 4. Verificar si ya pagó este mes
         $historial = $paymentsModel->getPaymentHistory($studentId);
 
         if (alumnoYaPago($historial)) {
@@ -168,7 +151,6 @@ function runPaymentReminders(
             continue;
         }
 
-        // 5. Enviar recordatorio
         $resultado = enviarRecordatorio(
             emailModel: $emailModel,
             email: $email,
@@ -176,28 +158,25 @@ function runPaymentReminders(
             concept: $concepto,
             amount: $montoPagar,
             diasRestantes: $diasParaVencimiento,
-            diaLimitePago: $diaLimitePago
+            diaLimitePago: $diaLimitePago,
+            fechaObjetivo: $fechaObjetivo
         );
 
         if ($resultado['success'] ?? false) {
-            echo "  ✔ Recordatorio enviado a {$studentName} <{$email}>\n";
+            echo "  ✔ Enviado a {$studentName} <{$email}>\n";
         } else {
-            echo "  ✘ Error al enviar a {$studentName}: " . ($resultado['message'] ?? 'Desconocido') . "\n";
+            echo "  ✘ Error con {$studentName}: " . ($resultado['message'] ?? 'Desconocido') . "\n";
         }
     }
 
-    echo "Proceso finalizado.\n\n";
+    echo "  Finalizado.\n\n";
 }
 
-// ─── Punto de entrada del cron ────────────────────────────────────────────────
-// Detecta qué función ejecutar según argumento CLI o ejecuta ambas
+// ─── Ejecución automática — siempre corre ambos ───────────────────────────────
+$hoy = new DateTime();
+echo "========================================\n";
+echo "CRON RECORDATORIO PAGOS — " . $hoy->format('d/m/Y H:i:s') . "\n";
+echo "========================================\n\n";
 
-$modo = $argv[1] ?? 'all';  // php payment_reminder.php 3 | php payment_reminder.php 1 | php payment_reminder.php all
-
-if ($modo === '3' || $modo === 'all') {
-    runPaymentReminders($studentsModel, $paymentsModel, $emailModel, diasParaVencimiento: 3);
-}
-
-if ($modo === '1' || $modo === 'all') {
-    runPaymentReminders($studentsModel, $paymentsModel, $emailModel, diasParaVencimiento: 1);
-}
+runPaymentReminders($studentsModel, $paymentsModel, $emailModel, diasParaVencimiento: 3);
+runPaymentReminders($studentsModel, $paymentsModel, $emailModel, diasParaVencimiento: 1);
