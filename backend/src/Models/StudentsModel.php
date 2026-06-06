@@ -10,18 +10,21 @@ use Firebase\JWT\Key;
 use mysqli_sql_exception;
 use Exception;
 
-class StudentsModel{
+class StudentsModel
+{
     private $connection;
 
-    public function __construct(DBConnection $dbConnection) {
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection->getConnection();
     }
 
-    public function getStudentName($studentId){
-        try{
+    public function getStudentName($studentId)
+    {
+        try {
             $sql = "SELECT nombre FROM students WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
-            
+
             if (!$stmt) {
                 throw new Exception('Error al preparar la consulta SQL: ' . $this->connection->error);
             }
@@ -39,7 +42,7 @@ class StudentsModel{
                 'success' => true,
                 'studentName' => $result['nombre'],
             ];
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Error al obtener el nombre del estudiante',
@@ -48,11 +51,12 @@ class StudentsModel{
         }
     }
 
-    public function getStudentById($studentId){
-        try{
+    public function getStudentById($studentId)
+    {
+        try {
             $sql = "SELECT * FROM students WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
-            
+
             if (!$stmt) {
                 throw new Exception('Error al preparar la consulta SQL: ' . $this->connection->error);
             }
@@ -70,7 +74,7 @@ class StudentsModel{
                 'success' => true,
                 'studentData' => $result,
             ];
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Error al obtener los datos del estudiante',
@@ -79,32 +83,33 @@ class StudentsModel{
         }
     }
 
-    public function getStudentsListSelect($search = '', $page = 1, $limit = 30){
+    public function getStudentsListSelect($search = '', $page = 1, $limit = 30)
+    {
         try {
             // Query base
             $sql = "SELECT * FROM students WHERE 1=1";
             $params = [];
             $types = "";
-            
+
             // Agregar búsqueda si existe
             if (!empty($search)) {
                 $sql .= " AND nombre LIKE ?";
                 $params[] = "%$search%";
                 $types .= "s";
             }
-            
+
             // Agregar ordenamiento
             $sql .= " ORDER BY nombre ASC";
-            
+
             // Agregar paginación
             $offset = ($page - 1) * $limit;
             $sql .= " LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
             $types .= "ii";
-            
+
             $stmt = $this->connection->prepare($sql);
-            
+
             if ($stmt) {
                 if (!empty($params)) {
                     $stmt->bind_param($types, ...$params);
@@ -115,25 +120,26 @@ class StudentsModel{
                 return $result;
             }
             return null;
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
     }
 
-    public function getStudentsCount($search = '') {
+    public function getStudentsCount($search = '')
+    {
         try {
             $sql = "SELECT COUNT(*) as total FROM students WHERE 1=1";
             $params = [];
             $types = "";
-            
+
             if (!empty($search)) {
                 $sql .= " AND nombre LIKE ?";
                 $params[] = "%$search%";
                 $types .= "s";
             }
-            
+
             $stmt = $this->connection->prepare($sql);
-            
+
             if ($stmt) {
                 if (!empty($params)) {
                     $stmt->bind_param($types, ...$params);
@@ -144,16 +150,17 @@ class StudentsModel{
                 return $result['total'];
             }
             return 0;
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return 0;
         }
     }
 
-    public function updateStatus($statusData){
-        try{
+    public function updateStatus($statusData)
+    {
+        try {
             $sql = "UPDATE students SET academical_status = ? WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
-            
+
             if (!$stmt) {
                 throw new Exception('Error al preparar la consulta SQL: ' . $this->connection->error);
             }
@@ -178,7 +185,7 @@ class StudentsModel{
                 'success' => true,
                 'message' => 'Estatus actualizado correctamente'
             ];
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Error al actualizar el estatus',
@@ -187,14 +194,15 @@ class StudentsModel{
         }
     }
 
-    public function getStudents(){
+    public function getStudents()
+    {
         $VerifySession = auth::check();
-        $isAdmin       = $VerifySession['isAdmin'] ?? false;
-        $userPerms     = $VerifySession['permissions'] ?? [];
+        $isAdmin = $VerifySession['isAdmin'] ?? false;
+        $userPerms = $VerifySession['permissions'] ?? [];
 
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT 
     s.*,
     g.nombre AS nombre_grupo,
@@ -207,30 +215,30 @@ LEFT JOIN groups g
 ";
             $query = $this->connection->query($sql);
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener los alumnos, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $students = array();
                 $secretKey = $_ENV['KEY'];
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
+                if ($query->num_rows > 0) {
+                    while ($row = $query->fetch_assoc()) {
                         $payload = [
                             "studentId" => $row['id']
                         ];
                         $encodeJWT = JWT::encode($payload, $secretKey, 'HS256');
 
                         $studentRow = [
-                            'success'         => true,
-                            'encodeJWT'       => $encodeJWT,
-                            'studentId'       => $row['id'],
-                            'no_control'      => $row['no_control'],
-                            'noControlSep'    => $row['noControlSEP'],
-                            'name'            => $row['nombre'],
-                            'phone'           => $row['telefono'],
-                            'email'           => $row['email'],
-                            'group_name'      => $row['nombre_grupo'],
-                            'group_key'       => $row['clave_grupo'],
-                            'academicalStatus'=> $row['academical_status']
+                            'success' => true,
+                            'encodeJWT' => $encodeJWT,
+                            'studentId' => $row['id'],
+                            'no_control' => $row['no_control'],
+                            'noControlSep' => $row['noControlSEP'],
+                            'name' => $row['nombre'],
+                            'phone' => $row['telefono'],
+                            'email' => $row['email'],
+                            'group_name' => $row['nombre_grupo'],
+                            'group_key' => $row['clave_grupo'],
+                            'academicalStatus' => $row['academical_status']
                         ];
 
                         if (PermissionHelper::canAccess(['edit_students', 'delete_students'], $userPerms, $isAdmin)) {
@@ -241,7 +249,7 @@ LEFT JOIN groups g
 
                         $students[] = $studentRow;
                     }
-                }else{
+                } else {
                     $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
                 }
                 $this->connection->close();
@@ -251,20 +259,54 @@ LEFT JOIN groups g
         }
     }
 
-    public function getStudent($studentId){
+    // En StudentsModel.php — agregar este método sin auth::check()
+    public function getStudentsForCron(): array
+    {
+        $sql = "SELECT 
+                s.*,
+                g.nombre AS nombre_grupo,
+                g.clave AS clave_grupo
+            FROM students s
+            LEFT JOIN student_groups sg 
+                ON s.id = sg.student_id AND sg.is_primary = TRUE
+            LEFT JOIN groups g 
+                ON sg.group_id = g.id";
+
+        $query = $this->connection->query($sql);
+
+        if (!$query) {
+            return [];
+        }
+
+        $students = [];
+
+        while ($row = $query->fetch_assoc()) {
+            $students[] = [
+                'success' => true,
+                'studentId' => $row['id'],
+                'name' => $row['nombre'],
+                'email' => $row['email'],
+            ];
+        }
+
+        return $students;
+    }
+
+    public function getStudent($studentId)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT * FROM students WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $studentId);
             $stmt->execute();
             $query = $stmt->get_result();
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener los datos del alumno, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $row = $query->fetch_assoc();
                 $student = array(
                     'success' => true,
@@ -289,12 +331,13 @@ LEFT JOIN groups g
         }
     }
 
-    public function addStudent($studentDataArray){
+    public function addStudent($studentDataArray)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            if($studentDataArray['controlSepNumber'] === ''){
+        } else {
+            if ($studentDataArray['controlSepNumber'] === '') {
                 $studentDataArray['controlSepNumber'] = NULL;
             }
 
@@ -305,21 +348,21 @@ LEFT JOIN groups g
             $stmt->bind_param('ssssssssss', $studentDataArray['controlNumber'], $studentDataArray['controlSepNumber'], $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentPhone, $studentDataArray['studentEmail']);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $lastStudentId = $stmt->insert_id;
                 $stmt->close();
 
-                if(isset($studentDataArray['microsoftId']) && isset($studentDataArray['microsoftEmail'])){
+                if (isset($studentDataArray['microsoftId']) && isset($studentDataArray['microsoftEmail'])) {
                     $sqlMicrosoft = "INSERT INTO microsoft_students (id, student_id, displayName, mail) VALUES (?, ?, ?, ?)";
                     $stmtMicrosoft = $this->connection->prepare($sqlMicrosoft);
                     $stmtMicrosoft->bind_param('siss', $studentDataArray['microsoftId'], $lastStudentId, $studentDataArray['studentName'], $studentDataArray['microsoftEmail']);
                     $stmtMicrosoft->execute();
 
-                    if($stmtMicrosoft->affected_rows > 0){
+                    if ($stmtMicrosoft->affected_rows > 0) {
                         $stmtMicrosoft->close();
                         $this->connection->close();
                         return array("success" => true, "message" => "Alumno registrado correctamente");
-                    }else{
+                    } else {
                         $stmtMicrosoft->close();
                         $this->connection->close();
                         return array("success" => false, "message" => "Error al registrar el alumno, por favor intente de nuevo más tarde");
@@ -328,7 +371,7 @@ LEFT JOIN groups g
 
                 $this->connection->close();
                 return array("success" => true, "message" => "Alumno local registrado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al registrar el alumno, por favor intente de nuevo más tarde");
@@ -336,15 +379,16 @@ LEFT JOIN groups g
         }
     }
 
-    public function updateStudent($studentDataArray){
+    public function updateStudent($studentDataArray)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
 
-            if(empty($studentDataArray['controlSepNumber'])){
+            if (empty($studentDataArray['controlSepNumber'])) {
                 $controlSepNumber = NULL;
-            }else{
+            } else {
                 $controlSepNumber = $studentDataArray['controlSepNumber'];
             }
 
@@ -353,11 +397,11 @@ LEFT JOIN groups g
             $stmt->bind_param('ssssssssssi', $studentDataArray['controlNumber'], $controlSepNumber, $studentDataArray['studentName'], $studentDataArray['studentGender'], $studentDataArray['studentBirthday'], $studentDataArray['studentState'], $studentDataArray['studentNation'], $studentDataArray['studentCurp'], $studentDataArray['studentPhone'], $studentDataArray['studentEmail'], $studentDataArray['idStudentDB']);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Alumno actualizado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al actualizar el alumno, por favor intente de nuevo más tarde");
@@ -365,21 +409,22 @@ LEFT JOIN groups g
         }
     }
 
-    public function deleteStudent($studentId){
+    public function deleteStudent($studentId)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "DELETE FROM students WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $studentId);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Alumno eliminado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al eliminar el alumno, por favor intente de nuevo más tarde");
@@ -388,27 +433,28 @@ LEFT JOIN groups g
 
     }
 
-    public function getStudentsNames(){
+    public function getStudentsNames()
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $query = "SELECT id, nombre FROM students";
             $result = mysqli_query($this->connection, $query);
 
-            if(!$result){
+            if (!$result) {
                 return array("success" => false, "message" => "Error al obtener los grupos");
-            }else{
+            } else {
                 $students = array();
-                if($result->num_rows > 0){
-                    while($row = $result->fetch_assoc()){
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
                         $students[] = array(
                             "success" => true,
                             "id" => $row['id'],
                             "name" => $row['nombre']
                         );
                     }
-                }else{
+                } else {
                     $students = array("success" => false, "message" => "No se encontraron grupos");
                 }
                 $this->connection->close();
@@ -417,20 +463,21 @@ LEFT JOIN groups g
         }
     }
 
-    public function getStudentsUsers(){
+    public function getStudentsUsers()
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT students.id, students.no_control, students.nombre, login_students.user, login_students.status FROM students LEFT JOIN login_students ON students.id = login_students.student_id WHERE students.id NOT IN (SELECT student_id FROM microsoft_students)";
             $query = $this->connection->query($sql);
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener los alumnos, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $students = array();
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
+                if ($query->num_rows > 0) {
+                    while ($row = $query->fetch_assoc()) {
                         $students[] = array(
                             'success' => true,
                             'id' => $row['id'],
@@ -440,7 +487,7 @@ LEFT JOIN groups g
                             'status' => $row['status']
                         );
                     }
-                }else{
+                } else {
                     $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
                 }
                 $this->connection->close();
@@ -451,20 +498,21 @@ LEFT JOIN groups g
 
     }
 
-    public function getMicrosoftStudentsUsers(){
+    public function getMicrosoftStudentsUsers()
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT * FROM microsoft_students";
             $query = $this->connection->query($sql);
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener los alumnos, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $students = array();
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
+                if ($query->num_rows > 0) {
+                    while ($row = $query->fetch_assoc()) {
                         $students[] = array(
                             'success' => true,
                             'id' => $row['id'],
@@ -473,7 +521,7 @@ LEFT JOIN groups g
                             'email' => $row['mail']
                         );
                     }
-                }else{
+                } else {
                     $students[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
                 }
                 $this->connection->close();
@@ -484,41 +532,43 @@ LEFT JOIN groups g
 
     }
 
-    public function verifyStudentUser($studentUser){
+    public function verifyStudentUser($studentUser)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT * FROM login_students WHERE user = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('s', $studentUser);
             $stmt->execute();
             $query = $stmt->get_result();
 
-            if($query->num_rows > 0){
-                return array("success" => true, "user" => false,"message" => "El usuario ya existe");
-            }else{
-                return array("success" => true, "user" => true,"message" => "Usuario disponible");
+            if ($query->num_rows > 0) {
+                return array("success" => true, "user" => false, "message" => "El usuario ya existe");
+            } else {
+                return array("success" => true, "user" => true, "message" => "Usuario disponible");
             }
         }
     }
 
-    public function addStudentUser($studentDataArray){
+    public function addStudentUser($studentDataArray)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $status = 'Activo';
             $sql = "INSERT INTO login_students (student_id, user, password, status) VALUES (?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('isss', $studentDataArray['studentUserId'], $studentDataArray['studentUserAdd'], $studentDataArray['studentUserPass'], $status);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Usuario registrado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al registrar el usuario, por favor intente de nuevo más tarde");
@@ -526,21 +576,22 @@ LEFT JOIN groups g
         }
     }
 
-    public function updateStudentUser($studentEditDataArray){
+    public function updateStudentUser($studentEditDataArray)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "UPDATE login_students SET user = ?, password = ? WHERE student_id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('ssi', $studentEditDataArray['studentUserAddEdit'], $studentEditDataArray['studentUserPassEdit'], $studentEditDataArray['studentUserIdEdit']);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Usuario actualizado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al actualizar el usuario, por favor intente de nuevo más tarde");
@@ -548,22 +599,23 @@ LEFT JOIN groups g
         }
     }
 
-    public function desactivateStudentUser($studentId){
+    public function desactivateStudentUser($studentId)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $status = 'Inactivo';
             $sql = "UPDATE login_students SET status = ? WHERE student_id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('si', $status, $studentId);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Usuario desactivado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al desactivar el usuario, por favor intente de nuevo más tarde");
@@ -571,22 +623,23 @@ LEFT JOIN groups g
         }
     }
 
-    public function reactivateStudentUser($studentId){
+    public function reactivateStudentUser($studentId)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $status = 'Activo';
             $sql = "UPDATE login_students SET status = ? WHERE student_id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('si', $status, $studentId);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Usuario reactivado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al reactivar el usuario, por favor intente de nuevo más tarde");
@@ -594,23 +647,24 @@ LEFT JOIN groups g
         }
     }
 
-    public function getSubjectsNames($carrerId){
+    public function getSubjectsNames($carrerId)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT carreers_subjects.id_carreer, carreers_subjects.id_subject, carreers_subjects.id_child_subject, subjects.nombre FROM carreers_subjects INNER JOIN subjects ON carreers_subjects.id_subject = subjects.id WHERE carreers_subjects.id_carreer = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $carrerId);
             $stmt->execute();
             $query = $stmt->get_result();
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener las materias, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $subjects = array();
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
+                if ($query->num_rows > 0) {
+                    while ($row = $query->fetch_assoc()) {
                         $subjects[] = array(
                             'success' => true,
                             'id_career' => $row['id_carreer'],
@@ -619,7 +673,7 @@ LEFT JOIN groups g
                             'id_child_subject' => $row['id_child_subject']
                         );
                     }
-                }else{
+                } else {
                     $subjects[] = array("success" => false, "message" => "No se encontraron materias registradas");
                 }
                 $stmt->close();
@@ -630,23 +684,24 @@ LEFT JOIN groups g
         }
     }
 
-    public function getChildSubjectsNames($idSubject){
+    public function getChildSubjectsNames($idSubject)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT * FROM subject_child WHERE id_subject = ? ";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $idSubject);
             $stmt->execute();
             $query = $stmt->get_result();
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener las materias, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $subjects = array();
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
+                if ($query->num_rows > 0) {
+                    while ($row = $query->fetch_assoc()) {
                         $subjects[] = array(
                             'success' => true,
                             'id_child_subject' => $row['id'],
@@ -654,7 +709,7 @@ LEFT JOIN groups g
                             'name_child_subject' => $row['nombre']
                         );
                     }
-                }else{
+                } else {
                     $subjects[] = array("success" => false, "message" => "No se encontraron materias registradas");
                 }
                 $stmt->close();
@@ -665,28 +720,30 @@ LEFT JOIN groups g
         }
     }
 
-    public function verifyGroupStudent($studentIdGroup){
+    public function verifyGroupStudent($studentIdGroup)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT students.id_group, groups.id_carreer FROM students INNER JOIN groups ON students.id_group = groups.id WHERE students.id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $studentIdGroup);
             $stmt->execute();
             $query = $stmt->get_result();
 
-            if($query->num_rows > 0){
+            if ($query->num_rows > 0) {
                 return array("success" => true, "group" => true, "id_carrer" => $query->fetch_assoc()['id_carreer'], "message" => "Alumno con grupo asignado");
-            }else{
+            } else {
                 return array("success" => true, "group" => false, "message" => "Alumno sin grupo asignado");
             }
         }
     }
 
-    public function getStudentGrades($studentId){
+    public function getStudentGrades($studentId)
+    {
         $VerifySession = auth::check();
-        if (!$VerifySession['success']) :
+        if (!$VerifySession['success']):
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         endif;
 
@@ -776,115 +833,117 @@ LEFT JOIN groups g
         }
     }
 
-    public function addGradeStudent($gradeDataArray) {
+    public function addGradeStudent($gradeDataArray)
+    {
         $VerifySession = auth::check();
-        if (!$VerifySession['success']) :
+        if (!$VerifySession['success']):
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         endif;
-            try {
-                $this->connection->begin_transaction();
+        try {
+            $this->connection->begin_transaction();
 
-                $idStudent = $gradeDataArray['studentId'];
-                $idSubject = $gradeDataArray['subject'];
-                $idChildSubject = $gradeDataArray['subjectChild'] ?? null;
+            $idStudent = $gradeDataArray['studentId'];
+            $idSubject = $gradeDataArray['subject'];
+            $idChildSubject = $gradeDataArray['subjectChild'] ?? null;
 
-                if ($idChildSubject) {
-                    $sql = "INSERT INTO student_grades_child (id_student, id_subject, id_subject_child, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?, ?)";
-                    $stmtChild = $this->connection->prepare($sql);
-                    if ($stmtChild === false) {
-                        return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
-                    }
-                    $stmtChild->bind_param('iiiddd', $idStudent, $idSubject, $idChildSubject, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
-                    $stmtChild->execute();
+            if ($idChildSubject) {
+                $sql = "INSERT INTO student_grades_child (id_student, id_subject, id_subject_child, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?, ?)";
+                $stmtChild = $this->connection->prepare($sql);
+                if ($stmtChild === false) {
+                    return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
+                }
+                $stmtChild->bind_param('iiiddd', $idStudent, $idSubject, $idChildSubject, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
+                $stmtChild->execute();
 
-                    if ($stmtChild ->affected_rows > 0) {
-                        $stmtChild ->close();
+                if ($stmtChild->affected_rows > 0) {
+                    $stmtChild->close();
 
-                        $count = "SELECT SUM(final_grade) as sum_grades, COUNT(*) as total FROM student_grades_child WHERE id_subject = ?";
-                        $stmtCount  = $this->connection->prepare($count);
-                        $stmtCount ->bind_param('i', $idSubject);
+                    $count = "SELECT SUM(final_grade) as sum_grades, COUNT(*) as total FROM student_grades_child WHERE id_subject = ?";
+                    $stmtCount = $this->connection->prepare($count);
+                    $stmtCount->bind_param('i', $idSubject);
 
-                        $stmtCount ->execute();
-                        $result = $stmtCount ->get_result();
+                    $stmtCount->execute();
+                    $result = $stmtCount->get_result();
 
-                        $row = $result->fetch_assoc();
-                        $sumGrades = $row['sum_grades'];
-                        $total = $row['total'];
-                        $stmtCount ->close();
+                    $row = $result->fetch_assoc();
+                    $sumGrades = $row['sum_grades'];
+                    $total = $row['total'];
+                    $stmtCount->close();
 
-                        $average = ($total > 0) ? $sumGrades / $total : 0;
+                    $average = ($total > 0) ? $sumGrades / $total : 0;
 
-                        if ($average > 0) {
-                            $sqlMain = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade)
+                    if ($average > 0) {
+                        $sqlMain = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade)
                                     VALUES (?, ?, ?, ?, ?)
                                     ON DUPLICATE KEY UPDATE
                                     continuos_grade = VALUES(continuos_grade),
                                     exam_grade = VALUES(exam_grade),
                                     final_grade = VALUES(final_grade)";
-                            $stmtMain = $this->connection->prepare($sqlMain);
-                            if ($stmtMain === false) {
-                                return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
-                            }
-                            $stmtMain->bind_param('iiddd', $idStudent, $idSubject, $average, $average, $average);
-                            $stmtMain->execute();
+                        $stmtMain = $this->connection->prepare($sqlMain);
+                        if ($stmtMain === false) {
+                            return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
+                        }
+                        $stmtMain->bind_param('iiddd', $idStudent, $idSubject, $average, $average, $average);
+                        $stmtMain->execute();
 
-                            if ($stmtMain->affected_rows > 0) {
-                                $stmtMain->close();
-                                $this->connection->commit();
-                                return array("success" => true, "message" => "Calificación registrada correctamente");
-                            } else {
-                                $stmtMain->close();
-                                return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
-                            }
-                        } else {
+                        if ($stmtMain->affected_rows > 0) {
+                            $stmtMain->close();
                             $this->connection->commit();
-                            return array("success" => true, "message" => "Se registro la calificación correctamente, pero no se pudo calcular el promedio de la materia principal");
+                            return array("success" => true, "message" => "Calificación registrada correctamente");
+                        } else {
+                            $stmtMain->close();
+                            return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
                         }
                     } else {
-                        $stmtChild->close();
-                        return array("success" => false, "message" => $stmt->error);
+                        $this->connection->commit();
+                        return array("success" => true, "message" => "Se registro la calificación correctamente, pero no se pudo calcular el promedio de la materia principal");
                     }
                 } else {
-                    $sql = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?)";
-                    $stmt = $this->connection->prepare($sql);
-                    if ($stmt === false) {
-                        return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
-                    }
-                    $stmt->bind_param('iiddd', $idStudent, $idSubject, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
-                    $stmt->execute();
-
-                    if ($stmt->affected_rows > 0) {
-                        $stmt->close();
-                        $this->connection->commit();
-                        return array("success" => true, "message" => "Calificación registrada correctamente");
-                    } else {
-                        $stmt->close();
-                        return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
-                    }
+                    $stmtChild->close();
+                    return array("success" => false, "message" => $stmt->error);
                 }
-            } catch (mysqli_sql_exception $e) {
-                $this->connection->rollback();
-                return array("success" => false, "message" => "Error de MySQL: " . $e->getMessage());
-            } catch (Exception $e) {
-                $this->connection->rollback();
-                return array("success" => false, "message" => "Error: " . $e->getMessage());
+            } else {
+                $sql = "INSERT INTO student_grades (id_student, id_subject, continuos_grade, exam_grade, final_grade) VALUES (?, ?, ?, ?, ?)";
+                $stmt = $this->connection->prepare($sql);
+                if ($stmt === false) {
+                    return array("success" => false, "message" => 'Error en la preparación de la consulta: ' . $this->connection->error);
+                }
+                $stmt->bind_param('iiddd', $idStudent, $idSubject, $gradeDataArray['gradeCont'], $gradeDataArray['gradetest'], $gradeDataArray['gradefinal']);
+                $stmt->execute();
+
+                if ($stmt->affected_rows > 0) {
+                    $stmt->close();
+                    $this->connection->commit();
+                    return array("success" => true, "message" => "Calificación registrada correctamente");
+                } else {
+                    $stmt->close();
+                    return array("success" => false, "message" => "Error al registrar la calificación, por favor intente de nuevo más tarde");
+                }
             }
+        } catch (mysqli_sql_exception $e) {
+            $this->connection->rollback();
+            return array("success" => false, "message" => "Error de MySQL: " . $e->getMessage());
+        } catch (Exception $e) {
+            $this->connection->rollback();
+            return array("success" => false, "message" => "Error: " . $e->getMessage());
+        }
     }
 
-    public function getGroupsNames(){
+    public function getGroupsNames()
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "SELECT * FROM groups";
             $query = $this->connection->query($sql);
 
-            if(!$query){
+            if (!$query) {
                 return array("success" => false, "message" => "Error al obtener los grupos, por favor intente de nuevo más tarde");
-            }else{
+            } else {
                 $groups = array();
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
+                if ($query->num_rows > 0) {
+                    while ($row = $query->fetch_assoc()) {
                         $groups[] = array(
                             'success' => true,
                             'id' => $row['id'],
@@ -892,7 +951,7 @@ LEFT JOIN groups g
                             'id_career' => $row['id_carreer']
                         );
                     }
-                }else{
+                } else {
                     $groups[] = array("success" => false, "message" => "No se encontraron grupos registrados");
                 }
                 $this->connection->close();
@@ -903,21 +962,22 @@ LEFT JOIN groups g
 
     }
 
-    public function addStudentGroup($studentGroupDataArray){
+    public function addStudentGroup($studentGroupDataArray)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "UPDATE students SET id_group = ? WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('ii', $studentGroupDataArray['studentIdGroup'], $studentGroupDataArray['studentId']);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => true, "message" => "Grupo asignado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al asignar el grupo, por favor intente de nuevo más tarde");
@@ -925,41 +985,43 @@ LEFT JOIN groups g
         }
     }
 
-    public function searchMicrosoftUser($displayName){
+    public function searchMicrosoftUser($displayName)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-            }else{
-                $accessToken = $VerifySession['accessToken']?? NULL;
+        } else {
+            $accessToken = $VerifySession['accessToken'] ?? NULL;
 
-                if($accessToken != NULL){
-                    $searchUser = new MicrosoftActions($this->connection);
-                    $search = $searchUser->getStudentByName($accessToken, $displayName);
+            if ($accessToken != NULL) {
+                $searchUser = new MicrosoftActions($this->connection);
+                $search = $searchUser->getStudentByName($accessToken, $displayName);
 
-                    if($search['success']){
-                        return array("success" => true, "message" => "Usuario encontrado", "data" => $search);
-                    }else{
-                        return array("success" => false, "message" => $search['error']);
-                    }
-                }else{
-                    return array("success" => false, "message" => "Debes iniciar sesión en Microsoft para poder enlazar un usuario a una cuenta");
+                if ($search['success']) {
+                    return array("success" => true, "message" => "Usuario encontrado", "data" => $search);
+                } else {
+                    return array("success" => false, "message" => $search['error']);
                 }
+            } else {
+                return array("success" => false, "message" => "Debes iniciar sesión en Microsoft para poder enlazar un usuario a una cuenta");
             }
+        }
     }
 
-    public function assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail){
+    public function assignMicrosoftUserToStudent($studentId, $microsoftUserId, $microsoftDisplayName, $microsoftEmail)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
+        } else {
             $sql = "INSERT INTO microsoft_students (id, student_id, displayName, mail) VALUES (?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('siss', $microsoftUserId, $studentId, $microsoftDisplayName, $microsoftEmail);
             $stmt->execute();
 
-            if($stmt->affected_rows > 0){
+            if ($stmt->affected_rows > 0) {
                 $stmt->close();
-                
+
                 //se elimina el usuario local si existe
                 $sqlDeleteLocalUser = "DELETE FROM login_students WHERE student_id = ?";
                 $stmtDelete = $this->connection->prepare($sqlDeleteLocalUser);
@@ -969,7 +1031,7 @@ LEFT JOIN groups g
 
                 $this->connection->close();
                 return array("success" => true, "message" => "Usuario de Microsoft asignado correctamente");
-            }else{
+            } else {
                 $stmt->close();
                 $this->connection->close();
                 return array("success" => false, "message" => "Error al asignar el usuario de Microsoft, por favor intente de nuevo más tarde");
@@ -977,9 +1039,10 @@ LEFT JOIN groups g
         }
     }
 
-    public function verifyTokenStudent($studentId, $token){
+    public function verifyTokenStudent($studentId, $token)
+    {
         $VerifySession = auth::check();
-        if(!$VerifySession['success']){
+        if (!$VerifySession['success']) {
             return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
         }
 
@@ -995,9 +1058,9 @@ LEFT JOIN groups g
         if ($decodedToken->studentId != $studentId) {
             return [
                 "success" => true,
-                "valid"   => false,
+                "valid" => false,
                 "message" => "Token inválido",
-                "token"   => $decodedToken
+                "token" => $decodedToken
             ];
         }
 
@@ -1008,7 +1071,7 @@ LEFT JOIN groups g
         $stmt->execute();
         $query = $stmt->get_result();
 
-        if($query->num_rows > 0){
+        if ($query->num_rows > 0) {
             return ["success" => true, "valid" => true, "message" => "Token válido", "token" => $decodedToken];
         }
 

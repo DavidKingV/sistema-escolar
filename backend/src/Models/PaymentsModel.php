@@ -48,15 +48,15 @@ class PaymentsModel
         return $response;
     }
 
-    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy)
+    public function addPayment($studentId, $date, $paymentMethod, $isInvoice, $concept, $concept_subject, $concept_subject_child, $concept_carreer, $concept_month, $cost, $extra, $total, $comments, $registredBy)
     {
         try {
             $randomPassword = $this->passwordsHelper->generateRandomPassword(12);
             $estatus = $isInvoice ? 'pending' : 'confirmed';
 
-            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, cost, extra, total, comments, registred_by, password, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO students_payments (id_student, payment_date, payment_method, invoice, concept, concept_subject, concept_subject_child, concept_carreer, concept_month, cost, extra, total, comments, registred_by, password, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param("isiisiiisiss", $studentId, $date, $paymentMethod, $isInvoice, $concept, $cost, $extra, $total, $comments, $registredBy, $randomPassword, $estatus);
+            $stmt->bind_param("isiisssssiiisiss", $studentId, $date, $paymentMethod, $isInvoice, $concept, $concept_subject, $concept_subject_child, $concept_carreer, $concept_month, $cost, $extra, $total, $comments, $registredBy, $randomPassword, $estatus);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
@@ -102,65 +102,43 @@ class PaymentsModel
         return $response;
     }
 
-    public function updatePayment(
-        $paymentId,
-        $cost,
-        $extra,
-        $total,
-        $method,
-        $comments
-    ) {
+    public function updatePayment($paymentId, $cost, $extra, $total, $method, $comments)
+    {
         try {
+            // Verificar que el pago no esté cancelado antes de actualizar
+            $checkSql = "SELECT status FROM students_payments WHERE id = ? AND isDeleted = 0";
+            $checkStmt = $this->connection->prepare($checkSql);
+            $checkStmt->bind_param("i", $paymentId);
+            $checkStmt->execute();
+            $result = $checkStmt->get_result()->fetch_assoc();
+            $checkStmt->close();
 
-            $sql = "
-            UPDATE students_payments 
-            SET
-                cost = ?,
-                extra = ?,
-                total = ?,
-                payment_method = ?,
-                comments = ?
-            WHERE id = ?
-        ";
+            if (!$result) {
+                return ["success" => false, "message" => "Pago no encontrado."];
+            }
+
+            if ($result['status'] === 'cancelled') {
+                return ["success" => false, "message" => "No se puede modificar un pago cancelado."];
+            }
+
+            $sql = "UPDATE students_payments 
+                SET cost = ?, extra = ?, total = ?, payment_method = ?, comments = ?
+                WHERE id = ? AND status != 'cancelled'";
 
             $stmt = $this->connection->prepare($sql);
-
-            $stmt->bind_param(
-                "sdissi",
-                $cost,
-                $extra,
-                $total,
-                $method,
-                $comments,
-                $paymentId
-            );
-
+            $stmt->bind_param("sdissi", $cost, $extra, $total, $method, $comments, $paymentId);
             $stmt->execute();
 
-            if ($stmt->affected_rows >= 0) {
-                return [
-                    "success" => true,
-                    "message" => "Pago actualizado correctamente"
-                ];
+            if ($stmt->affected_rows > 0) {
+                return ["success" => true, "message" => "Pago actualizado correctamente."];
             }
 
-            return [
-                "success" => false,
-                "message" => "No se realizaron cambios"
-            ];
+            return ["success" => false, "message" => "No se realizaron cambios."];
 
         } catch (mysqli_sql_exception $e) {
-
-            return [
-                "success" => false,
-                "message" => "Error al actualizar el pago"
-            ];
-
+            return ["success" => false, "message" => "Error al actualizar el pago."];
         } finally {
-
-            if (isset($stmt)) {
-                $stmt->close();
-            }
+            $stmt->close();
         }
     }
 
@@ -205,33 +183,38 @@ class PaymentsModel
     public function cancelPayment($paymentId, $comments)
     {
         try {
+            // Verificar estado actual
+            $checkSql = "SELECT status FROM students_payments WHERE id = ? AND isDeleted = 0";
+            $checkStmt = $this->connection->prepare($checkSql);
+            $checkStmt->bind_param("i", $paymentId);
+            $checkStmt->execute();
+            $result = $checkStmt->get_result()->fetch_assoc();
+            $checkStmt->close();
+
+            if (!$result) {
+                return ["success" => false, "message" => "Pago no encontrado."];
+            }
+
+            if ($result['status'] === 'cancelled') {
+                return ["success" => false, "message" => "El pago ya está cancelado."];
+            }
+
             $sql = "UPDATE students_payments
-                SET status    = 'cancelled',
-                    comments  = ?
-                WHERE id      = ?
-                  AND isDeleted = 0";
+                SET status = 'cancelled', comments = ?
+                WHERE id = ? AND status != 'cancelled' AND isDeleted = 0";
 
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("si", $comments, $paymentId);
             $stmt->execute();
 
             if ($stmt->affected_rows > 0) {
-                return [
-                    "success" => true,
-                    "message" => "Recibo cancelado correctamente."
-                ];
+                return ["success" => true, "message" => "Recibo cancelado correctamente."];
             }
 
-            return [
-                "success" => false,
-                "message" => "No se pudo cancelar el recibo."
-            ];
+            return ["success" => false, "message" => "No se pudo cancelar el recibo."];
 
         } catch (mysqli_sql_exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al cancelar el recibo."
-            ];
+            return ["success" => false, "message" => "Error al cancelar el recibo."];
         }
     }
 
@@ -354,6 +337,10 @@ class PaymentsModel
                     payment_method,
                     invoice,
                     concept,
+                    concept_subject,
+                    concept_subject_child,
+                    concept_carreer,
+                    concept_month,
                     cost,
                     extra,
                     total,
@@ -395,6 +382,10 @@ class PaymentsModel
                     "payment_method" => $row['payment_method'],
                     "invoice" => $row['invoice'],
                     "concept" => $row['concept'],
+                    "concept_subject" => $row['concept_subject'] ?? null,
+                    "concept_subject_child" => $row['concept_subject_child'] ?? null,
+                    "concept_carreer" => $row['concept_carreer'] ?? null,
+                    "concept_month" => $row['concept_month'],
                     "cost" => $row['cost'],
                     "extra" => $row['extra'] ?? null,
                     "amount" => $row['total'],
