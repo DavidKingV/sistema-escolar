@@ -4,15 +4,18 @@ namespace Vendor\Schoolarsystem\Models;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\PermissionHelper;
 use Vendor\Schoolarsystem\auth;
+require_once(__DIR__ . '/../../login/index.php');
 
 class GroupsModel
 {
     private $connection;
+    private $loginControl;
 
 
     public function __construct(DBConnection $dbConnection)
     {
         $this->connection = $dbConnection->getConnection();
+        $this->loginControl = new \LoginControl($dbConnection);
     }
 
     public function getNoGroupStudentsList($search = '', $page = 1, $limit = 30)
@@ -726,11 +729,24 @@ WHERE sg.group_id = ?;";
         return ["success" => false, "message" => "No se pudieron agregar los estudiantes al grupo"];
     }
 
-    public function deleteStudentGroup($groupId, $studentId)
+    public function deleteStudentGroup($groupId, $studentId, $password)
     {
         $VerifySession = auth::check();
         if (!$VerifySession['success']) {
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        }
+
+        $userId = $_SESSION['userId'];
+
+        // validar password
+        $isValidPassword = $this->loginControl
+            ->verifyUserPassword($userId, $password);
+
+        if (!$isValidPassword) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta"
+            ];
         }
 
         $sql = "DELETE FROM student_groups WHERE student_id = ? AND group_id = ?";

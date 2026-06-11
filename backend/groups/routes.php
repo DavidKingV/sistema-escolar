@@ -48,7 +48,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
         case 'deleteStudentGroup':
             $groupId = $_POST['groupId'];
             $studentId = $_POST['studentId'];
-            $response = $groups->deleteStudentGroup($groupId, $studentId);
+            $password = $_POST['password'];
+            $response = $groups->deleteStudentGroup($groupId, $studentId, $password);
             break;
     }
 
