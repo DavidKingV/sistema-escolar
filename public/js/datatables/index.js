@@ -123,9 +123,7 @@ function initializeStudentPaymentDataTable() {
         data: "actions",
         render: function (data, type, row) {
           if (!data) return ""; // si no hay permiso, celda vacía
-          return (
-            `<button data-id="${row.studentId}" data-name="${row.name}" class="btn btn-primary btn-circle viewPayments" data-bs-toggle="modal" data-bs-target="#studentPaymentsModal"><i class="bi bi-eye"></i></button>`
-          );
+          return `<button data-id="${row.studentId}" data-name="${row.name}" class="btn btn-primary btn-circle viewPayments" data-bs-toggle="modal" data-bs-target="#studentPaymentsModal"><i class="bi bi-eye"></i></button>`;
         },
         className: "text-center",
       },
@@ -591,7 +589,6 @@ function initializeGroupsDataTable() {
       type: "POST",
       data: { action: "getGroups" },
       dataSrc: function (data) {
-        console.log(data);
         if (!data[0].success) {
           Swal.fire({
             icon: "error",
@@ -612,7 +609,7 @@ function initializeGroupsDataTable() {
       {
         data: "members",
         render: function (data, type, row) {
-          return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembros</a></span>`;
+          return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembro(s)</a></span>`;
         },
         className: "text-center",
       },
@@ -669,7 +666,6 @@ function initializeGroupsStudentsDataTable(groupId) {
       type: "POST",
       data: { groupId: groupId, action: "getGroupsStudents" },
       dataSrc: function (data) {
-        console.log(data);
         if (!data[0].success) {
           Swal.fire({
             icon: "error",

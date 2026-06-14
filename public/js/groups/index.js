@@ -40,17 +40,15 @@ $("#groupsTable").on("click", ".editGroup", async function () {
   }
 });
 
-$("#updateGroup").on("submit", function (e) {
-  e.preventDefault();
-  let groupDataEdit = $(this).serialize();
-
+// index.js - Solo lógica de update
+function handleUpdateGroup(groupDataEdit) {
   Swal.fire({
     title: "¿Estás seguro de actualizar al grupo?",
     text: "Esta acción no se puede deshacer",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "rgb(48, 133, 214)",
-    cancelButtonColor: "rgb(221, 51, 51);",
+    cancelButtonColor: "rgb(221, 51, 51)",
     confirmButtonText: "Sí, actualizar",
     cancelButtonText: "Cancelar",
   }).then((result) => {
@@ -58,7 +56,7 @@ $("#updateGroup").on("submit", function (e) {
       UpdateGroup(groupDataEdit);
     }
   });
-});
+}
 
 $("#groupsTable").on("click", ".deleteGroup", function () {
   let groupId = $(this).data("id");
@@ -166,7 +164,7 @@ $("#addStudentGroupForm").on("submit", function (e) {
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "rgb(48, 133, 214)",
-    cancelButtonColor: "rgb(221, 51, 51);",
+    cancelButtonColor: "rgb(221, 51, 51)",
     confirmButtonText: "Sí, agregar",
     cancelButtonText: "Cancelar",
   }).then((result) => {
@@ -270,8 +268,8 @@ const AddStudentGroup = async (groupId, studentId) => {
       // Reload the table
       $("#groupStudentsTable").DataTable().ajax.reload();
       $("#addStudentGroup").validate().resetForm();
-      $("#studentIdGroup").select2("val", "All");
-      GetStudentsNames();
+      $("#studentIdGroup").val(null).trigger("change");
+      await GetStudentsNames();
     } else {
       // Show an error message
       Swal.fire({
@@ -362,7 +360,7 @@ const GetStudentsNames = async () => {
   const GetStudentsSelect = async () => {
     try {
       const response = await $.ajax({
-        url: "../backend/groups/routes.php",
+        url: "../../../backend/groups/routes.php",
         type: "GET",
         data: { action: "getStudentsNames" },
         dataType: "json",
@@ -378,19 +376,26 @@ const GetStudentsNames = async () => {
     const students = await GetStudentsSelect();
 
     if (!students || students.length === 0) {
-      console.log("No se encontraron grupos");
+      console.log("No se encontraron alumnos");
       return;
     }
 
     let $select = $("#studentIdGroup");
+
+    // ← Destruir Select2 y limpiar opciones antes de repoblar
+    if ($select.hasClass("select2-hidden-accessible")) {
+      $select.select2("destroy");
+    }
+    $select.empty();
+
     $.each(students, function (index, student) {
       if (student.success !== false) {
-        let $option = $("<option>", {
-          value: student.id,
-          text: student.name,
-        });
-
-        $select.append($option);
+        $select.append(
+          $("<option>", {
+            value: student.id,
+            text: student.name,
+          }),
+        );
       }
     });
 
@@ -403,77 +408,77 @@ const GetStudentsNames = async () => {
   }
 };
 
-const GetDataGroupEdit = async (groupId) => {
-  try {
-    // Función para obtener el valor predeterminado de la base de datos usando async/await
-    const getDefaultCareer = async () => {
-      const response = await $.ajax({
-        url: "../backend/groups/routes.php",
-        type: "GET",
-        data: { groupId: groupId, action: "getGroupData" },
-      });
-      if (!response.success) {
-        throw new Error(response.message);
-      } else {
-        FillTable(response);
-        return response.carreer_name;
-      }
-    };
+// const GetDataGroupEdit = async (groupId) => {
+//   try {
+//     // Función para obtener el valor predeterminado de la base de datos usando async/await
+//     const getDefaultCareer = async () => {
+//       const response = await $.ajax({
+//         url: "../backend/groups/routes.php",
+//         type: "GET",
+//         data: { groupId: groupId, action: "getGroupData" },
+//       });
+//       if (!response.success) {
+//         throw new Error(response.message);
+//       } else {
+//         FillTable(response);
+//         return response.carreer_name;
+//       }
+//     };
 
-    // Función para cargar el JSON de carreras
-    const loadCareers = async () => {
-      const response = await $.ajax({
-        url: "../backend/groups/routes.php",
-        type: "GET",
-        data: { action: "getGroupsJson" },
-      });
-      if (!response) {
-        throw new Error(response.message);
-      } else {
-        return response;
-      }
-    };
+//     // Función para cargar el JSON de carreras
+//     const loadCareers = async () => {
+//       const response = await $.ajax({
+//         url: "../backend/groups/routes.php",
+//         type: "GET",
+//         data: { action: "getGroupsJson" },
+//       });
+//       if (!response) {
+//         throw new Error(response.message);
+//       } else {
+//         return response;
+//       }
+//     };
 
-    // Obtener el valor predeterminado
-    const defaultCareer = await getDefaultCareer();
+//     // Obtener el valor predeterminado
+//     const defaultCareer = await getDefaultCareer();
 
-    // Cargar el JSON de carreras
-    const careers = await loadCareers();
+//     // Cargar el JSON de carreras
+//     const careers = await loadCareers();
 
-    let $selectEdit = $("#carreerNameGroupEdit");
-    $.each(careers, function (area, subareas) {
-      let $mainOptgroup = $("<optgroup>", { label: area.replace(/_/g, " ") });
-      $.each(subareas, function (subarea, programs) {
-        let $subOptgroup = $("<optgroup>", {
-          label: "  " + subarea.replace(/_/g, " "),
-        }); // Agrega espacios para simular jerarquía
-        $.each(programs, function (index, program) {
-          let $option = $("<option>", {
-            value: program.id,
-            text: "    " + program.nombre,
-          });
-          // Verificar si esta opción coincide con el valor predeterminado
-          if (program.nombre === defaultCareer) {
-            $option.prop("selected", true); // Establecer la opción como seleccionada
-          }
+//     let $selectEdit = $("#carreerNameGroupEdit");
+//     $.each(careers, function (area, subareas) {
+//       let $mainOptgroup = $("<optgroup>", { label: area.replace(/_/g, " ") });
+//       $.each(subareas, function (subarea, programs) {
+//         let $subOptgroup = $("<optgroup>", {
+//           label: "  " + subarea.replace(/_/g, " "),
+//         }); // Agrega espacios para simular jerarquía
+//         $.each(programs, function (index, program) {
+//           let $option = $("<option>", {
+//             value: program.id,
+//             text: "    " + program.nombre,
+//           });
+//           // Verificar si esta opción coincide con el valor predeterminado
+//           if (program.nombre === defaultCareer) {
+//             $option.prop("selected", true); // Establecer la opción como seleccionada
+//           }
 
-          $subOptgroup.append($option); // Agrega la opción al subgrupo
-        });
-        $mainOptgroup.append($subOptgroup.children()); // Añade opciones del subgrupo al grupo principal
-      });
+//           $subOptgroup.append($option); // Agrega la opción al subgrupo
+//         });
+//         $mainOptgroup.append($subOptgroup.children()); // Añade opciones del subgrupo al grupo principal
+//       });
 
-      $selectEdit.append($mainOptgroup);
-    });
+//       $selectEdit.append($mainOptgroup);
+//     });
 
-    // Inicializar Select2
-    $selectEdit.select2({
-      theme: "bootstrap-5",
-      dropdownParent: $("#GroupsEditModal"),
-    });
-  } catch (error) {
-    console.error("Error: ", error);
-  }
-};
+//     // Inicializar Select2
+//     $selectEdit.select2({
+//       theme: "bootstrap-5",
+//       dropdownParent: $("#GroupsEditModal"),
+//     });
+//   } catch (error) {
+//     console.error("Error: ", error);
+//   }
+// };
 
 const GetCarreerName = async () => {
   try {
@@ -534,3 +539,47 @@ GetCarreerName();
 $("#GroupsEditModal").on("hidden.bs.modal", function () {
   CleanInputsGroupsEdit();
 });
+
+// =======================
+// Snapshot para grupos
+// =======================
+let originalGroupData = {};
+
+const normalizeValue = (val) => (val ?? "").toString().trim();
+
+const getCurrentGroupFormData = () => ({
+  idGroupDB: normalizeValue($("#idGroupDB").val()),
+  carreerNameGroupEdit: normalizeValue($("#carreerNameGroupEdit").val()),
+  keyGroupEdit: normalizeValue($("#keyGroupEdit").val()),
+  nameGroupEdit: normalizeValue($("#nameGroupEdit").val()),
+  startDateEdit: normalizeValue($("#startDateEdit").val()),
+  endDateEdit: normalizeValue($("#endDateEdit").val()),
+  descriptionGroupEdit: normalizeValue($("#descriptionGroupEdit").val()),
+});
+
+const hasGroupChanges = () => {
+  const currentData = getCurrentGroupFormData();
+  return Object.keys(originalGroupData).some(
+    (key) => currentData[key] !== originalGroupData[key],
+  );
+};
+
+const observeGroupChanges = () => {
+  $("#updateGroup")
+    .find("input, select")
+    .off("input change")
+    .on("input change", () => {
+      setTimeout(() => {
+        const changed = hasGroupChanges();
+        $("#saveGroupChanges").prop("disabled", !changed);
+      }, 0);
+    });
+};
+
+// Llama esto después de llenar el form con los datos del servidor
+const setGroupSnapshot = () => {
+  originalGroupData = getCurrentGroupFormData();
+  $("#saveGroupChanges").prop("disabled", true); // Inicia deshabilitado
+};
+
+export { handleUpdateGroup, observeGroupChanges, setGroupSnapshot };
