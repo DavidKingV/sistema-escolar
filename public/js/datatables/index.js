@@ -123,9 +123,7 @@ function initializeStudentPaymentDataTable() {
         data: "actions",
         render: function (data, type, row) {
           if (!data) return ""; // si no hay permiso, celda vacía
-          return (
-            `<button data-id="${row.studentId}" data-name="${row.name}" class="btn btn-primary btn-circle viewPayments" data-bs-toggle="modal" data-bs-target="#studentPaymentsModal"><i class="bi bi-eye"></i></button>`
-          );
+          return `<button data-id="${row.studentId}" data-name="${row.name}" class="btn btn-primary btn-circle viewPayments" data-bs-toggle="modal" data-bs-target="#studentPaymentsModal"><i class="bi bi-eye"></i></button>`;
         },
         className: "text-center",
       },
@@ -273,7 +271,7 @@ function initializeStudentsMicrosoftUsersTable() {
   });
 }
 
-function InitializeStudentGrades(studentIdGroup) {
+function initializeStudentGrades(studentIdGroup) {
   $("#gradesStudentTable").DataTable({
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
@@ -591,7 +589,6 @@ function initializeGroupsDataTable() {
       type: "POST",
       data: { action: "getGroups" },
       dataSrc: function (data) {
-        console.log(data);
         if (!data[0].success) {
           Swal.fire({
             icon: "error",
@@ -612,7 +609,7 @@ function initializeGroupsDataTable() {
       {
         data: "members",
         render: function (data, type, row) {
-          return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembros</a></span>`;
+          return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembro(s)</a></span>`;
         },
         className: "text-center",
       },
@@ -669,7 +666,6 @@ function initializeGroupsStudentsDataTable(groupId) {
       type: "POST",
       data: { groupId: groupId, action: "getGroupsStudents" },
       dataSrc: function (data) {
-        console.log(data);
         if (!data[0].success) {
           Swal.fire({
             icon: "error",
@@ -776,6 +772,53 @@ function initializeSubjectsDataTable() {
   });
 }
 
+function initializeDuplicatesDataTable() {
+  $("#duplicatesTable").DataTable({
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
+    },
+    ordering: false,
+    processing: true,
+    ajax: {
+      url: "../../backend/groups/routes.php",
+      type: "POST",
+      data: { action: "getDuplicateStudents" },
+      dataSrc: function (data) {
+        if (!data.success) {
+          Swal.fire({ icon: "error", title: "Error", text: data.message });
+          return [];
+        }
+        return data.results;
+      },
+    },
+    columns: [
+      { data: "nombre", className: "text-center" },
+      {
+        data: "total_grupos",
+        className: "text-center",
+        render: function (data) {
+          return `<span class="badge bg-danger">${data} grupos</span>`;
+        },
+      },
+      {
+        data: null,
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+                        <button class="btn btn-sm btn-warning btnResolveDuplicate"
+                            data-student-id="${row.id}"
+                            data-student-name="${row.nombre}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#duplicatesModal">
+                            <i class="bi bi-wrench"></i> Resolver
+                        </button>
+                    `;
+        },
+      },
+    ],
+  });
+}
+
 export {
   initializeStudentDataTable,
   initializeStudentPaymentDataTable,
@@ -787,5 +830,6 @@ export {
   initializeGroupsDataTable,
   initializeGroupsStudentsDataTable,
   initializeSubjectsDataTable,
-  InitializeStudentGrades,
+  initializeStudentGrades,
+  initializeDuplicatesDataTable,
 };

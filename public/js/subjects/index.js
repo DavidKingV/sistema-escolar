@@ -48,24 +48,51 @@ $("#updateSubjectChild").click(function() {
 
 });
 
-$("#deleteSubjectChild").click(function() {
+$("#deleteSubjectChild").on("click", async function () {
 
     let subjectChildId = $("#idMainSubjectInfo").val();
 
-    Swal.fire({
+    // Obtener instancia del modal de Bootstrap y ocultarlo
+    const modalEl = document.getElementById("childSubjectsModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+
+    modal.hide();
+
+    // Esperar a que el modal termine de cerrarse antes de abrir Swal
+    await new Promise((resolve) =>
+        $(modalEl).one("hidden.bs.modal", resolve)
+    );
+
+    const result = await Swal.fire({
         title: '¿Estás seguro de eliminar la materia hija?',
-        text: 'No podrás revertir esta acción.',
-        icon: 'warning',
+        text: "Ingresa tu contraseña para continuar",
+        icon: "warning",
+        input: "password",
+        inputPlaceholder: "Contraseña",
+        inputAttributes: {
+            autocapitalize: "off",
+            autocorrect: "off",
+        },
         showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonColor: '#d33',
         confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if(result.isConfirmed){
-            DeleteSubjectChild(subjectChildId);
-        }
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        inputValidator: (value) => {
+            if (!value) {
+                return "Debes ingresar tu contraseña";
+            }
+        },
     });
+
+    // Si cancela, reabrir el modal
+    if (!result.isConfirmed) {
+        modal.show();
+        return;
+    }
+
+    const password = result.value;
+    DeleteSubjectChild(subjectChildId, password);
 
 });
 
@@ -170,16 +197,28 @@ $("#subjectsTable").on('click', '.deleteSubject', function() {
     let subjectId = $(this).data('id');
     Swal.fire({
         title: '¿Estás seguro de eliminar la materia?',
-        text: 'No podrás revertir esta acción.',
-        icon: 'warning',
+        text: "Ingresa tu contraseña para continuar",
+        icon: "warning",
+        input: "password",
+        inputPlaceholder: "Contraseña",
+        inputAttributes: {
+            autocapitalize: "off",
+            autocorrect: "off",
+        },
         showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonColor: '#d33',
         confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        inputValidator: (value) => {
+            if (!value) {
+                return "Debes ingresar tu contraseña";
+            }
+        },
     }).then((result) => {
         if(result.isConfirmed){
-            DeleteSubject(subjectId);
+            const password = result.value;
+            DeleteSubject(subjectId, password);
         }
     });
 });
@@ -277,12 +316,12 @@ const AddSubject = async (subjectData) => {
     }
 }
 
-const DeleteSubject = async (subjectId) => {
+const DeleteSubject = async (subjectId, password) => {
     try {
         const response = await $.ajax({
             url: "../backend/subjects/routes.php",
             type: "POST",
-            data: {subjectId: subjectId, action: "deleteSubject"}
+            data: {subjectId: subjectId, password: password, action: "deleteSubject"}
         });
         if(response.success){
             Swal.fire({
@@ -434,12 +473,12 @@ const AddSubjectChild = async (subjectChildData) => {
     }
 }
 
-const DeleteSubjectChild = async (subjectChildId) => {
+const DeleteSubjectChild = async (subjectChildId, password) => {
     try {
         const response = await $.ajax({
             url: "../backend/subjects/routes.php",
             type: "POST",
-            data: {subjectChildId: subjectChildId, action: "deleteSubjectChild"}
+            data: {subjectChildId: subjectChildId, password: password, action: "deleteSubjectChild"}
         });
         if(response.success){
             Swal.fire({

@@ -1,5 +1,5 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
-import { initializeStudentDataTable, initializeStudentPaymentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, InitializeStudentGrades } from '../datatables/index.js';
+import { initializeStudentDataTable, initializeStudentPaymentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, initializeStudentGrades } from '../datatables/index.js';
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { sendFetch } from '../global/fetchCall.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';

@@ -248,6 +248,11 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
                     </a>
                 </li>
                 <?php endif; ?>
+                <li class="nav-item">
+                    <a href="<?php echo $_ENV['BASE_URL']; ?>/grupos/duplicados.php" class="list-group-item list-group-item-action sidebar-link">
+                        <i class="fas fa-list"></i> Duplicados
+                    </a>
+                </li>
             </ul>
         </li>
 

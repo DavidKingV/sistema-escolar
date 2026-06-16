@@ -1,14 +1,14 @@
 <?php
-require __DIR__.'/../../backend/vendor/autoload.php';
-include __DIR__.'/../../backend/views/mainMenu.php';
+require __DIR__ . '/../../backend/vendor/autoload.php';
+include __DIR__ . '/../../backend/views/mainMenu.php';
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\PermissionHelper;
 
 $VerifySession = auth::check();
 
-$isAdmin       = $VerifySession['isAdmin']       ?? false;
-$userPerms     = $VerifySession['permissions']   ?? [];
+$isAdmin = $VerifySession['isAdmin'] ?? false;
+$userPerms = $VerifySession['permissions'] ?? [];
 
 if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     header('Location: ../dashboard.php');
@@ -17,6 +17,7 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,13 +26,15 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/allMain.min.css">
     <!--<link rel="stylesheet" href="../assets/css/alumnos.css">-->
-    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <title>Detalles del grupo</title>
 </head>
+
 <body>
-      
+
     <div id="content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -86,16 +89,21 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                         <div class="card-header">
                             <ul class="nav nav-tabs card-header-tabs">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="studentsList" data-bs-toggle="tab" data-bs-target="#studentListTab" type="button" role="tab" aria-controls="studentListTab" aria-selected="true">Alumnos</button>
+                                    <button class="nav-link active" id="studentsList" data-bs-toggle="tab"
+                                        data-bs-target="#studentListTab" type="button" role="tab"
+                                        aria-controls="studentListTab" aria-selected="true">Alumnos</button>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link" id="addStudentTab" data-bs-toggle="tab" data-bs-target="#addStudentGroup" type="button" role="tab" aria-controls="addStudentGroup" aria-selected="false">Agregar</button>
+                                    <button class="nav-link" id="addStudentTab" data-bs-toggle="tab"
+                                        data-bs-target="#addStudentGroup" type="button" role="tab"
+                                        aria-controls="addStudentGroup" aria-selected="false">Agregar</button>
                                 </li>
                             </ul>
                         </div>
                         <div class="card-body">
                             <div class="tab-content" id="myTabContent">
-                                <div class="tab-pane fade show active" id="studentListTab" role="tabpanel" aria-labelledby="studentListTab" tabindex="0">
+                                <div class="tab-pane fade show active" id="studentListTab" role="tabpanel"
+                                    aria-labelledby="studentListTab" tabindex="0">
                                     <h4 class="card-title py-3">Lista de alumnos</h4>
                                     <table class="table" id="groupStudentsTable">
                                         <thead>
@@ -110,23 +118,28 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade" id="addStudentGroup" role="tabpanel" aria-labelledby="addStudentGroup" tabindex="0">
+                                <div class="tab-pane fade" id="addStudentGroup" role="tabpanel"
+                                    aria-labelledby="addStudentGroup" tabindex="0">
                                     <h4 class="card-title py-3">Agregar alumno al grupo</h4>
                                     <form id="addStudentGroupForm">
                                         <div class="row g-2">
                                             <div class="col-md">
-                                                <select class="form-select" id="studentIdGroup" name="studentIdGroup[]" multiple="multiple">
+                                                <select class="form-select" id="studentIdGroup" name="studentIdGroup[]"
+                                                    multiple="multiple">
                                                     <!-- Opciones de alumnos aquí -->
                                                 </select>
                                                 <div>
                                                     <p class="py-1">
-                                                        <label id="studentNameGroup-error" class="error text-bg-danger" for="studentNameGroup" style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
+                                                        <label id="studentNameGroup-error" class="error text-bg-danger"
+                                                            for="studentNameGroup"
+                                                            style="font-size: 12px; border-radius: 10px; padding: 0px 5px; display:none;"></label>
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md py-1">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cerrar</button>
                                             <button type="submit" class="btn btn-primary">Agregar</button>
                                         </div>
                                     </form>
@@ -140,18 +153,23 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     </div>
 
 </body>
+
 </html>
 
 
 <!-- Boostrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- jquery -->
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js" integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"
+    integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
 
 <!-- datables -->
