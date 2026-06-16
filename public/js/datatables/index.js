@@ -271,7 +271,7 @@ function initializeStudentsMicrosoftUsersTable() {
   });
 }
 
-function InitializeStudentGrades(studentIdGroup) {
+function initializeStudentGrades(studentIdGroup) {
   $("#gradesStudentTable").DataTable({
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
@@ -772,6 +772,53 @@ function initializeSubjectsDataTable() {
   });
 }
 
+function initializeDuplicatesDataTable() {
+  $("#duplicatesTable").DataTable({
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
+    },
+    ordering: false,
+    processing: true,
+    ajax: {
+      url: "../../backend/groups/routes.php",
+      type: "POST",
+      data: { action: "getDuplicateStudents" },
+      dataSrc: function (data) {
+        if (!data.success) {
+          Swal.fire({ icon: "error", title: "Error", text: data.message });
+          return [];
+        }
+        return data.results;
+      },
+    },
+    columns: [
+      { data: "nombre", className: "text-center" },
+      {
+        data: "total_grupos",
+        className: "text-center",
+        render: function (data) {
+          return `<span class="badge bg-danger">${data} grupos</span>`;
+        },
+      },
+      {
+        data: null,
+        className: "text-center",
+        render: function (data, type, row) {
+          return `
+                        <button class="btn btn-sm btn-warning btnResolveDuplicate"
+                            data-student-id="${row.id}"
+                            data-student-name="${row.nombre}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#duplicatesModal">
+                            <i class="bi bi-wrench"></i> Resolver
+                        </button>
+                    `;
+        },
+      },
+    ],
+  });
+}
+
 export {
   initializeStudentDataTable,
   initializeStudentPaymentDataTable,
@@ -783,5 +830,6 @@ export {
   initializeGroupsDataTable,
   initializeGroupsStudentsDataTable,
   initializeSubjectsDataTable,
-  InitializeStudentGrades,
+  initializeStudentGrades,
+  initializeDuplicatesDataTable,
 };

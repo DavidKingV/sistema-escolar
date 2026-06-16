@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 session_start();
 
 use Vendor\Schoolarsystem\DBConnection;
@@ -8,11 +8,11 @@ use Vendor\Schoolarsystem\Controllers\GroupsController;
 $connection = new DBConnection();
 $groups = new GroupsController($connection);
 
-if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
     $response = null;
 
-    switch ($action){
+    switch ($action) {
         case 'getGroups':
             $response = $groups->getGroups();
             break;
@@ -51,9 +51,24 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
             $password = $_POST['password'];
             $response = $groups->deleteStudentGroup($groupId, $studentId, $password);
             break;
+
+        case 'getDuplicateStudents':
+            $response = $groups->getDuplicateStudents();
+            break;
+
+        case 'getStudentDuplicateGroups':
+            $studentId = $_POST['studentId'];
+            $response = $groups->getStudentDuplicateGroups($studentId);
+            break;
+
+        case 'resolveDuplicate':
+            $studentId = $_POST['studentId'];
+            $correctGroupId = $_POST['correctGroupId'];
+            $response = $groups->resolveDuplicate($studentId, $correctGroupId);
+            break;
     }
 
-    if(isset($response)){
+    if (isset($response)) {
         header('Content-Type: application/json');
         echo json_encode($response);
     }
@@ -79,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
             break;
     }
 
-    if(isset($response)){
+    if (isset($response)) {
         header('Content-Type: application/json');
         echo json_encode($response);
     }

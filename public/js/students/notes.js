@@ -1,5 +1,5 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
-import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, InitializeStudentGrades } from '../datatables/index.js';
+import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, initializeStudentGrades } from '../datatables/index.js';
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner } from '../utils/alerts.js';
 
@@ -20,7 +20,7 @@ $(async function () {
             if (tokenValid) {
                 const groupExists = await VerifyGroupStudent(studentIdGroup);
                 if (groupExists) {
-                    const table = await InitializeStudentGrades(studentIdGroup);
+                    const table = await initializeStudentGrades(studentIdGroup);
                     HideTab("#alertDisplay");
                     RenderAlertMessage("El alumno ya tiene un grupo asignado", "info", "#studentGroupDetails");
                     

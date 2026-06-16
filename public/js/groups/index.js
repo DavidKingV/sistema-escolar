@@ -1,5 +1,6 @@
 import {
   initializeGroupsDataTable,
+  initializeDuplicatesDataTable,
   initializeGroupsStudentsDataTable,
 } from "../datatables/index.js";
 import { FillTable, CleanInputsGroupsEdit, FillDivsGroups } from "./forms.js";
@@ -533,6 +534,141 @@ const GetCarreerName = async () => {
 };
 
 GetCarreerName();
+
+// =======================
+// Cargar grupos del alumno en el modal
+// =======================
+const loadStudentDuplicateGroups = async (studentId) => {
+  try {
+    const response = await $.ajax({
+      url: "../../backend/groups/routes.php",
+      type: "POST",
+      data: { action: "getStudentDuplicateGroups", studentId },
+      dataType: "json",
+    });
+
+    if (!response.success) {
+      throw new Error(response.message);
+    }
+
+    const $list = $("#duplicateGroupsList");
+    $list.empty();
+
+    response.results.forEach((group) => {
+      $list.append(`
+                <div class="form-check card p-3 mb-2 border">
+                    <div class="d-flex align-items-start gap-3">
+                        <input class="form-check-input mt-1" type="radio" 
+                               name="correctGroup" 
+                               id="group_${group.group_id}" 
+                               value="${group.group_id}">
+                        <label class="form-check-label w-100" for="group_${group.group_id}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>${group.group_nombre}</strong>
+                                <span class="badge bg-primary">${group.clave}</span>
+                            </div>
+                            <div class="text-muted mt-1" style="font-size: 13px;">
+                                <span><i class="bi bi-book"></i> ${group.carreer_nombre}</span>
+                                <span class="ms-3"><i class="bi bi-tag"></i> ${group.subarea}</span>
+                                <span class="ms-3"><i class="bi bi-calendar"></i> Asignado: ${group.assigned_at}</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            `);
+    });
+
+    // Habilitar botón al seleccionar un radio
+    $('input[name="correctGroup"]').on("change", function () {
+      $("#btnSaveDuplicate").prop("disabled", false);
+    });
+  } catch (error) {
+    Swal.fire({ icon: "error", title: "Error", text: error.message });
+  }
+};
+
+// =======================
+// Resolver duplicado
+// =======================
+const resolveDuplicate = async (studentId) => {
+  const correctGroupId = $('input[name="correctGroup"]:checked').val();
+
+  if (!correctGroupId) {
+    Swal.fire({
+      icon: "warning",
+      title: "Selecciona un grupo",
+      text: "Debes seleccionar el grupo correcto.",
+    });
+    return;
+  }
+
+  try {
+    const response = await $.ajax({
+      url: "../../backend/groups/routes.php",
+      type: "POST",
+      data: { action: "resolveDuplicate", studentId, correctGroupId },
+      dataType: "json",
+    });
+
+    if (!response.success) {
+      throw new Error(response.message);
+    }
+
+    Swal.fire({ icon: "success", title: "Resuelto", text: response.message });
+
+    // Cerrar modal y recargar tabla
+    $("#duplicatesModal").modal("hide");
+    $("#duplicatesTable").DataTable().ajax.reload();
+  } catch (error) {
+    Swal.fire({ icon: "error", title: "Error", text: error.message });
+  }
+};
+
+initializeDuplicatesDataTable();
+
+// Abrir modal y cargar grupos del alumno
+$("#duplicatesTable").on("click", ".btnResolveDuplicate", async function () {
+  const studentId = $(this).data("student-id");
+  const studentName = $(this).data("student-name");
+
+  $("#duplicateStudentName").text(studentName);
+  $("#btnSaveDuplicate").prop("disabled", true).data("student-id", studentId);
+  $("#duplicateGroupsList").html(`
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        `);
+
+  $("#duplicatesModal").modal("show");
+  await loadStudentDuplicateGroups(studentId);
+});
+
+// Confirmar resolución
+$("#btnSaveDuplicate").on("click", async function () {
+  const studentId = $(this).data("student-id");
+
+  Swal.fire({
+    title: "¿Confirmar cambio?",
+    text: "Se eliminarán los grupos incorrectos del alumno. Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "rgb(48, 133, 214)",
+    cancelButtonColor: "rgb(221, 51, 51)",
+    confirmButtonText: "Sí, confirmar",
+    cancelButtonText: "Cancelar",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await resolveDuplicate(studentId);
+    }
+  });
+});
+
+// Refrescar tabla
+$("#btnRefreshDuplicates").on("click", function () {
+  $("#duplicatesTable").DataTable().ajax.reload();
+});
 
 //miselanious
 

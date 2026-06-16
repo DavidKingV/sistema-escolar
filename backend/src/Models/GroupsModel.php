@@ -838,6 +838,175 @@ WHERE sg.group_id = ?;";
         }
     }
 
+    public function getDuplicateStudents()
+    {
+        $VerifySession = auth::check();
+        if (!$VerifySession['success']) {
+            return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
+        }
+
+        $sql = "
+        SELECT 
+            s.id,
+            s.nombre,
+            COUNT(sg.group_id) AS total_grupos
+        FROM students s
+        JOIN student_groups sg ON s.id = sg.student_id
+        JOIN groups g ON sg.group_id = g.id
+        JOIN carreers c ON g.id_carreer = c.id
+        WHERE LOWER(c.subarea) NOT IN ('curso', 'diplomados')
+        GROUP BY s.id, s.nombre
+        HAVING COUNT(sg.group_id) > 1
+        ORDER BY total_grupos DESC
+    ";
+
+        $result = $this->connection->query($sql);
+
+        if (!$result) {
+            return ["success" => false, "message" => $this->connection->error];
+        }
+
+        $students = [];
+        while ($row = $result->fetch_assoc()) {
+            $students[] = [
+                "id" => $row['id'],
+                "nombre" => $row['nombre'],
+                "total_grupos" => $row['total_grupos']
+            ];
+        }
+
+        $result->free();
+
+        return [
+            "success" => true,
+            "results" => $students
+        ];
+    }
+
+    public function getStudentDuplicateGroups($studentId)
+    {
+        $VerifySession = auth::check();
+        if (!$VerifySession['success']) {
+            return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
+        }
+
+        $sql = "
+        SELECT 
+            sg.id AS sg_id,
+            g.id AS group_id,
+            g.clave,
+            g.nombre AS group_nombre,
+            c.nombre AS carreer_nombre,
+            c.subarea,
+            sg.assigned_at
+        FROM student_groups sg
+        JOIN groups g ON sg.group_id = g.id
+        JOIN carreers c ON g.id_carreer = c.id
+        WHERE sg.student_id = ?
+        AND LOWER(c.subarea) NOT IN ('curso', 'diplomados')
+        ORDER BY sg.assigned_at ASC
+    ";
+
+        $stmt = $this->connection->prepare($sql);
+        if (!$stmt) {
+            return ["success" => false, "message" => "Error preparando consulta"];
+        }
+
+        $stmt->bind_param('i', $studentId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        $groups = [];
+        while ($row = $result->fetch_assoc()) {
+            $groups[] = [
+                "sg_id" => $row['sg_id'],
+                "group_id" => $row['group_id'],
+                "clave" => $row['clave'],
+                "group_nombre" => $row['group_nombre'],
+                "carreer_nombre" => $row['carreer_nombre'],
+                "subarea" => $row['subarea'],
+                "assigned_at" => $row['assigned_at']
+            ];
+        }
+
+        return ["success" => true, "results" => $groups];
+    }
+
+    public function resolveDuplicate($studentId, $correctGroupId)
+    {
+        $VerifySession = auth::check();
+        if (!$VerifySession['success']) {
+            return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
+        }
+
+        $studentId = intval($studentId);
+        $correctGroupId = intval($correctGroupId);
+
+        try {
+            $this->connection->begin_transaction();
+
+            // 1. Obtener todos los grupos de carrera del alumno excepto el correcto
+            $sqlGet = "
+            SELECT sg.group_id
+            FROM student_groups sg
+            JOIN groups g ON sg.group_id = g.id
+            JOIN carreers c ON g.id_carreer = c.id
+            WHERE sg.student_id = ?
+            AND LOWER(c.subarea) NOT IN ('curso', 'diplomados')
+            AND sg.group_id != ?
+        ";
+            $stmtGet = $this->connection->prepare($sqlGet);
+            $stmtGet->bind_param('ii', $studentId, $correctGroupId);
+            $stmtGet->execute();
+            $resultGet = $stmtGet->get_result();
+            $stmtGet->close();
+
+            $groupsToRemove = [];
+            while ($row = $resultGet->fetch_assoc()) {
+                $groupsToRemove[] = intval($row['group_id']);
+            }
+
+            if (empty($groupsToRemove)) {
+                $this->connection->rollback();
+                return ["success" => false, "message" => "No se encontraron grupos duplicados a eliminar"];
+            }
+
+            $idsStr = implode(',', $groupsToRemove);
+
+            // 2. Eliminar de student_groups los grupos incorrectos
+            $sqlDelete = "
+            DELETE FROM student_groups
+            WHERE student_id = ?
+            AND group_id IN ($idsStr)
+        ";
+            $stmtDelete = $this->connection->prepare($sqlDelete);
+            $stmtDelete->bind_param('i', $studentId);
+            $stmtDelete->execute();
+            $stmtDelete->close();
+
+            // 3. Actualizar id_group en students con el grupo correcto
+            $sqlUpdate = "UPDATE students SET id_group = ? WHERE id = ?";
+            $stmtUpdate = $this->connection->prepare($sqlUpdate);
+            $stmtUpdate->bind_param('ii', $correctGroupId, $studentId);
+            $stmtUpdate->execute();
+            $stmtUpdate->close();
+
+            $this->connection->commit();
+
+            return [
+                "success" => true,
+                "message" => "Duplicados resueltos correctamente. Se eliminaron " . count($groupsToRemove) . " grupo(s) incorrectos."
+            ];
+
+        } catch (Exception $e) {
+            $this->connection->rollback();
+            return ["success" => false, "message" => "Error al resolver duplicados: " . $e->getMessage()];
+        } finally {
+            $this->connection->close();
+        }
+    }
+
     public function getGroupCareer($studentId)
     {
         $VerifySession = auth::check();
