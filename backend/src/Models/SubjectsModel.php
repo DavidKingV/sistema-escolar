@@ -540,18 +540,17 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
                         'subject_child_nombre' => $row['subject_child_nombre'] ?? 'Sin materias hijas'
                     );
                 }
-            } else {
-                // Si no hay registros, se puede retornar un arreglo con el mensaje o simplemente un arreglo vacío.
-                $subjects[] = array(
-                    'success' => false,
-                    'message' => 'No se encontraron materias'
-                );
             }
             
             // Cerrar la sentencia una vez que ya no es necesaria
             $stmt->close();
             
-            return $subjects;
+            return [
+                'draw'            => 1,
+                'recordsTotal'    => count($subjects),
+                'recordsFiltered' => count($subjects),
+                'data'            => $subjects
+            ];
             
         } catch(Exception $e) {
             return array(
