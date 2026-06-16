@@ -250,6 +250,7 @@ const UpdateCarreer = async (carreerDataEdit) => {
 
 const GetCarreerData = async (idCarreer) => {
     try {
+        $("#careerEditLoader").css("display", "flex");
         // Función para obtener el valor predeterminado de la base de datos usando async/await
         const getDefaultCareer = async () => {
             const response = await $.ajax({
@@ -304,6 +305,8 @@ const GetCarreerData = async (idCarreer) => {
             $selectEdit.append($mainOptgroup);
         });
 
+        $("#careerEditLoader").hide();
+
         // Inicializar Select2
         $selectEdit.select2({
             theme: "bootstrap-5",
@@ -327,6 +330,7 @@ const GetCarreerData = async (idCarreer) => {
         });
 
     } catch (error) {
+        $("#careerEditLoader").hide()
         console.error('Error: ', error);
     }
 };
