@@ -18,13 +18,52 @@ class GroupsModel
         $this->loginControl = new \LoginControl($dbConnection);
     }
 
-    public function getNoGroupStudentsList($search = '', $page = 1, $limit = 30)
+    public function getNoGroupStudentsList($search = '', $page = 1, $limit = 30, $groupId = 0)
     {
         try {
-            // Query base
-            $sql = "SELECT id, nombre FROM students WHERE 1=1";
-            $params = [];
-            $types = "";
+            // Determinar si el grupo es Curso o Diplomado
+            $isCourseOrDiploma = false;
+
+            if ($groupId > 0) {
+                $sqlType = "
+                SELECT c.subarea 
+                FROM groups g
+                JOIN carreers c ON g.id_carreer = c.id
+                WHERE g.id = ?
+            ";
+                $stmtType = $this->connection->prepare($sqlType);
+                $stmtType->bind_param('i', $groupId);
+                $stmtType->execute();
+                $resultType = $stmtType->get_result();
+                $row = $resultType->fetch_assoc();
+                $stmtType->close();
+
+                if ($row) {
+                    $subarea = strtolower($row['subarea']);
+                    $isCourseOrDiploma = in_array($subarea, ['curso', 'diplomados']);
+                }
+            }
+
+            if ($isCourseOrDiploma) {
+                // Mostrar todos los estudiantes que NO están ya en ESTE grupo
+                // pero pueden tener otro grupo de carrera (is_primary)
+                $sql = "
+                SELECT s.id, s.nombre 
+                FROM students s
+                WHERE s.id NOT IN (
+                    SELECT sg.student_id 
+                    FROM student_groups sg 
+                    WHERE sg.group_id = ?
+                )
+            ";
+                $params = [$groupId];
+                $types = "i";
+            } else {
+                // Solo estudiantes sin grupo de carrera asignado
+                $sql = "SELECT id, nombre FROM students WHERE id_group IS NULL";
+                $params = [];
+                $types = "";
+            }
 
             // Agregar búsqueda si existe
             if (!empty($search)) {
@@ -63,7 +102,7 @@ class GroupsModel
     public function getGroupsCount($search = '')
     {
         try {
-            $sql = "SELECT COUNT(*) as total FROM students WHERE 1=1";
+            $sql = "SELECT COUNT(*) as total FROM students WHERE id_group IS NULL";
             $params = [];
             $types = "";
 
@@ -288,7 +327,7 @@ WHERE sg.group_id = ?;";
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $sql = "SELECT id, nombre FROM students";
+        $sql = "SELECT id, nombre FROM students WHERE id_group IS NULL";
         $result = $this->connection->query($sql);
 
         if (!$result) {
@@ -322,7 +361,7 @@ WHERE sg.group_id = ?;";
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        $sql = "SELECT carreers.nombre as nombre_carrera, carreers.id as id_carreerCarreer, groups.* FROM groups INNER JOIN carreers ON groups.id_carreer = carreers.id WHERE groups.id = ?";
+        $sql = "SELECT carreers.nombre as nombre_carrera, carreers.id as id_carreer, carreers.subarea as subarea_carrera, groups.* FROM groups INNER JOIN carreers ON groups.id_carreer = carreers.id WHERE groups.id = ?";
         $stmt = $this->connection->prepare($sql);
 
         if (!$stmt) {
@@ -346,7 +385,8 @@ WHERE sg.group_id = ?;";
             $group = array(
                 "success" => true,
                 "id" => $row['id'],
-                "id_carreer" => $row['id_carreerCarreer'],
+                "id_carreer" => $row['id_carreer'],
+                "subarea_carrera" => $row['subarea_carrera'],
                 "carreer_name" => $row['nombre_carrera'],
                 "key" => $row['clave'],
                 "name" => $row['nombre'],
@@ -451,7 +491,7 @@ WHERE sg.group_id = ?;";
 
         if (!$stmt) {
             $this->connection->close();
-            return array("success" => false, "message" => "Error al actualizar la carrera");
+            return array("success" => false, "message" => "Error al actualizar el grupo");
         }
 
         $stmt->bind_param('isssssi', $groupDataEditArray['idCarreerHidden'], $groupDataEditArray['keyGroupEdit'], $groupDataEditArray['nameGroupEdit'], $groupDataEditArray['startDateEdit'], $groupDataEditArray['endDateEdit'], $groupDataEditArray['descriptionGroupEdit'], $groupDataEditArray['idGroupDB']);
@@ -460,12 +500,12 @@ WHERE sg.group_id = ?;";
         if ($stmt->affected_rows > 0) {
             $stmt->close();
             $this->connection->close();
-            return array("success" => true, "message" => "Carrera actualizada correctamente");
+            return array("success" => true, "message" => "Grupo actualizado correctamente");
         }
 
         $stmt->close();
         $this->connection->close();
-        return array("success" => false, "message" => "Error al actualizar la carrera");
+        return array("success" => false, "message" => "Error al actualizar el grupo");
     }
 
     public function deleteGroup($groupId)
@@ -497,162 +537,170 @@ WHERE sg.group_id = ?;";
         return array("success" => false, "message" => "Error al eliminar el grupo");
     }
 
-    public function addStudentGroup($groupId, $studentId)
+    public function addStudentGroup($groupId, $studentIds)
     {
         $VerifySession = auth::check();
+
         if (!$VerifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+            return ["success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado"];
         }
 
-        if (!is_array($studentId) || empty($studentId)) {
-            $this->connection->close();
-            return array("success" => false, "message" => "No se proporcionaron estudiantes válidos");
+        if (!is_array($studentIds) || empty($studentIds)) {
+            return ["success" => false, "message" => "No se proporcionaron estudiantes válidos"];
         }
 
-        // Sanitizar IDs
-        $ids = array_values(array_unique(array_map('intval', $studentId)));
-        $ids = array_filter($ids, fn($v) => $v > 0);
+        $ids = array_values(array_unique(array_map('intval', $studentIds)));
+        $ids = array_filter($ids, fn($id) => $id > 0);
 
         if (empty($ids)) {
-            $this->connection->close();
-            return array("success" => false, "message" => "No se proporcionaron estudiantes válidos");
+            return ["success" => false, "message" => "No se proporcionaron estudiantes válidos"];
         }
 
-        $ids_str = implode(',', $ids);
-        $inserted = 0;
-
         try {
-            // Transacción para atomicidad (evita race conditions)
             $this->connection->begin_transaction();
 
             /**
-             * 1) Excluir alumnos que ya están en ESTE grupo
-             *    (esto cumple exactamente tu requisito: "comprobar que el alumno no esté ya en el grupo")
+             * Determinar si el grupo es Curso o Diplomado
              */
-            $alreadySql = "SELECT student_id
-                       FROM student_groups
-                       WHERE student_id IN ($ids_str)
-                         AND group_id = ?";
-            $stmtAlready = $this->connection->prepare($alreadySql);
-            if (!$stmtAlready) {
-                throw new Exception("Error preparando verificación de duplicados");
-            }
-            $stmtAlready->bind_param('i', $groupId);
-            $stmtAlready->execute();
-            $resAlready = $stmtAlready->get_result();
+            $sqlType = "
+            SELECT c.subarea 
+            FROM groups g
+            JOIN carreers c ON g.id_carreer = c.id
+            WHERE g.id = ?
+        ";
+            $stmtType = $this->connection->prepare($sqlType);
+            $stmtType->bind_param('i', $groupId);
+            $stmtType->execute();
+            $resultType = $stmtType->get_result();
+            $rowType = $resultType->fetch_assoc();
+            $stmtType->close();
 
-            $alreadyInGroup = [];
-            while ($row = $resAlready->fetch_assoc()) {
-                $alreadyInGroup[] = (int) $row['student_id'];
+            $isCourseOrDiploma = false;
+            if ($rowType) {
+                $subarea = strtolower($rowType['subarea']);
+                $isCourseOrDiploma = in_array($subarea, ['curso', 'diplomados']);
             }
-            $stmtAlready->close();
 
-            // Quitar los que ya están en el grupo
-            if (!empty($alreadyInGroup)) {
-                $ids = array_values(array_diff($ids, $alreadyInGroup));
-                if (empty($ids)) {
-                    $this->connection->commit();
-                    $this->connection->close();
-                    return ["success" => false, "message" => "Todos los estudiantes ya pertenecen a este grupo"];
+            $idsStr = implode(',', $ids);
+            $alreadyAssigned = [];
+            $availableStudents = [];
+
+            if ($isCourseOrDiploma) {
+                /**
+                 * Curso/Diplomado: solo verificar que no estén ya en ESTE grupo
+                 */
+                $sqlAssigned = "
+                SELECT student_id AS id
+                FROM student_groups
+                WHERE student_id IN ($idsStr)
+                AND group_id = ?
+            ";
+                $stmtAssigned = $this->connection->prepare($sqlAssigned);
+                $stmtAssigned->bind_param('i', $groupId);
+                $stmtAssigned->execute();
+                $resultAssigned = $stmtAssigned->get_result();
+                $stmtAssigned->close();
+
+                while ($row = $resultAssigned->fetch_assoc()) {
+                    $alreadyAssigned[] = (int) $row['id'];
                 }
-                $ids_str = implode(',', $ids);
+
+                $availableStudents = array_values(array_diff($ids, $alreadyAssigned));
+
+            } else {
+                /**
+                 * Carrera: solo estudiantes sin grupo asignado
+                 */
+                $sqlAssigned = "
+                SELECT id
+                FROM students
+                WHERE id IN ($idsStr)
+                AND id_group IS NOT NULL
+            ";
+                $resultAssigned = $this->connection->query($sqlAssigned);
+
+                if ($resultAssigned === false) {
+                    throw new Exception("Error verificando estudiantes asignados");
+                }
+
+                while ($row = $resultAssigned->fetch_assoc()) {
+                    $alreadyAssigned[] = (int) $row['id'];
+                }
+
+                $availableStudents = array_values(array_diff($ids, $alreadyAssigned));
+            }
+
+            if (empty($availableStudents)) {
+                $this->connection->rollback();
+                return [
+                    "success" => false,
+                    "message" => $isCourseOrDiploma
+                        ? "Todos los estudiantes seleccionados ya están registrados en este curso/diplomado"
+                        : "Todos los estudiantes seleccionados ya pertenecen a un grupo"
+                ];
+            }
+
+            $availableIdsStr = implode(',', $availableStudents);
+
+            /**
+             * Actualizar id_group en students solo si es carrera
+             */
+            if (!$isCourseOrDiploma) {
+                $sqlUpdate = "UPDATE students SET id_group = ? WHERE id IN ($availableIdsStr)";
+                $stmtUpdate = $this->connection->prepare($sqlUpdate);
+
+                if (!$stmtUpdate) {
+                    throw new Exception("Error preparando actualización de grupo");
+                }
+
+                $stmtUpdate->bind_param("i", $groupId);
+
+                if (!$stmtUpdate->execute()) {
+                    throw new Exception("Error asignando grupo a estudiantes");
+                }
+
+                $stmtUpdate->close();
             }
 
             /**
-             * 2) Detectar quién ya tiene primary
+             * Registrar en student_groups
+             * is_primary = groupId si es carrera, 0 si es curso/diplomado
              */
-            $checkSql = "SELECT DISTINCT student_id
-                     FROM student_groups
-                     WHERE student_id IN ($ids_str)
-                       AND is_primary = TRUE";
-            $result = $this->connection->query($checkSql);
+            $isPrimary = $isCourseOrDiploma ? 0 : $groupId;
+            $values = [];
 
-            $studentsWithPrimary = [];
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $studentsWithPrimary[] = (int) $row['student_id'];
-                }
+            foreach ($availableStudents as $studentId) {
+                $values[] = "(" . intval($studentId) . ", " . intval($groupId) . ", " . intval($isPrimary) . ")";
             }
 
-            // 3) Separar alumnos
-            $primaryStudents = array_values(array_diff($ids, $studentsWithPrimary)); // sin primary -> serán primary
-            $secondaryStudents = array_values($studentsWithPrimary);                 // con primary -> serán secondary
+            if (!empty($values)) {
+                $sqlInsert = "
+                INSERT INTO student_groups (student_id, group_id, is_primary)
+                VALUES " . implode(',', $values);
 
-            /**
-             * 4) Insertar PRIMARY (para los que no tienen)
-             *    - IMPORTANTE enterprise: antes, neutralizamos cualquier primary existente
-             *      (por seguridad ante concurrencia o datos sucios).
-             *    - Insertamos con INSERT IGNORE para no “actualizar” sin querer.
-             */
-            if (!empty($primaryStudents)) {
-                $primaryIdsStr = implode(',', $primaryStudents);
-
-                // Asegura 1 solo primary por alumno (aunque por lógica no deberían tener, esto blinda el sistema)
-                $sqlUnsetPrimary = "UPDATE student_groups
-                                SET is_primary = FALSE
-                                WHERE student_id IN ($primaryIdsStr)
-                                  AND is_primary = TRUE";
-                if (!$this->connection->query($sqlUnsetPrimary)) {
-                    throw new Exception("Error actualizando primary existente");
+                if (!$this->connection->query($sqlInsert)) {
+                    throw new Exception("Error registrando estudiantes en student_groups");
                 }
-
-                $sqlPrimary = "INSERT IGNORE INTO student_groups (student_id, group_id, is_primary)
-                           SELECT id AS student_id, ? AS group_id, TRUE AS is_primary
-                           FROM students
-                           WHERE id IN ($primaryIdsStr)";
-                $stmt1 = $this->connection->prepare($sqlPrimary);
-                if (!$stmt1) {
-                    throw new Exception("Error preparando inserción primary");
-                }
-                $stmt1->bind_param('i', $groupId);
-                $stmt1->execute();
-                $inserted += $stmt1->affected_rows;
-                $stmt1->close();
-            }
-
-            /**
-             * 5) Insertar SECONDARY (para los que ya tienen primary)
-             *    Igual: INSERT IGNORE para no modificar lo existente.
-             */
-            if (!empty($secondaryStudents)) {
-                $secondaryIdsStr = implode(',', $secondaryStudents);
-
-                $sqlSecondary = "INSERT IGNORE INTO student_groups (student_id, group_id, is_primary)
-                             SELECT id AS student_id, ? AS group_id, FALSE AS is_primary
-                             FROM students
-                             WHERE id IN ($secondaryIdsStr)";
-                $stmt2 = $this->connection->prepare($sqlSecondary);
-                if (!$stmt2) {
-                    throw new Exception("Error preparando inserción secondary");
-                }
-                $stmt2->bind_param('i', $groupId);
-                $stmt2->execute();
-                $inserted += $stmt2->affected_rows;
-                $stmt2->close();
             }
 
             $this->connection->commit();
-            $this->connection->close();
 
-            if ($inserted > 0) {
-                $skipped = !empty($alreadyInGroup) ? count($alreadyInGroup) : 0;
-                $msg = "Estudiantes agregados correctamente (se asignaron primarios/secundarios según correspondía)";
-                if ($skipped > 0) {
-                    $msg .= ". Omitidos $skipped porque ya pertenecían al grupo.";
-                }
-                return ["success" => true, "message" => $msg];
+            $updatedRows = count($availableStudents);
+            $message = "{$updatedRows} estudiante(s) agregado(s) correctamente";
+
+            if (!empty($alreadyAssigned)) {
+                $message .= ". Se omitieron " . count($alreadyAssigned) . " porque ya estaban registrados.";
             }
 
-            return ["success" => false, "message" => "No se pudieron agregar los estudiantes al grupo"];
+            return ["success" => true, "message" => $message];
 
         } catch (Exception $e) {
-            // rollback seguro
-            if ($this->connection && $this->connection->errno === 0) {
-                // si la conexión sigue viva
-                $this->connection->rollback();
-            }
-            $this->connection->close();
+            $this->connection->rollback();
             return ["success" => false, "message" => "Error al agregar estudiantes al grupo: " . $e->getMessage()];
+        } finally {
+            if ($this->connection) {
+                $this->connection->close();
+            }
         }
     }
 
@@ -738,9 +786,7 @@ WHERE sg.group_id = ?;";
 
         $userId = $_SESSION['userId'];
 
-        // validar password
-        $isValidPassword = $this->loginControl
-            ->verifyUserPassword($userId, $password);
+        $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
 
         if (!$isValidPassword) {
             return [
@@ -749,27 +795,47 @@ WHERE sg.group_id = ?;";
             ];
         }
 
-        $sql = "DELETE FROM student_groups WHERE student_id = ? AND group_id = ?";
-        $stmt = $this->connection->prepare($sql);
+        try {
+            $this->connection->begin_transaction();
 
-        if (!$stmt) {
+            // 1. Nullear id_group en students
+            $sqlUpdate = "UPDATE students SET id_group = NULL WHERE id = ? AND id_group = ?";
+            $stmtUpdate = $this->connection->prepare($sqlUpdate);
+
+            if (!$stmtUpdate) {
+                throw new Exception("Error preparando actualización del grupo");
+            }
+
+            $stmtUpdate->bind_param('ii', $studentId, $groupId);
+            $stmtUpdate->execute();
+            $stmtUpdate->close();
+
+            // 2. Eliminar de student_groups
+            $sqlDelete = "DELETE FROM student_groups WHERE student_id = ? AND group_id = ?";
+            $stmtDelete = $this->connection->prepare($sqlDelete);
+
+            if (!$stmtDelete) {
+                throw new Exception("Error preparando eliminación del grupo");
+            }
+
+            $stmtDelete->bind_param('ii', $studentId, $groupId);
+            $stmtDelete->execute();
+
+            if ($stmtDelete->affected_rows === 0) {
+                throw new Exception("No se encontró el registro a eliminar");
+            }
+
+            $stmtDelete->close();
+            $this->connection->commit();
+
+            return array("success" => true, "message" => "Estudiante eliminado del grupo correctamente");
+
+        } catch (Exception $e) {
+            $this->connection->rollback();
+            return array("success" => false, "message" => "Error al eliminar el estudiante del grupo: " . $e->getMessage());
+        } finally {
             $this->connection->close();
-            return array("success" => false, "message" => "Error al eliminar los estudiantes del grupo");
         }
-
-        $stmt->bind_param('ii', $studentId, $groupId);
-        $stmt->execute();
-
-        if ($stmt->affected_rows > 0) {
-            $stmt->close();
-            $this->connection->close();
-            return array("success" => true, "message" => "Estudiantes eliminados del grupo correctamente");
-        }
-
-        $error = $stmt->error;
-        $stmt->close();
-        $this->connection->close();
-        return array("success" => false, "message" => "Error al eliminar los estudiantes del grupo" . $error);
     }
 
     public function getGroupCareer($studentId)

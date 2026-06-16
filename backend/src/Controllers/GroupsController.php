@@ -17,8 +17,9 @@ class GroupsController{
         $search = $_POST['search'] ?? '';
         $page = intval($_POST['page'] ?? 1);
         $limit = 30;
+        $groupId = intval($_POST['groupId'] ?? 0);
 
-        $studentsList = $this->groups->getNoGroupStudentsList($search, $page, $limit);
+        $studentsList = $this->groups->getNoGroupStudentsList($search, $page, $limit, $groupId);
         $studentsTotal = $this->groups->getGroupsCount($search);
 
         $students=array();
