@@ -3,12 +3,15 @@ namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\auth;
+require_once(__DIR__ . '/../../login/index.php');
 
 class CarreersModel{
     private $connection;
+    private $loginControl;
 
     public function __construct(DBConnection $dbConnection) {
         $this->connection = $dbConnection->getConnection();
+        $this->loginControl = new \LoginControl($dbConnection);
     }
 
     public function getCareers(){
@@ -118,11 +121,22 @@ class CarreersModel{
         }
     }
 
-    public function deleteCarreer($idCarreer){
+    public function deleteCarreer($idCarreer, $password){
         $VerifySession = auth::check();
         if(!$VerifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }else{
+            $userId = $_SESSION['userId'];
+
+            $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
+
+            if (!$isValidPassword) {
+                return [
+                    "success" => false,
+                    "message" => "Contraseña incorrecta"
+                ];
+            }
+
             $sql = "DELETE FROM carreers WHERE id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param('i', $idCarreer);

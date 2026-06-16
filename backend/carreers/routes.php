@@ -46,8 +46,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
         case 'deleteCarreer':
             $idCarreer = $_POST['idCarreer'];
+            $password = $_POST['password'];
 
-            $delete = $carreers->deleteCarreer($idCarreer);
+            $delete = $carreers->deleteCarreer($idCarreer, $password);
 
             header('Content-Type: application/json');
             echo json_encode($delete);
