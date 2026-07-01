@@ -40,8 +40,9 @@ try {
     </script>";
 } catch (\Throwable $e) {
     error_log('MicrosoftAuth error: ' . $e->getMessage());
+    $detail = json_encode($e->getMessage());
     echo "<script>
-        window.opener.postMessage({ error: 'authentication_failed' }, '*');
+        window.opener.postMessage({ error: 'authentication_failed', detail: {$detail} }, '*');
         window.close();
     </script>";
 }
