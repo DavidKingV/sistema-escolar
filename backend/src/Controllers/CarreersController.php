@@ -27,8 +27,8 @@ class CarreersController{
         return $this->carreers->updateCarreer($carreerDataEditArray);
     }
 
-    public function deleteCarreer($idCarreer){
-        return $this->carreers->deleteCarreer($idCarreer);
+    public function deleteCarreer($idCarreer, $password){
+        return $this->carreers->deleteCarreer($idCarreer, $password);
     }
 
     public function getSubjects($carreerId){

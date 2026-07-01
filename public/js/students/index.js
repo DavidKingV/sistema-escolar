@@ -1,11 +1,12 @@
 import { FillTable, ClearInputsEditEstudents, ClearStudensAddUser, ClearStudensEditUser, AverageGrade, initializeSubjectChangeListener, HideTab, RenderAlertMessage } from './forms.js';
-import { initializeStudentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, InitializeStudentGrades } from '../datatables/index.js';
+import { initializeStudentDataTable, initializeStudentPaymentDataTable, initializeStudentsUsersTable, initializeStudentsMicrosoftUsersTable, initializeStudentGrades } from '../datatables/index.js';
 import { enviarPeticionAjax } from '../utils/ajax.js';
 import { sendFetch } from '../global/fetchCall.js';
 import { errorAlert, successAlert, infoAlert, loadingSpinner, confirmAlert } from '../utils/alerts.js';
 import { validateForm, capitalizeAllWords, capitalizeAll, inputLowerCase } from '../global/validate/index.js';
 
 initializeStudentDataTable();
+initializeStudentPaymentDataTable();
 initializeStudentsUsersTable();
 initializeStudentsMicrosoftUsersTable();
 
@@ -206,6 +207,21 @@ $(function () {
 });
 
 $('#studentTable').on('click', '.editStudent', function() {
+    // Get the student id
+    const studentId = $(this).data('id');
+    if (studentId) {
+        // Get the student data
+        GetStudentsData(studentId);
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'ID del estudiante no proporcionado',
+            text: 'Por favor proporciona un ID válido para editar.'
+        });
+    }
+});
+
+$('#studentPaymentTable').on('click', '.editStudentPayment', function() {
     // Get the student id
     const studentId = $(this).data('id');
     if (studentId) {
@@ -850,7 +866,7 @@ const GetStudentsData = async (studentId) => {
 
     try {
         const response = await $.ajax({
-            url: '../backend/students/routes.php',
+            url: '../../backend/students/routes.php',
             type: 'GET',
             data: {studentId: studentId, action: 'getStudentData'}
             

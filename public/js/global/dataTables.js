@@ -16,7 +16,7 @@ export function initializeDataTable(element, url, data, columns) {
             type: "POST",
             data: data,            
             dataSrc: function(data){
-                if(!data.success){
+                if(data.success === false){
                     //errorAlert(data.message);
                     return [];
                 }

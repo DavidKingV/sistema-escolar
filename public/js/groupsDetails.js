@@ -5,11 +5,12 @@ import { sendFetch } from './global/fetchCall.js';
 const callback = '../api.php';
 
 $(function() {
-    getStudentsList($('#studentIdGroup'));
+    const groupId = new URLSearchParams(window.location.search).get('id');
+    getStudentsList($('#studentIdGroup'), groupId);
 });
 
 
-const getStudentsList = async (input) => {
+const getStudentsList = async (input, groupId) => {
     try {
         input.select2({
             theme: "bootstrap-5",
@@ -23,7 +24,8 @@ const getStudentsList = async (input) => {
                     return {
                         action: 'getNoGroupStudentsList',
                         search: params.term, // término de búsqueda
-                        page: params.page || 1
+                        page: params.page || 1,
+                        groupId: groupId
                     };
                 },
                 processResults: function(data, params) {

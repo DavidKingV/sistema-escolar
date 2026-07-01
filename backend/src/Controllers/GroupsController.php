@@ -4,32 +4,36 @@ namespace Vendor\Schoolarsystem\Controllers;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Models\GroupsModel;
 
-class GroupsController{
+class GroupsController
+{
     private $connection;
     private $groups;
 
-    public function __construct(DBConnection $dbConnection) {
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection;
         $this->groups = new GroupsModel($dbConnection);
     }
 
-    public function getNoGroupStudentsList(){
+    public function getNoGroupStudentsList()
+    {
         $search = $_POST['search'] ?? '';
         $page = intval($_POST['page'] ?? 1);
         $limit = 30;
+        $groupId = intval($_POST['groupId'] ?? 0);
 
-        $studentsList = $this->groups->getNoGroupStudentsList($search, $page, $limit);
+        $studentsList = $this->groups->getNoGroupStudentsList($search, $page, $limit, $groupId);
         $studentsTotal = $this->groups->getGroupsCount($search);
 
-        $students=array();
+        $students = array();
 
-        if(!$studentsList !== NULL){
+        if (!$studentsList !== NULL) {
             while ($row = $studentsList->fetch_assoc()) {
                 $students[] = array(
                     'id' => $row['id'],
                     'text' => $row['nombre'] // Cambiado a 'text' para compatibilidad con Select2
                 );
-            }        
+            }
             return array(
                 'results' => $students,
                 'pagination' => array(
@@ -37,7 +41,7 @@ class GroupsController{
                 ),
                 'total_count' => $studentsTotal
             );
-        }else{
+        } else {
             return array(
                 'results' => [],
                 'pagination' => array(
@@ -48,57 +52,85 @@ class GroupsController{
         }
     }
 
-    public function addSchedule($data){
+    public function addSchedule($data)
+    {
         $addSchedule = $this->groups->addSchedule($data);
         return $addSchedule;
     }
 
-    public function getSchedulesGroup($groupId){
+    public function getSchedulesGroup($groupId)
+    {
         $schedulesGroup = $this->groups->getSchedulesGroup($groupId);
         return $schedulesGroup;
     }
 
-    public function getGroups(){
+    public function getGroups()
+    {
         return $this->groups->getGroups();
     }
 
-    public function getGroupsStudents($groupId){
+    public function getGroupsStudents($groupId)
+    {
         return $this->groups->getGroupsStudents($groupId);
     }
 
-    public function getStudentsNames(){
+    public function getStudentsNames()
+    {
         return $this->groups->getStudentsNames();
     }
 
-    public function getGroupData($groupId){
+    public function getGroupData($groupId)
+    {
         return $this->groups->getGroupData($groupId);
     }
 
-    public function getGroupsJson(){
+    public function getGroupsJson()
+    {
         return $this->groups->getGroupsJson();
     }
 
-    public function addGroup($groupDataArray){
+    public function addGroup($groupDataArray)
+    {
         return $this->groups->addGroup($groupDataArray);
     }
 
-    public function updateGroup($groupDataEditArray){
+    public function updateGroup($groupDataEditArray)
+    {
         return $this->groups->updateGroup($groupDataEditArray);
     }
 
-    public function deleteGroup($groupId){
+    public function deleteGroup($groupId)
+    {
         return $this->groups->deleteGroup($groupId);
     }
 
-    public function addStudentGroup($groupId, $studentId){
+    public function addStudentGroup($groupId, $studentId)
+    {
         return $this->groups->addStudentGroup($groupId, $studentId);
     }
 
-    public function deleteStudentGroup($groupId, $studentId){
-        return $this->groups->deleteStudentGroup($groupId, $studentId);
+    public function deleteStudentGroup($groupId, $studentId, $password)
+    {
+        return $this->groups->deleteStudentGroup($groupId, $studentId, $password);
     }
 
-    public function getGroupCareer($studentId){
+    public function getDuplicateStudents()
+    {
+        return $this->groups->getDuplicateStudents();
+    }
+
+    public function getStudentDuplicateGroups($studentId)
+    {
+        return $this->groups->getStudentDuplicateGroups($studentId);
+    }
+
+    public function resolveDuplicate($studentId, $correctGroupId)
+    {
+        return $this->groups->resolveDuplicate($studentId, $correctGroupId);
+    }
+
+    public function getGroupCareer($studentId)
+    {
         return $this->groups->getGroupCareer($studentId);
     }
 }

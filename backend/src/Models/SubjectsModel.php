@@ -2,12 +2,15 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
+require_once(__DIR__ . '/../../login/index.php');
 
 class SubjectsModel{
     private $connection;
+    private $loginControl;
 
     public function __construct(DBConnection $dbConnection) {
         $this->connection = $dbConnection->getConnection();
+        $this->loginControl = new \LoginControl($dbConnection);
     }
 
     public function fetchSubjects(){
@@ -158,8 +161,19 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
         }
     }
 
-    public function deleteSubject($subjectId){
+    public function deleteSubject($subjectId, $password){
         try {
+            $userId = $_SESSION['userId'];
+
+            $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
+
+            if (!$isValidPassword) {
+                return [
+                    "success" => false,
+                    "message" => "Contraseña incorrecta"
+                ];
+            }
+
             $query = "DELETE FROM subjects WHERE id = ?";
             $stmt = $this->connection->prepare($query);
 
@@ -341,8 +355,19 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
         }
     }
 
-    public function deleteSubjectChild($subjectChildId){
+    public function deleteSubjectChild($subjectChildId, $password){
         try {
+            $userId = $_SESSION['userId'];
+
+            $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
+
+            if (!$isValidPassword) {
+                return [
+                    "success" => false,
+                    "message" => "Contraseña incorrecta"
+                ];
+            }
+            
             $query = "DELETE FROM subject_child WHERE id = ?";
             $stmt = $this->connection->prepare($query);
             
@@ -515,18 +540,17 @@ LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
                         'subject_child_nombre' => $row['subject_child_nombre'] ?? 'Sin materias hijas'
                     );
                 }
-            } else {
-                // Si no hay registros, se puede retornar un arreglo con el mensaje o simplemente un arreglo vacío.
-                $subjects[] = array(
-                    'success' => false,
-                    'message' => 'No se encontraron materias'
-                );
             }
             
             // Cerrar la sentencia una vez que ya no es necesaria
             $stmt->close();
             
-            return $subjects;
+            return [
+                'draw'            => 1,
+                'recordsTotal'    => count($subjects),
+                'recordsFiltered' => count($subjects),
+                'data'            => $subjects
+            ];
             
         } catch(Exception $e) {
             return array(

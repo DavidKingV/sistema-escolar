@@ -8,14 +8,17 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
 
-class EmailsModel{
+class EmailsModel
+{
     private $mail;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->mail = new PHPMailer(true);
     }
 
-    public function SendEventEmail($eventId, $eventDateTime, $eventType, $email){
+    public function SendEventEmail($eventId, $eventDateTime, $eventType, $email)
+    {
         try {
             $loader = new FilesystemLoader(__DIR__ . '/../../views'); // Directorio donde están tus plantillas
             $twig = new Environment($loader);
@@ -30,19 +33,19 @@ class EmailsModel{
             $this->mail->SMTPDebug = 0;                      // Enable verbose debug output
             $this->mail->isSMTP();                                            // Send using SMTP
             $this->Debugoutput = 'html';
-            $this->mail->Host       = $_ENV['EMAIL_HOST'];                     // Set the SMTP server to send through
-            $this->mail->SMTPAuth   = true;                                   // Enable SMTP authentication
-            $this->mail->Username   = $_ENV['EMAIL_USER'];                     // SMTP username
-            $this->mail->Password   = $_ENV['EMAIL_PASS'];                               // SMTP password
+            $this->mail->Host = $_ENV['EMAIL_HOST'];                     // Set the SMTP server to send through
+            $this->mail->SMTPAuth = true;                                   // Enable SMTP authentication
+            $this->mail->Username = $_ENV['EMAIL_USER'];                     // SMTP username
+            $this->mail->Password = $_ENV['EMAIL_PASS'];                               // SMTP password
             $this->mail->SMTPSecure = 'TLS';         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
-            $this->mail->Port       = $_ENV['EMAIL_PORT'];                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+            $this->mail->Port = $_ENV['EMAIL_PORT'];                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
             $this->mail->setFrom($_ENV['EMAIL_USER'], 'Clínica UNIF');
             $this->mail->addAddress($email);     // Add a recipient
 
             $this->mail->isHTML(true);                                  // Set email format to HTML
             $this->mail->CharSet = 'UTF-8';
-            $this->mail->Body    = $htmlContent;
+            $this->mail->Body = $htmlContent;
 
             if (!$this->mail->send()) {
                 return [
@@ -56,7 +59,7 @@ class EmailsModel{
                 'message' => 'Correo enviado exitosamente.',
             ];
 
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Message could not be sent. Mailer Error: ' . $this->mail->ErrorInfo
@@ -64,32 +67,41 @@ class EmailsModel{
         }
     }
 
-    public function SendPaymentEmail($paymentId, $paymentData, $url, $pdfPassword, $email){
+    public function SendPaymentEmail($paymentId, $paymentData, $url, $pdfPassword, $email)
+    {
         try {
             $loader = new FilesystemLoader(__DIR__ . '/../../views/emails'); // Directorio donde están tus plantillas
             $twig = new Environment($loader);
 
             // Definir una función personalizada para formatear números como moneda
-            $products = is_array($paymentData['concept']) 
-                ? $paymentData['concept'] 
-                : [$paymentData['concept']];
+            $products = is_array($paymentData['concept'])
+                ? $paymentData['concept']
+                : [
+                    implode(' ', array_filter([
+                        $paymentData['concept'],
+                        $paymentData['concept_subject'] ? '- Materia: ' . $paymentData['concept_subject'] : null,
+                        $paymentData['concept_subject_child'] ? '| Submateria: ' . $paymentData['concept_subject_child'] : null,
+                        $paymentData['concept_carreer'] ? '| ' . $paymentData['concept_carreer'] : null,
+                        $paymentData['concept_month'],
+                    ]))
+                ];
 
-            $subtotals = is_array($paymentData['total']) 
-                ? $paymentData['total'] 
+            $subtotals = is_array($paymentData['total'])
+                ? $paymentData['total']
                 : [$paymentData['total']];
 
             foreach ($products as $i => $producto) {
                 $productos[] = [
-                    'product'  => $producto,
+                    'product' => $producto,
                     'subTotal' => $subtotals[$i] ?? null, // usamos ?? por si no existe índice
                 ];
             }
 
             $htmlContent = $twig->render('payment.html', [
                 'PAYMENT_ID' => $paymentId,
-                'PRODUCTS'   => $productos,
-                'TOTAL'      => $paymentData['total'],
-                'URL'        => $url,
+                'PRODUCTS' => $productos,
+                'TOTAL' => $paymentData['total'],
+                'URL' => $url,
                 'PASSWORD' => $pdfPassword,
             ]);
 
@@ -97,12 +109,12 @@ class EmailsModel{
             $this->mail->SMTPDebug = 0;                      // Enable verbose debug output
             $this->mail->isSMTP();                                            // Send using SMTP
             $this->Debugoutput = 'html';
-            $this->mail->Host       = $_ENV['EMAIL_HOST'];                     // Set the SMTP server to send through
-            $this->mail->SMTPAuth   = true;                                   // Enable SMTP authentication
-            $this->mail->Username   = $_ENV['EMAIL_USER'];                     // SMTP username
-            $this->mail->Password   = $_ENV['EMAIL_PASS'];                               // SMTP password
+            $this->mail->Host = $_ENV['EMAIL_HOST'];                     // Set the SMTP server to send through
+            $this->mail->SMTPAuth = true;                                   // Enable SMTP authentication
+            $this->mail->Username = $_ENV['EMAIL_USER'];                     // SMTP username
+            $this->mail->Password = $_ENV['EMAIL_PASS'];                               // SMTP password
             $this->mail->SMTPSecure = 'TLS';         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
-            $this->mail->Port       = $_ENV['EMAIL_PORT'];                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+            $this->mail->Port = $_ENV['EMAIL_PORT'];                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
             $this->mail->setFrom($_ENV['EMAIL_USER'], 'ESMEFIS Centro Universitario');
             $this->mail->addAddress($email);     // Add a recipient
@@ -110,7 +122,7 @@ class EmailsModel{
             $this->mail->isHTML(true);                                  // Set email format to HTML
             $this->mail->CharSet = 'UTF-8';
             $this->mail->Subject = 'Recibo de pago ESMEFIS';
-            $this->mail->Body    = $htmlContent;
+            $this->mail->Body = $htmlContent;
 
             if (!$this->mail->send()) {
                 return [
@@ -124,11 +136,72 @@ class EmailsModel{
                 'message' => 'Correo enviado exitosamente.',
             ];
 
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Message could not be sent. Mailer Error: ' . $this->mail->ErrorInfo
             ];
+        }
+    }
+
+    public function SendReminderEmail(
+        string $studentName,
+        string $email,
+        string $subject,
+        array $paymentData,
+        int $diasRestantes,
+        string $paymentDate
+    ): array {
+        try {
+            $loader = new FilesystemLoader(__DIR__ . '/../../views/emails');
+            $twig = new Environment($loader);
+
+            $productos = [];
+            $products = is_array($paymentData['concept']) ? $paymentData['concept'] : [$paymentData['concept']];
+            $subtotals = is_array($paymentData['total']) ? $paymentData['total'] : [$paymentData['total']];
+
+            foreach ($products as $i => $producto) {
+                $productos[] = [
+                    'product' => $producto,
+                    'subTotal' => '$' . number_format($subtotals[$i] ?? 0, 2),
+                ];
+            }
+
+            // Usa una plantilla dedicada para recordatorios
+            $htmlContent = $twig->render('payment_reminder.html', [
+                'STUDENT_NAME' => $studentName,
+                'PRODUCTS' => $productos,
+                'TOTAL' => '$' . number_format($paymentData['total'][0] ?? 0, 2),
+                'DIAS_RESTANTES' => $diasRestantes,
+                'PAYMENT_DATE' => $paymentDate,
+            ]);
+
+            $this->mail->clearAddresses();
+            $this->mail->SMTPDebug = 0;
+            $this->mail->isSMTP();
+            $this->mail->Host = $_ENV['EMAIL_HOST'];
+            $this->mail->SMTPAuth = true;
+            $this->mail->Username = $_ENV['EMAIL_USER'];
+            $this->mail->Password = $_ENV['EMAIL_PASS'];
+            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $this->mail->Port = $_ENV['EMAIL_PORT'];
+
+            $this->mail->setFrom($_ENV['EMAIL_USER'], 'ESMEFIS Centro Universitario');
+            $this->mail->addAddress($email, $studentName);
+
+            $this->mail->isHTML(true);
+            $this->mail->CharSet = 'UTF-8';
+            $this->mail->Subject = $subject;
+            $this->mail->Body = $htmlContent;
+
+            if (!$this->mail->send()) {
+                return ['success' => false, 'message' => $this->mail->ErrorInfo];
+            }
+
+            return ['success' => true, 'message' => 'Correo enviado exitosamente.'];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $this->mail->ErrorInfo];
         }
     }
 }

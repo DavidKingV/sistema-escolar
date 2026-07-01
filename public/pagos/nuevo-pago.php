@@ -29,7 +29,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Agregar nuevo pago</h2>
-                <a href="#" class="btn btn-secondary">
+                <a href="../pagos/pagos.php" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver a la lista
                 </a>
             </div>
@@ -60,24 +60,25 @@
                                             <label id="paymentDay-error" class="error text-bg-danger" for="paymentDay" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                                             <div class="input-group py-3">
                                                 <span class="input-group-text">Cada mes los días</span>
-                                                <input type="number" class="form-control" id="paymentDay" name="paymentDay">
+                                                <input type="number" class="form-control" id="paymentDay" name="paymentDay" placeholder="Registra un día de pago">
                                             </div>
                                             <div class="input-group py-3">
                                                 <span class="input-group-text">Concepto</span>
                                                 <select class="form-select" id="paymentConceptDay" name="paymentConceptDay" readonly>
-                                                    <option selected value="Mensualidad">Mensualidad</option>
+                                                    <option selected value="0">Selecciona un concepto</option>    
+                                                    <option value="Mensualidad">Mensualidad</option>
                                                 </select>
                                             </div>
                                             <div class="input-group py-3">
                                                 <span class="input-group-text">$</span>
-                                                <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay">
+                                                <input type="number" class="form-control" id="paymentAmountDay" name="paymentAmountDay" placeholder="Registra el monto del pago">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row g-2 py-3">
                                         <div class="col-md">
-                                            <button type="button" id="savePaymentDays" class="btn btn-success">Definir</button>
-                                            <button type="button" class="btn btn-primary" id="updatePaymentDays" disabled>Actualizar</button>
+                                            <button type="button" class="btn btn-success" id="savePaymentDays">Definir</button>
+                                            <button type="button" class="btn btn-primary" id="updatePaymentDays">Actualizar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -108,6 +109,8 @@
                                             <th>Concepto</th>
                                             <th>Monto</th>
                                             <th>Fecha de registro</th>
+                                            <th>Método de pago</th>
+                                            <th>Estatus</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -144,7 +147,7 @@
                             <div class="col-md">
                                 <label for="paymentConcept">Concepto</label>
                                 <label id="paymentConcept-error" class="error text-bg-danger" for="paymentConcept" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
-                                <select class="form-select" id="paymentConcept" name="paymentConcept" aria-label="Floating label select example">
+                                <select class="form-select" id="paymentConcept" name="paymentConcept" aria-label="Floating label select example" disabled>
                                     <option selected value="0">Concepto</option>
                                     <option value="Inscripción">Inscripción</option>
                                     <option value="Mensualidad">Mensualidad</option>
@@ -175,7 +178,7 @@
                             </div>
                             <div class="col-md">
                                 <label for="paymentMonth">Mes</label>                                
-                                <select class="form-select" id="paymentMonth" name="paymentMonth" aria-label="Floating label select example">
+                                <select class="form-select" id="paymentMonth" name="paymentMonth" aria-label="Floating label select example" disabled>
                                     <option selected value="0">Mes</option>
                                     <option value="Enero">Enero</option>
                                     <option value="Febrero">Febrero</option>

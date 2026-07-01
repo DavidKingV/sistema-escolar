@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../backend/vendor/autoload.php');
+require_once(__DIR__ . '/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -27,10 +27,12 @@ $careerId = $_POST['careerId'];
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#add_subject_tab" type="button" role="tab" aria-controls="add_subject_tab" aria-selected="true">Registrar</button>
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#add_subject_tab"
+            type="button" role="tab" aria-controls="add_subject_tab" aria-selected="true">Registrar</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#view_subjects_tab" type="button" role="tab" aria-controls="view_subjects_tab" aria-selected="false">Ver Lista</button>
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#view_subjects_tab" type="button"
+            role="tab" aria-controls="view_subjects_tab" aria-selected="false">Ver Lista</button>
     </li>
 </ul>
 
@@ -45,7 +47,8 @@ $careerId = $_POST['careerId'];
                     </select>
                     <label for="floatingSelect">Selecciona</label>
                 </div>
-                <label id="subjectName-error" class="error text-bg-danger" for="subjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                <label id="subjectName-error" class="error text-bg-danger" for="subjectName"
+                    style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
             </div>
 
             <div class="col-md" id="childSubjectDiv">
@@ -55,7 +58,8 @@ $careerId = $_POST['careerId'];
                     </select>
                     <label for="floatingSelect">Selecciona</label>
                 </div>
-                <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName" style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
+                <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName"
+                    style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
             </div>
 
             <div class="col-md">
@@ -87,28 +91,32 @@ $careerId = $_POST['careerId'];
     let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     let careerId = <?php echo $careerId; ?>;
 
-    $(function() {
+    $(function () {
         getSubjectsList($('#subjectName'));
     });
 
-    $('#profile-tab').on('click', function() {
+    $('#profile-tab').on('click', function () {
         initializeDataTable('#subjectsListTable', api, { careerId: careerId, action: 'subjectsListTable' }, [
-            { data: 'claveSubject', render: function(data, type, row) {
-            return `<div>
+            {
+                data: 'claveSubject', render: function (data, type, row) {
+                    return `<div>
                         <div class="ps-3">
-                            <div class="fw-600 pb-1">`+row.claveSubject+`</div>
-                            <p class="m-0 text-grey fs-09">`+row.claveSubjectChild+`</p>
+                            <div class="fw-600 pb-1">`+ row.claveSubject + `</div>
+                            <p class="m-0 text-grey fs-09">`+ row.claveSubjectChild + `</p>
                         </div>
                     </div>`;
-            }, 'className': 'text-center py-2'}, 
-            { data: 'nombre', render: function(data, type, row) {
-            return `<div>
+                }, 'className': 'text-center py-2'
+            },
+            {
+                data: 'nombre', render: function (data, type, row) {
+                    return `<div>
                         <div class="ps-3">
-                            <div class="fw-600 pb-1">`+row.nombre+`</div>
-                            <p class="m-0 text-grey fs-09">`+row.subject_child_nombre+`</p>
+                            <div class="fw-600 pb-1">`+ row.nombre + `</div>
+                            <p class="m-0 text-grey fs-09">`+ row.subject_child_nombre + `</p>
                         </div>
                     </div>`;
-            }, 'className': 'text-center py-2'}
+                }, 'className': 'text-center py-2'
+            }
         ]);
     });
 
@@ -123,17 +131,17 @@ $careerId = $_POST['careerId'];
                     type: 'POST',
                     dataType: 'json',
                     delay: 250,
-                    data: function(params) {                        
+                    data: function (params) {
                         return {
                             action: 'getSubjectsListSelect',
                             careerId: careerId,
                             search: params.term, // término de búsqueda
                             page: params.page || 1
                         };
-                    },                    
-                    processResults: function(data, params) {
+                    },
+                    processResults: function (data, params) {
                         params.page = params.page || 1;
-                        
+
                         return {
                             results: data.results,
                             pagination: data.pagination
@@ -143,35 +151,35 @@ $careerId = $_POST['careerId'];
                 },
                 minimumInputLength: 0,
                 language: {
-                    inputTooShort: function() {
+                    inputTooShort: function () {
                         return "Por favor ingrese al menos 2 caracteres";
                     },
-                    searching: function() {
+                    searching: function () {
                         return "Buscando...";
                     },
-                    noResults: function() {
+                    noResults: function () {
                         return "No se encontraron resultados.";
                     }
                 },
             });
 
-            input.on('select2:select', function(e) {
+            input.on('select2:select', function (e) {
                 GetChildSubject(e.params.data.id)
             });
 
-            input.on('select2:unselect', function(e) {
+            input.on('select2:unselect', function (e) {
                 $('#childSubjectName').empty();
                 $('#childSubjectName').append('<option selected value="">Submateria</option>');
                 $('#childSubjectName').prop("disabled", true);
             });
 
-            input.on('select2:clear', function(e) {
+            input.on('select2:clear', function (e) {
                 $('#childSubjectName').empty();
                 $('#childSubjectName').append('<option selected value="">Submateria</option>');
                 $('#childSubjectName').prop("disabled", true);
             });
 
-            input.on('change', function(e) {
+            input.on('change', function (e) {
                 $('#childSubjectName').empty();
                 $('#childSubjectName').append('<option selected value="">Submateria</option>');
                 $('#childSubjectName').prop("disabled", true);
@@ -183,9 +191,9 @@ $careerId = $_POST['careerId'];
     };
 
     const GetChildSubject = async (subjectId) => {
- 
+
         const Childsubject = async () => {
-            try{
+            try {
                 const response = await $.ajax({
                     url: api,
                     type: 'POST',
@@ -195,20 +203,20 @@ $careerId = $_POST['careerId'];
                     }
                 });
                 return response;
-            }catch(error){
+            } catch (error) {
                 console.error(error);
             }
         }
 
-        try{
-            const  subjectsList = await Childsubject();
+        try {
+            const subjectsList = await Childsubject();
             if (subjectsList[0].success === false) {
                 return;
             }
 
             let $select = $('.childSubjectName');
 
-            $.each(subjectsList, function(index, subject) {
+            $.each(subjectsList, function (index, subject) {
                 if (subject.success !== false) {
                     let $option = $('<option>', {
                         value: subject.childSubjectId,
@@ -216,7 +224,7 @@ $careerId = $_POST['careerId'];
                     });
 
                     $select.append($option);
-                    
+
                 }
             });
 
@@ -225,39 +233,36 @@ $careerId = $_POST['careerId'];
                 theme: "bootstrap-5",
                 placeholder: 'Selecciona la submateria',
             });
-            
+
             $("#childSubjectName").prop("disabled", false);
-        }catch(error){
+        } catch (error) {
             console.error(error);
         }
 
-    } 
+    }
 
-    $("#addSubjectCareer").on("submit", function(e){
-    e.preventDefault();
+    $("#addSubjectCareer").on("submit", function (e) {
+        e.preventDefault();
 
-    let subjectAddData = $(this).serialize();
-    subjectAddData += '&careerId=' + careerId;
+        let subjectAddData = $(this).serialize();
+        subjectAddData += '&careerId=' + careerId;
 
-    loadingAlert();
+        loadingAlert();
 
-    sendFetch(api, 'POST', { action: 'addSubjectCareer', subjectAddData })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
-                .then(data => {
-                    if (data.success) {
-                        if(data.error != null)infoAlert(data.error);
-                        successAlert(data.message);
-                        $('#subjectsModal').modal('hide');
-                        $('#carreersTable').DataTable().ajax.reload();
-                    } else {
-                        errorAlert(data.message);
-                    }
-                });
+        sendFetch(api, 'POST', { action: 'addSubjectCareer', subjectAddData })
+            .then(data => {
+                if (data.success) {
+                    if (data.error != null) infoAlert(data.error);
+                    successAlert(data.message);
+                    $('#subjectsModal').modal('hide');
+                    $('#carreersTable').DataTable().ajax.reload();
+                } else {
+                    errorAlert(data.message);
+                }
+            }).catch(error => {
+                errorAlert('Ocurrió un error inesperado.');
+                console.error(error);
+            });
     });
 
 </script>

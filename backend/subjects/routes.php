@@ -47,9 +47,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
         case 'deleteSubject':
             $subjectId = $_POST['subjectId'];
+            $password = $_POST['password'];
 
             $subjectsController = new SubjectsController($connection);
-            $deleteSubject = $subjectsController->DeleteSubject($subjectId);
+            $deleteSubject = $subjectsController->DeleteSubject($subjectId, $password);
 
             header('Content-Type: application/json');
             echo json_encode($deleteSubject);
@@ -79,8 +80,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
 
         case 'deleteSubjectChild':
             $subjectChildId = $_POST['subjectChildId'];
+            $password = $_POST['password'];
             $subjectsController = new SubjectsController($connection);
-            $deleteSubjectChild = $subjectsController->DeleteSubjectChild($subjectChildId);
+            $deleteSubjectChild = $subjectsController->DeleteSubjectChild($subjectChildId, $password);
             header('Content-Type: application/json');
             echo json_encode($deleteSubjectChild);
             break;

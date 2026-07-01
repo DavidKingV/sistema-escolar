@@ -54,14 +54,14 @@ class SubjectsController{
         return $this->subjects->updateSubject($subjectDataEditArray);
     }
 
-    public function DeleteSubject($subjectId){
+    public function DeleteSubject($subjectId, $password){
         $verifySession = auth::check();
 
         if(!$verifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        return $this->subjects->deleteSubject($subjectId);
+        return $this->subjects->deleteSubject($subjectId, $password);
     }
 
     public function AddSubjectChild($subjectChildDataArray){
@@ -94,14 +94,14 @@ class SubjectsController{
         return $this->subjects->updateSubjectChild($subjectChildDataEditArray);
     }
 
-    public function DeleteSubjectChild($subjectChildId){
+    public function DeleteSubjectChild($subjectChildId, $password){
         $verifySession = auth::check();
 
         if(!$verifySession['success']){
             return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
         }
 
-        return $this->subjects->deleteSubjectChild($subjectChildId);
+        return $this->subjects->deleteSubjectChild($subjectChildId, $password);
     }
 
     public function getSubjectsListSelect($careerId){

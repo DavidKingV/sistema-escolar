@@ -59,6 +59,21 @@
 <div class="modal fade modal-lg" id="CareerEditModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="CareerEditModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
+        <div id="careerEditLoader" style="
+          display: none;
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.8);
+          z-index: 10;
+          border-radius: inherit;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          gap: 10px;
+      ">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span class="text-muted">Cargando...</span>
+      </div>
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="CareerEditModalLabel">Editar Carrera</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

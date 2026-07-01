@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 session_start();
 
 use Vendor\Schoolarsystem\DBConnection;
@@ -10,7 +10,8 @@ $payments = new PaymentsController($connection);
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-function responseJson($data) {
+function responseJson($data)
+{
     header('Content-Type: application/json');
     echo json_encode($data);
 }
@@ -19,16 +20,46 @@ if ($data === null) {
     $data = $_POST;
 }
 
-if(!isset($data['action'])){
+if (!isset($data['action'])) {
     responseJson(['error' => 'Action not specified']);
     exit;
-}else{
+} else {
     switch ($data['action']) {
         case 'AddPayment':
             $paymentData = $data['data'];
             parse_str($paymentData, $paymentDataArray);
             $add = $payments->addPayment($paymentDataArray);
             responseJson($add);
+            break;
+
+        case 'UpdatePayment':
+            $paymentData = $data['data'];
+            parse_str($paymentData, $paymentDataArray);
+            $update = $payments->updatePayment($paymentDataArray);
+            responseJson($update);
+            break;
+
+        case 'DeletePayment':
+            $paymentId = $data['paymentId'];
+            $password = $data['password'];
+            $response = $payments->deletePayment(
+                $paymentId,
+                $password
+            );
+            responseJson($response);
+            break;
+
+        case 'CancelPayment':
+            $paymentId = $data['paymentId'];
+            $comments = $data['comments'];
+            $response = $payments->cancelPayment($paymentId, $comments);
+            responseJson($response);
+            break;
+
+        case 'VerifyPassword':
+            $password = $data['password'];
+            $response = $payments->verifyPassword($password);
+            responseJson($response);
             break;
 
         case 'VerifyTaxData':
@@ -65,8 +96,11 @@ if(!isset($data['action'])){
             break;
 
         case 'GetPaymentHistory':
-            $studentId = $data['studentId'];
-            $history = $payments->getPaymentHistory($studentId);
+            $studentId = $data['studentId'] ?? null;
+            $paymentId = $data['paymentId'] ?? null;
+
+            $history = $payments->getPaymentHistory($studentId, $paymentId);
+
             responseJson($history);
             break;
 

@@ -152,26 +152,38 @@ $("#carreersTable").on("click", ".deleteCarreer", function() {
     let idCarreer = $(this).data("id");
     Swal.fire({
         title: '¿Estás seguro de eliminar la carrera?', 
-        text: 'Esta acción no se puede deshacer',
-        icon: 'warning',
+        text: "Ingresa tu contraseña para continuar",
+        icon: "warning",
+        input: "password",
+        inputPlaceholder: "Contraseña",
+        inputAttributes: {
+            autocapitalize: "off",
+            autocorrect: "off",
+        },
         showCancelButton: true,
-        confirmButtonColor: 'rgb(48, 133, 214)',
-        cancelButtonColor: 'rgb(221, 51, 51);',
+        confirmButtonColor: '#d33',
         confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        inputValidator: (value) => {
+            if (!value) {
+                return "Debes ingresar tu contraseña";
+            }
+        },
     }).then((result) => {
         if(result.isConfirmed){
-            DeleteCarreer(idCarreer);
+            const password = result.value;
+            DeleteCarreer(idCarreer, password);
         }
     });
 });
 
-const DeleteCarreer = async (idCarreer) => {
+const DeleteCarreer = async (idCarreer, password) => {
     try {
         const response = await $.ajax({
             url: '../backend/carreers/routes.php',
             type: 'POST',
-            data: {idCarreer: idCarreer, action: 'deleteCarreer'}
+            data: {idCarreer: idCarreer, password: password, action: 'deleteCarreer'}
         });
         if(response.success){
             // Show a success message
@@ -238,6 +250,7 @@ const UpdateCarreer = async (carreerDataEdit) => {
 
 const GetCarreerData = async (idCarreer) => {
     try {
+        $("#careerEditLoader").css("display", "flex");
         // Función para obtener el valor predeterminado de la base de datos usando async/await
         const getDefaultCareer = async () => {
             const response = await $.ajax({
@@ -292,6 +305,8 @@ const GetCarreerData = async (idCarreer) => {
             $selectEdit.append($mainOptgroup);
         });
 
+        $("#careerEditLoader").hide();
+
         // Inicializar Select2
         $selectEdit.select2({
             theme: "bootstrap-5",
@@ -315,6 +330,7 @@ const GetCarreerData = async (idCarreer) => {
         });
 
     } catch (error) {
+        $("#careerEditLoader").hide()
         console.error('Error: ', error);
     }
 };
