@@ -1,17 +1,4 @@
 <?php
-// ponytail: DEBUG TEMPORAL — capta CUALQUIER fatal a un archivo legible por URL.
-// Quitar este bloque (hasta la marca FIN DEBUG) cuando se resuelva el 500.
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
-$__mslog = __DIR__ . '/mslog.txt';
-register_shutdown_function(function () use ($__mslog) {
-    $e = error_get_last();
-    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-        file_put_contents($__mslog, date('c') . " FATAL: {$e['message']} en {$e['file']}:{$e['line']}\n", FILE_APPEND);
-    }
-});
-// FIN DEBUG
-
 session_start();
 require_once __DIR__ . '/../vendor/autoload.php';
 
