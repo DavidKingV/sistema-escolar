@@ -20,22 +20,26 @@ $microsoft = new Auth($tenant, $clientId, $clientSecret, $redirectUri, $scopes);
 
 try {
     $tokens = $microsoft->getToken($_REQUEST['code'], Session::get("state"));
+
+    // ponytail: Microsoft devuelve un JSON de error (secret expirado, etc.) en vez del token;
+    // sin esto $tokens->access_token es un Error fatal no capturado = 500 en blanco.
+    if (!is_object($tokens) || empty($tokens->access_token)) {
+        $detail = is_object($tokens) && isset($tokens->error_description)
+            ? $tokens->error_description
+            : 'Token endpoint no devolvió access_token';
+        throw new Exception($detail);
+    }
+
     $microsoft->setAccessToken($tokens->access_token);
-    
     $user = (new User);
 
-    if($tokens->access_token) {
-        $baseUrl = $_ENV['BASE_URL'] ?? '.';
-        echo "<script>
-             window.opener.postMessage({ MiAccto: '{$tokens->access_token}', redirect: '{$baseUrl}/dashboard.php' }, '*');
-            window.close();
-        </script>";
-        
-
-    } else {
-        throw new Exception('User data not found');
-    }
-} catch (Exception $e) {
+    $baseUrl = $_ENV['BASE_URL'] ?? '.';
+    echo "<script>
+         window.opener.postMessage({ MiAccto: '{$tokens->access_token}', redirect: '{$baseUrl}/dashboard.php' }, '*');
+        window.close();
+    </script>";
+} catch (\Throwable $e) {
+    error_log('MicrosoftAuth error: ' . $e->getMessage());
     echo "<script>
         window.opener.postMessage({ error: 'authentication_failed' }, '*');
         window.close();
