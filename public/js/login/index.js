@@ -37,7 +37,7 @@ window.addEventListener('message', function(event) {
         window.location.href = event.data.redirect || 'dashboard.php';
     } else if (event.data.error) {
         // Manejar errores de autenticación
-        alert('Authentication failed');
+        alert('Authentication failed: ' + (event.data.detail || event.data.error));
     } else{
         // Manejar otros mensajes
         alert('Unknown message');
