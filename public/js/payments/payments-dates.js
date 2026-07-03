@@ -13,7 +13,6 @@ function CashFormatInput(input) {
 }
 
 const SendPaymentsMount = async (data) => {
-    console.log(data);
     enviarPeticionAjaxAction(phpPath, 'POST', 'setStudentPayMount', data)
     .done(function(data){
         if(data.success){

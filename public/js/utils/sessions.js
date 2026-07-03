@@ -3,16 +3,6 @@ import { enviarPeticionAjax } from './ajax.js';
 
 var phpPath = '/backend/login/routes.php';
 
-function openInNewWindow(url) {
-    const newWindow = window.open(url, '_blank', 'width=800,height=600');
-
-    // Espera a que la nueva ventana se haya cargado completamente antes de enviar el mensaje
-    newWindow.onload = function() {
-        newWindow.postMessage({ success: true, message: "Sesión cerrada" }, "*");
-        newWindow.close();
-    };
-}
-
 $("#endSession").click(function(e){
     e.preventDefault();
 
@@ -24,14 +14,8 @@ $("#endSession").click(function(e){
                 Swal.close();
                 if (data.success) {
                     if(data.microsoftLogout){
-                        openInNewWindow("https://login.microsoftonline.com/ff8c5e54-d300-4681-8870-a4805a435d2a/oauth2/v2.0/logout");
-
-                        window.addEventListener('message', function(event) {
-                            if (event.data.success) {
-                                window.location.href = data.microsoft_redirect || "/index.php";
-                                successAlert(event.data.message);
-                            }
-                        }, false);
+                        var redirectUri = encodeURIComponent(data.microsoft_redirect || window.location.origin + "/index.php");
+                        window.location.href = "https://login.microsoftonline.com/ff8c5e54-d300-4681-8870-a4805a435d2a/oauth2/v2.0/logout?post_logout_redirect_uri=" + redirectUri;
                     } else {
                         window.location.href = data.redirect || "/public/index.php?sesion=close";
                     }

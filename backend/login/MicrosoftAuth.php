@@ -18,32 +18,26 @@ $scopes = Session::get("scopes") ?? ["User.ReadBasic.All", "offline_access"];
 
 $microsoft = new Auth($tenant, $clientId, $clientSecret, $redirectUri, $scopes);
 
+$baseUrl = $_ENV['BASE_URL'] ?? '.';
+
 try {
     $tokens = $microsoft->getToken($_REQUEST['code'], Session::get("state"));
-
-    // ponytail: Microsoft devuelve un JSON de error (secret expirado, etc.) en vez del token;
-    // sin esto $tokens->access_token es un Error fatal no capturado = 500 en blanco.
-    if (!is_object($tokens) || empty($tokens->access_token)) {
-        $detail = is_object($tokens) && isset($tokens->error_description)
-            ? $tokens->error_description
-            : 'Token endpoint no devolvió access_token';
-        throw new Exception($detail);
-    }
-
     $microsoft->setAccessToken($tokens->access_token);
+
     $user = (new User);
 
-    $baseUrl = $_ENV['BASE_URL'] ?? '.';
-    echo "<script>
-         window.opener.postMessage({ MiAccto: '{$tokens->access_token}', redirect: '{$baseUrl}/dashboard.php' }, '*');
-        window.close();
-    </script>";
-} catch (\Throwable $e) {
-    error_log('MicrosoftAuth error: ' . $e->getMessage());
-    $detail = json_encode($e->getMessage());
-    echo "<script>
-        window.opener.postMessage({ error: 'authentication_failed', detail: {$detail} }, '*');
-        window.close();
-    </script>";
+    if ($tokens->access_token) {
+        // Guardamos el token en la sesión del servidor en vez de exponerlo en el JS
+        Session::set('microsoft_access_token', $tokens->access_token);
+        $_SESSION['logged_in'] = true;
+
+        header("Location: {$baseUrl}/dashboard.php");
+        exit;
+    } else {
+        throw new Exception('User data not found');
+    }
+} catch (Exception $e) {
+    header("Location: {$baseUrl}/login.php?error=authentication_failed");
+    exit;
 }
 ?>
