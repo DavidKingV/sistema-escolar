@@ -3,6 +3,8 @@ namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Models\PaymentsModel;
+use Vendor\Schoolarsystem\Models\StudentsModel;
+use Vendor\Schoolarsystem\Models\EmailsModel;
 use Vendor\Schoolarsystem\auth;
 use Facturapi\Facturapi;
 use Facturapi\Exceptions\Facturapi_Exception;
@@ -19,6 +21,145 @@ class PaymentsController
         $this->connection = $dbConnection;
         $this->payments = new PaymentsModel($dbConnection);
         $this->loginControl = new \LoginControl($dbConnection);
+    }
+
+    // ─── Recordatorios de pago (cron) ─────────────────────────────────────────
+    // Sin auth::check(): se ejecuta desde CLI, protegido por el guard del cronjob.
+    // El echo es intencional: cPanel captura stdout en el correo del cron.
+
+    private function alumnoYaPago(array $paymentHistory): bool
+    {
+        if (!($paymentHistory['success'] ?? false) || empty($paymentHistory['data'])) {
+            return false;
+        }
+
+        $mesActual = (int) date('m');
+        $anioActual = (int) date('Y');
+
+        foreach ($paymentHistory['data'] as $pago) {
+            if (stripos($pago['concept'], 'mensualidad') === false)
+                continue;
+            if (empty($pago['payment_date']))
+                continue;
+
+            $fechaPago = new \DateTime($pago['payment_date']);
+            if (
+                (int) $fechaPago->format('m') === $mesActual &&
+                (int) $fechaPago->format('Y') === $anioActual &&
+                $pago['status'] !== 'cancelled'
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function enviarRecordatorio(
+        EmailsModel $emailModel,
+        string $email,
+        string $studentName,
+        string $concept,
+        float $amount,
+        int $diasRestantes,
+        int $diaLimitePago,
+        \DateTime $fechaObjetivo
+    ): array {
+        $asunto = $diasRestantes === 1
+            ? '⚠️ Último día para pagar tu mensualidad – ESMEFIS'
+            : "Recordatorio: tu mensualidad vence en {$diasRestantes} días – ESMEFIS";
+
+        $meses = [
+            1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
+            5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
+            9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+        ];
+
+        $mesVencimiento = (int) $fechaObjetivo->format('n');
+        $anioVencimiento = (int) $fechaObjetivo->format('Y');
+
+        $paymentDate = $diaLimitePago . ' de ' . $meses[$mesVencimiento] . ' de ' . $anioVencimiento;
+
+        $paymentData = [
+            'concept' => ["{$concept} " . $meses[$mesVencimiento] . " {$anioVencimiento}"],
+            'total' => [$amount],
+            'email' => $email,
+        ];
+
+        return $emailModel->SendReminderEmail(
+            studentName: $studentName,
+            email: $email,
+            subject: $asunto,
+            paymentData: $paymentData,
+            diasRestantes: $diasRestantes,
+            paymentDate: $paymentDate
+        );
+    }
+
+    public function runPaymentReminders(
+        StudentsModel $studentsModel,
+        EmailsModel $emailModel,
+        int $diasParaVencimiento
+    ): void {
+        $hoy = new \DateTime();
+        $fechaObjetivo = (clone $hoy)->modify("+{$diasParaVencimiento} days");
+        $diaObjetivo = (int) $fechaObjetivo->format('j');
+
+        echo "[" . $hoy->format('Y-m-d H:i:s') . "] Recordatorio {$diasParaVencimiento} día(s) antes — vencimiento el {$fechaObjetivo->format('d/m/Y')}...\n";
+
+        $students = $studentsModel->getStudentsForCron();
+
+        if (empty($students) || !isset($students[0]['studentId'])) {
+            echo "  Sin alumnos registrados.\n\n";
+            return;
+        }
+
+        foreach ($students as $student) {
+            if (!($student['success'] ?? false))
+                continue;
+
+            $studentId = $student['studentId'];
+            $studentName = $student['name'];
+            $email = $student['email'];
+
+            $paymentInfo = $this->payments->verifyMonthlyPayment($studentId);
+
+            if (!($paymentInfo['success'] ?? false) || !isset($paymentInfo['payment_day']))
+                continue;
+
+            $diaLimitePago = (int) $paymentInfo['payment_day'];
+            $montoPagar = (float) $paymentInfo['monthly_amount'];
+            $concepto = $paymentInfo['concept'] ?? 'Mensualidad';
+
+            if ($diaLimitePago !== $diaObjetivo)
+                continue;
+
+            $historial = $this->payments->getPaymentHistory($studentId);
+
+            if ($this->alumnoYaPago($historial)) {
+                echo "  Alumno #{$studentId} ({$studentName}) ya pagó. Se omite.\n";
+                continue;
+            }
+
+            $resultado = $this->enviarRecordatorio(
+                emailModel: $emailModel,
+                email: $email,
+                studentName: $studentName,
+                concept: $concepto,
+                amount: $montoPagar,
+                diasRestantes: $diasParaVencimiento,
+                diaLimitePago: $diaLimitePago,
+                fechaObjetivo: $fechaObjetivo
+            );
+
+            if ($resultado['success'] ?? false) {
+                echo "  ✔ Enviado a {$studentName} <{$email}>\n";
+            } else {
+                echo "  ✘ Error con {$studentName}: " . ($resultado['message'] ?? 'Desconocido') . "\n";
+            }
+        }
+
+        echo "  Finalizado.\n\n";
     }
 
     public function verifyPassword($password)
