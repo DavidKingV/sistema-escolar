@@ -21,6 +21,10 @@ export function validateForm(formId, rules, messages) {
     $.validator.addMethod("noSpace", function(value, element) {
         return this.optional(element) || (value.trim().indexOf(" ") === -1);
     }, "El campo no debe contener espacios");
+
+    $.validator.addMethod('lettersonly', function(value, element) {
+        return this.optional(element) || /^[a-zA-ZÀ-ÿ\s]+$/.test(value);
+    }, 'Solo se permiten letras y espacios.');
 }
 
 export function capitalizeFirstLetter(input) {

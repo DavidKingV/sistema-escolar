@@ -415,7 +415,6 @@ function initializeTeachersDataTable() {
       type: "POST",
       data: { action: "getTeachers" },
       dataSrc: function (data) {
-        console.log(data);
         if (!data[0].success) {
           Swal.fire({
             icon: "error",

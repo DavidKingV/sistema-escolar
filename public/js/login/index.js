@@ -1,7 +1,3 @@
-function openInNewWindow(url) {
-    window.open(url, '_blank', 'width=800,height=600');
-}
-
 function login(data){
     $.ajax({
         url: '../backend/login/routes.php',
@@ -32,7 +28,7 @@ function login(data){
 
 $("#openInNewWindow").on("click", function(event) {
     event.preventDefault();
-    openInNewWindow("../backend/login/MicrosoftLogin.php");
+    window.location.href = "../backend/login/MicrosoftLogin.php";
 });
 
 window.addEventListener('message', function(event) {

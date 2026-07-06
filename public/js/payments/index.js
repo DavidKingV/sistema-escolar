@@ -328,7 +328,9 @@ const VerifyMonthlyPayment = async (studentId) => {
               concept += ` | ${row.concept_carreer}`;
             }
 
-            concept += ` ${row.concept_month}`;
+            if (row.concept_month) {
+              concept += ` ${row.concept_month}`;
+            }
 
             return escapeHtml(concept);
           },
@@ -443,7 +445,9 @@ const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
                 concept += ` | ${row.concept_carreer}`;
               }
 
-              concept += ` ${row.concept_month}`;
+              if (row.concept_month) {
+                concept += ` ${row.concept_month}`;
+              }
 
               return escapeHtml(concept);
             },
