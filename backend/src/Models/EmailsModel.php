@@ -37,7 +37,7 @@ class EmailsModel
             $this->mail->SMTPAuth = true;                                   // Enable SMTP authentication
             $this->mail->Username = $_ENV['EMAIL_USER'];                     // SMTP username
             $this->mail->Password = $_ENV['EMAIL_PASS'];                               // SMTP password
-            $this->mail->SMTPSecure = 'TLS';         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;         // Implicit TLS, matches port 465
             $this->mail->Port = $_ENV['EMAIL_PORT'];                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
             $this->mail->setFrom($_ENV['EMAIL_USER'], 'Clínica UNIF');
@@ -113,7 +113,7 @@ class EmailsModel
             $this->mail->SMTPAuth = true;                                   // Enable SMTP authentication
             $this->mail->Username = $_ENV['EMAIL_USER'];                     // SMTP username
             $this->mail->Password = $_ENV['EMAIL_PASS'];                               // SMTP password
-            $this->mail->SMTPSecure = 'TLS';         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;         // Implicit TLS, matches port 465
             $this->mail->Port = $_ENV['EMAIL_PORT'];                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
             $this->mail->setFrom($_ENV['EMAIL_USER'], 'ESMEFIS Centro Universitario');
