@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../backend/vendor/autoload.php');
+require_once(__DIR__ . '/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -31,19 +31,20 @@ $studentStatus = $_POST['studentStatus'] ?? NULL;
     <div class="form-group">
         <div class="mb-3" hidden>
             <label for="studentId">ID:</label>
-            <input class="form-control" id="studentId" name="studentId" type="text" placeholder="" value="<?php echo $studentId ?>" readonly>      
+            <input class="form-control" id="studentId" name="studentId" type="text" placeholder=""
+                value="<?php echo $studentId ?>" readonly>
         </div>
 
         <div class="mb-3">
             <label for="studentStatus">Estatus:</label>
             <select name="studentStatus" id="studentStatus" class="form-control">
-                <option value="0" >Selección</option>
+                <option value="0">Selección</option>
                 <option value="1" <?php echo $studentStatus === '1' ? 'selected' : '' ?>>Activo</option>
                 <option value="2" <?php echo $studentStatus === '2' ? 'selected' : '' ?>>Baja Temporal</option>
                 <option value="3" <?php echo $studentStatus === '3' ? 'selected' : '' ?>>Inactivo</option>
                 <option value="4" <?php echo $studentStatus === '4' ? 'selected' : '' ?>>Egresado</option>
             </select>
-        </div>       
+        </div>
 
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -52,33 +53,30 @@ $studentStatus = $_POST['studentStatus'] ?? NULL;
     </div>
 </form>
 
-<script type="module">    
+<script type="module">
     import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/utils/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
+    import { enviarPeticionAjax } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
 
-    let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
-
-    $('#addEvent').submit(function(e) {
+    $('#addEvent').submit(function (e) {
+        let formData = $(this).serialize();
         e.preventDefault();
-        
-        let statusData = $(this).serialize();
 
         loadingAlert();
 
-        sendFetch(api, 'POST', { action: 'updateStatus', statusData })
-                .then(data => {
-                    if (data.success) {
-                        if(data.error != null)infoAlert(data.error);
-                        successAlert(data.message);
-                        $('#statusModal').modal('hide');
-                        $('#studentTable').DataTable().ajax.reload();
-                    } else {
-                        errorAlert(data.message);
-                    }
-                })
-                .catch(error => {
-                    errorAlert(error.message);
-                });
+        enviarPeticionAjax(`${BASE_URL}/api/updateStatus`, 'POST', formData)
+            .then(data => {
+                if (data.success) {
+                    if (data.error != null) infoAlert(data.error);
+                    successAlert(data.message);
+                    $('#statusModal').modal('hide');
+                    $('#studentTable').DataTable().ajax.reload();
+                } else {
+                    errorAlert(data.message);
+                }
+            })
+            .catch(error => {
+                errorAlert(error.message);
+            });
     });
 
-</script>   
+</script>
