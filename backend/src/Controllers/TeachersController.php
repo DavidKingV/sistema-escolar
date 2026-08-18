@@ -2,58 +2,124 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\TeachersModel;
+use Vendor\Schoolarsystem\Models\LoginModel;
 
-class TeachersController{
-    private $connection;
-    private $teachers;
+class TeachersController
+{
+    private DBConnection $connection;
+    private TeachersModel $teachers;
+    private LoginModel $login;
 
-    public function __construct(DBConnection $dbConnection){
-        $this->connection = $dbConnection;
-        $this->teachers = new TeachersModel($dbConnection);
+    public function __construct()
+    {
+        $this->connection = DBConnection::getInstance();
+        $this->teachers = new TeachersModel($this->connection);
+        $this->login = new LoginModel($this->connection);
     }
 
-    public function getTeachers(){
-        return $this->teachers->getTeachers();
+    public function getTeacherById(int $teacherId): array
+    {
+        if ($error = Validation::id($teacherId)) {
+            return $error;
+        }
+
+        return $this->teachers->getTeacherById($teacherId);
     }
 
-    public function getTeacher($teacherId){
-        return $this->teachers->getTeacher($teacherId);
+    public function getAllTeachers(): array
+    {
+        return $this->teachers->getAllTeachers();
     }
 
-    public function addTeacher($teacherData){
+    public function addTeacher(array $teacherData): array
+    {
+        if ($error = Validation::requiredArray($teacherData)) {
+            return $error;
+        }
+
         return $this->teachers->addTeacher($teacherData);
     }
 
-    public function updateTeacherData($teacherData){
-        return $this->teachers->updateTeacherData($teacherData);
+    public function updateTeacher(array $teacherUpdateData): array
+    {
+        if ($error = Validation::requiredArray($teacherUpdateData)) {
+            return $error;
+        }
+
+        return $this->teachers->updateTeacher($teacherUpdateData);
     }
 
-    public function deleteTeacher($teacherId){
-        return $this->teachers->deleteTeacher($teacherId);
+    public function deleteTeacherById(int $teacherId, string $password): array
+    {
+        if ($error = Validation::id($teacherId)) {
+            return $error;
+        }
+
+        if ($error = Validation::password($password)) {
+            return $error;
+        }
+
+        $userId = $_SESSION['userId'];
+
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta."
+            ];
+        }
+
+        return $this->teachers->deleteTeacherById($teacherId);
     }
 
-    public function getTeachersUsers(){
-        return $this->teachers->getTeachersUsers();
+    public function getAllTeachersUsers(): array
+    {
+        return $this->teachers->getAllTeachersUsers();
     }
 
-    public function verifyTeacherUser($teacherUser){
-        return $this->teachers->verifyTeacherUser($teacherUser);
-    }
+    public function addTeacherUser(array $teacherUserData): array
+    {
+        if ($error = Validation::requiredArray($teacherUserData)) {
+            return $error;
+        }
 
-    public function addTeacherUser($teacherUserData){
         return $this->teachers->addTeacherUser($teacherUserData);
     }
 
-    public function desactivateTeacherUser($teacherUserId){
+    public function updateTeacherUserData(array $teacherUserUpdateData): array
+    {
+        if ($error = Validation::requiredArray($teacherUserUpdateData)) {
+            return $error;
+        }
+
+        return $this->teachers->updateTeacherUserData($teacherUserUpdateData);
+    }
+
+    public function verifyTeacherByUser(string $teacherUser): array
+    {
+        if ($error = Validation::string($teacherUser)) {
+            return $error;
+        }
+
+        return $this->teachers->verifyTeacherByUser($teacherUser);
+    }
+
+    public function desactivateTeacherUser(int $teacherUserId): array
+    {
+        if ($error = Validation::id($teacherUserId)) {
+            return $error;
+        }
+
         return $this->teachers->desactivateTeacherUser($teacherUserId);
     }
 
-    public function reactivateTeacherUser($teacherUserId){
-        return $this->teachers->reactivateTeacherUser($teacherUserId);
-    }
+    public function reactivateTeacherUser(int $teacherUserId): array
+    {
+        if ($error = Validation::id($teacherUserId)) {
+            return $error;
+        }
 
-    public function updateTeacherUserData($teacherUserData){
-        return $this->teachers->updateTeacherUserData($teacherUserData);
+        return $this->teachers->reactivateTeacherUser($teacherUserId);
     }
 }

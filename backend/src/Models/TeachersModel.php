@@ -2,285 +2,370 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\Core\DatabaseHelper;
 
-class TeachersModel{
+class TeachersModel
+{
     private $connection;
 
-    public function __construct(DBConnection $dbConnection){
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection->getConnection();
     }
 
-    public function getTeachers(){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "SELECT * FROM teachers";
-            $result = mysqli_query($this->connection, $query);
+    public function getTeacherById(int $teacherId): array
+    {
+        return DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT
+                    id,
+                    nombre AS name,
+                    genero AS gender,
+                    nacimiento AS birthdate,
+                    estado_civil AS civil_status,
+                    telefono AS phone,
+                    email
+                FROM teachers
+                WHERE id = ?;
+            ",
+            "i",
+            [$teacherId]
+        );
+    }
 
-            if(!$result){
-                return array("success" => false, "message" => "Error al obtener los datos de los profesores,por favor intente de nuevo más tarde");
-            }else{
-                $teachers = array();
-                if($result->num_rows > 0){
-                    while($row = $result->fetch_assoc()){
-                        $teachers[] = array(
-                            "success" => true,
-                            "id" => $row['id'],
-                            "name" => $row['nombre'],
-                            "phone" => $row['telefono'],
-                            "email" => $row['email']
-                        );
-                    }
-                }else{
-                    $teachers[] = array("success" => false, "message" => "No se encontraron alumnos registrados");
-                }
-                $this->connection->close();
-                return $teachers;
+    public function getAllTeachers(): array
+    {
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT
+                    id,
+                    nombre AS name,
+                    telefono AS phone,
+                    email
+                FROM teachers;
+            "
+        );
+    }
+
+    public function addTeacher(array $teacherDataArray): array
+    {
+        return DatabaseHelper::insert(
+            $this->connection,
+            "
+                INSERT INTO teachers (
+                    nombre,
+                    genero,
+                    nacimiento,
+                    estado_civil,
+                    telefono,
+                    email
+                ) VALUES (?, ?, ?, ?, ?, ?);
+            ",
+            "ssssss",
+            [
+                $teacherDataArray['teacherName'],
+                $teacherDataArray['teacherGender'],
+                $teacherDataArray['teacherBirthday'],
+                $teacherDataArray['teacherState'],
+                $teacherDataArray['teacherPhone'],
+                $teacherDataArray['teacherEmail']
+            ]
+        );
+    }
+
+    public function updateTeacher(array $teacherUpdateData): array
+    {
+        $id = $teacherUpdateData['idTeacherEdit'];
+
+        try {
+            $currentData = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT
+                        nombre,
+                        genero,
+                        nacimiento,
+                        estado_civil,
+                        telefono,
+                        email
+                    FROM teachers
+                    WHERE id = ?;
+                ",
+                "i",
+                [$id]
+            );
+
+            if (!$currentData["success"]) {
+                return [
+                    "success" => false,
+                    "message" => $currentData["message"],
+                    "data" => null
+                ];
             }
+
+            $newData = [
+                "nombre" => $teacherUpdateData['teacherNameEdit'],
+                "genero" => $teacherUpdateData['teacherGenderEdit'],
+                "nacimiento" => $teacherUpdateData['teacherBirthdayEdit'],
+                "estado_civil" => $teacherUpdateData['teacherStateEdit'],
+                "telefono" => $teacherUpdateData['teacherPhoneEdit'],
+                "email" => $teacherUpdateData['teacherEmailEdit']
+            ];
+
+            if ($currentData["data"] == $newData) {
+                return [
+                    "success" => false,
+                    "message" => "No se detectaron cambios para guardar.",
+                    "data" => null
+                ];
+            }
+
+            return DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE teachers
+                    SET
+                        nombre = ?,
+                        genero = ?,
+                        nacimiento = ?,
+                        estado_civil = ?,
+                        telefono = ?,
+                        email = ?
+                    WHERE id = ?;
+                ",
+                "ssssssi",
+                [
+                    $newData["nombre"],
+                    $newData["genero"],
+                    $newData["nacimiento"],
+                    $newData["estado_civil"],
+                    $newData["telefono"],
+                    $newData["email"],
+                    $id
+                ]
+            );
+
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error inesperado al actualizar los datos del profesor.",
+                "data" => null
+            ];
         }
     }
 
-    public function getTeacher($idTeacher){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "SELECT * FROM teachers WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("i", $idTeacher);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $teacher = array();
-            if($result->num_rows > 0){
-                while($row = $result->fetch_assoc()){
-                    $teacher = array(
-                        "success" => true,
-                        "id" => $row['id'],
-                        "name" => $row['nombre'],
-                        "gender" => $row['genero'],
-                        "birthdate" => $row['nacimiento'],
-                        "civil_status" => $row['estado_civil'],
-                        "phone" => $row['telefono'],
-                        "email" => $row['email'],
-                    );
-                }
-            }else{
-                return array("success" => false, "message" => "No se encontró el profesor solicitado");
+    public function deleteTeacherById(int $teacherId): array
+    {
+        return DatabaseHelper::delete(
+            $this->connection,
+            "
+                DELETE
+                FROM teachers
+                WHERE id = ?;
+            ",
+            "i",
+            [$teacherId]
+        );
+    }
+
+    public function getAllTeachersUsers(): array
+    {
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT
+                    teachers.id,
+                    teachers.nombre AS name,
+                    login_teachers.user,
+                    login_teachers.status
+                FROM teachers
+                LEFT JOIN login_teachers ON teachers.id = login_teachers.id_teacher;
+            "
+        );
+    }
+
+    public function addTeacherUser(array $teacherUserDataArray): array
+    {
+        return DatabaseHelper::insert(
+            $this->connection,
+            "
+                INSERT INTO login_teachers (
+                    id_teacher,
+                    user,
+                    password,
+                    status
+                ) VALUES (?, ?, ?, ?);
+            ",
+            "isss",
+            [
+                $teacherUserDataArray['teacherUserId'],
+                $teacherUserDataArray['teacherUserAdd'],
+                $teacherUserDataArray['teacherUserPass'],
+                "Activo"
+            ]
+        );
+    }
+
+    public function updateTeacherUserData(array $teacherUserUpdateDataArray): array
+    {
+        $id = $teacherUserUpdateDataArray['teacherUserIdEdit'];
+
+        try {
+            $currentData = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT
+                       user,
+                       password
+                    FROM login_teachers
+                    WHERE id = ?;
+                ",
+                "i",
+                [$id]
+            );
+
+            if (!$currentData["success"]) {
+                return [
+                    "success" => false,
+                    "message" => $currentData["message"],
+                    "data" => null
+                ];
             }
-            $stmt->close();
-            $this->connection->close();
-            return $teacher;
+
+            $newData = [
+                "user" => $teacherUserUpdateDataArray['teacherUserAddEdit'],
+                "password" => $teacherUserUpdateDataArray['teacherUserPassEdit'],
+            ];
+
+            if ($currentData["data"] == $newData) {
+                return [
+                    "success" => false,
+                    "message" => "No se detectaron cambios para guardar.",
+                    "data" => null
+                ];
+            }
+
+            return DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE login_teachers
+                    SET
+                        user = ?,
+                        password = ?
+                    WHERE id_teacher = ?;
+                ",
+                "ssi",
+                [
+                    $newData["user"],
+                    $newData["password"],
+                    $id
+                ]
+            );
+
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error inesperado al actualizar los datos de usuario del profesor.",
+                "data" => null
+            ];
         }
     }
 
-    public function addTeacher($teacherData){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "INSERT INTO teachers (nombre, genero, nacimiento, estado_civil, telefono, email) VALUES (?, ?, ?, ?, ?, ?)";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("ssssss", $teacherData['teacherName'], $teacherData['teacherGender'], $teacherData['teacherBirthday'], $teacherData['teacherState'], $teacherData['teacherPhone'], $teacherData['teacherEmail']);
-            $stmt->execute();
+    public function verifyTeacherByUser(string $teacherUser): array
+    {
+        $result = DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT user
+                FROM login_teachers
+                WHERE user = ?;
+            ",
+            "s",
+            [$teacherUser]
+        );
 
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Profesor registrado correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al registrar el profesor, por favor intente de nuevo más tarde");
-            }
+        if ($result['success']) {
+            return [
+                "success" => true,
+                "user" => false,
+                "message" => "El usuario ya existe"
+            ];
+        } else {
+            return [
+                "success" => true,
+                "user" => true,
+                "message" => "Usuario disponible"
+            ];
         }
     }
 
-    public function updateTeacherData($teacherData){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "UPDATE teachers SET nombre = ?, genero = ?, nacimiento = ?, estado_civil = ?, telefono = ?, email = ? WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("ssssssi", $teacherData['teacherNameEdit'], $teacherData['teacherGenderEdit'], $teacherData['teacherBirthdayEdit'], $teacherData['teacherStateEdit'], $teacherData['teacherPhoneEdit'], $teacherData['teacherEmailEdit'], $teacherData['idTeacherEdit']);
-            $stmt->execute();
+    public function desactivateTeacherUser(int $teacherUserId): array
+    {
+        $status = 'Inactivo';
 
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Datos actualizados correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al actualizar los datos del profesor, por favor intente de nuevo más tarde");
-            }
+        $result = DatabaseHelper::update(
+            $this->connection,
+            "
+                UPDATE login_teachers
+                SET
+                    status = ?
+                WHERE id_teacher = ?;
+            ",
+            "si",
+            [
+                $status,
+                $teacherUserId
+            ]
+        );
+
+        if ($result['success']) {
+            return [
+                "success" => true,
+                "user" => false,
+                "message" => "Usuario desactivado correctamente."
+            ];
+        } else {
+            return [
+                "success" => true,
+                "user" => true,
+                "message" => "Error al desactivar el usuario, por favor intente de nuevo o más tarde."
+            ];
         }
     }
 
-    public function deleteTeacher($teacherId){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "DELETE FROM teachers WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("i", $teacherId);
-            $stmt->execute();
+    public function reactivateTeacherUser(int $teacherUserId): array
+    {
+        $status = 'Activo';
 
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Profesor eliminado correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al eliminar el profesor, por favor intente de nuevo más tarde");
-            }
-        }
-    }
+        $result = DatabaseHelper::update(
+            $this->connection,
+            "
+                UPDATE login_teachers
+                SET
+                    status = ?
+                WHERE id_teacher = ?;
+            ",
+            "si",
+            [
+                $status,
+                $teacherUserId
+            ]
+        );
 
-    public function getTeachersUsers(){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "SELECT teachers.id, teachers.nombre, login_teachers.user, login_teachers.status FROM teachers LEFT JOIN login_teachers ON teachers.id = login_teachers.id_teacher";
-            $result = mysqli_query($this->connection, $query);
-
-            if(!$result){
-                return array("success" => false, "message" => "Error al obtener los datos de los profesores, por favor intente de nuevo más tarde");
-            }else{
-                $teachers = array();
-                if($result->num_rows > 0){
-                    while($row = $result->fetch_assoc()){
-                        $teachers[] = array(
-                            "success" => true,
-                            "name" => $row['nombre'],
-                            "id" => $row['id'],
-                            "user" => $row['user'],
-                            "status" => $row['status']
-                        );
-                    }
-                }else{
-                    $teachers[] = array(
-                        "success" => false,
-                        "message" => "No se encontraron profesores registrados"
-                    );
-                }
-                $this->connection->close();
-                return $teachers;
-            }
-        }
-    }
-
-    public function verifyTeacherUser($teacherUserAdd){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "SELECT user FROM login_teachers WHERE user = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("s", $teacherUserAdd);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if($result->num_rows > 0){
-                return array("success" => true, "user" => false, "message" => "El usuario ya existe");
-            }else{
-                return array("success" => true, "user" => true, "message" => "Usuario disponible");
-            }
-        }
-    }
-
-    public function addTeacherUser($teacherUserAddArray){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $status = "Activo";
-            $query = "INSERT INTO login_teachers (id_teacher, user, password, status) VALUES (?, ?, ?, ?)";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("isss", $teacherUserAddArray['teacherUserId'], $teacherUserAddArray['teacherUserAdd'], $teacherUserAddArray['teacherUserPass'], $status);
-            $stmt->execute();
-
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Usuario registrado correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al registrar el usuario, por favor intente de nuevo más tarde");
-            }
-        }
-    }
-
-    public function desactivateTeacherUser($teacherUserId){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $status = "Inactivo";
-            $query = "UPDATE login_teachers SET status = ? WHERE id_teacher = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("si", $status, $teacherUserId);
-            $stmt->execute();
-
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Usuario desactivado correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al desactivar el usuario, por favor intente de nuevo más tarde");
-            }
-        }
-    }
-
-    public function reactivateTeacherUser($teacherUserId){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $status = "Activo";
-            $query = "UPDATE login_teachers SET status = ? WHERE id_teacher = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("si", $status, $teacherUserId);
-            $stmt->execute();
-
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Usuario reactivado correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al reactivar el usuario, por favor intente de nuevo más tarde");
-            }
-        }
-    }
-
-    public function updateTeacherUserData($teacherUserDataArray){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $query = "UPDATE login_teachers SET user = ?, password = ? WHERE id_teacher = ?";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bind_param("ssi", $teacherUserDataArray['teacherUserAddEdit'], $teacherUserDataArray['teacherUserPassEdit'], $teacherUserDataArray['teacherUserIdEdit']);
-            $stmt->execute();
-
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Datos actualizados correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al actualizar los datos del usuario, por favor intente de nuevo más tarde");
-            }
+        if ($result['success']) {
+            return [
+                "success" => true,
+                "user" => false,
+                "message" => "Usuario reactivado correctamente."
+            ];
+        } else {
+            return [
+                "success" => true,
+                "user" => true,
+                "message" => "Error al reactivar el usuario, por favor intente de nuevo o más tarde."
+            ];
         }
     }
 }
