@@ -1,6 +1,7 @@
-<?php include_once __DIR__.'/../backend/views/mainMenu.php'; ?>
+<?php include_once __DIR__ . '/../backend/views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,18 +13,19 @@
     <!--<link rel="stylesheet" href="assets/css/dashboard.css">-->
     <title>Inicio</title>
 </head>
+
 <body>
     <!-- Content -->
     <div id="content">
         <div class="container-fluid">
             <h2 class="mb-4">Dashboard</h2>
-            
+
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="card stat-card">
                         <div class="card-body">
                             <div class="stat-value">1,245</div>
-                            <div class="stat-label">Estudiantes</div>
+                            <div class="stat-label">Alumnos</div>
                         </div>
                     </div>
                 </div>
@@ -52,7 +54,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
@@ -64,7 +66,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
@@ -109,22 +111,27 @@
     </div>
 
 </body>
+
 </html>
 
+<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
+
 <!-- Boostrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- jquery -->
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js" integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"
+    integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
 
 <!-- globaljs -->
 <script src="js/global/mainMenu.js"></script>
 
 <!-- customs scripts -->
-<script src="js/dashboard/index.js"></script>
 <script type="module" src="js/utils/sessions.js"></script>
-

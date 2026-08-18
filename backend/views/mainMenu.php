@@ -12,7 +12,7 @@ loadEnv::cargar();
 $VerifySession = auth::check();
 
 if (!$VerifySession['success']) {
-    header('Location: '.$_ENV['BASE_URL'].'/index.php?sesion=no-started');
+    header('Location: '.$_ENV['BASE_URL'].'/login.php?sesion=no-started');
     exit();
 }
 
@@ -109,13 +109,13 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
     </div>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a href="<?php echo $_ENV['BASE_URL']; ?>/dashboard.php" class="sidebar-link">
+            <a href="<?php echo $_ENV['BASE_URL']; ?>/dashboard" class="sidebar-link">
                 <i class="bi bi-house-fill px-3"></i>
                 <span class="sidebar-link-text">Dashboard</span>
             </a>
         </li>
 
-        <!-- Estudiantes -->
+        <!-- Alumnos -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#admissionsMenu" role="button" aria-expanded="false" aria-controls="admissionsMenu">
                 <i class="bi bi-file-earmark-text px-3"></i>
@@ -135,7 +135,7 @@ $sidebarPermissions  = htmlspecialchars(json_encode($userPerms, JSON_UNESCAPED_U
             </ul>
         </li>
 
-        <!-- Estudiantes -->
+        <!-- Alumnos -->
         <li class="nav-item">
             <a class="sidebar-link dropdown-toggle" data-bs-toggle="collapse" href="#studentsMenu" role="button" aria-expanded="false" aria-controls="studentsMenu">
                 <i class="bi bi-person-badge-fill px-3"></i>

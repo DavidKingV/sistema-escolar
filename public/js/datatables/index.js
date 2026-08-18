@@ -1,4 +1,9 @@
+var BASE_URL =
+  window.location.protocol + "//" + window.location.host + "/public";
+
 function initializeStudentDataTable() {
+  let canManageStudents = false;
+
   $("#studentTable").DataTable({
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
@@ -7,19 +12,19 @@ function initializeStudentDataTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../backend/students/routes.php",
-      type: "POST",
-      data: { action: "getStudents" },
+      url: `${BASE_URL}/student/getAllStudents`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        canManageStudents = data.permissions.canManageStudents;
+        return data.data;
       },
     },
     columns: [
@@ -40,22 +45,22 @@ function initializeStudentDataTable() {
         data: "academicalStatus",
         className: "text-center",
         render: function (data, type, row) {
-          if (data === "1")
+          if (data === 1)
             return `<span class="badge text-bg-success" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Activo</span>`;
-          else if (data === "2")
+          else if (data === 2)
             return `<span class="badge text-bg-warning" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Baja Temporal</span>`;
-          else if (data === "3")
+          else if (data === 3)
             return `<span class="badge text-bg-danger" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Inactivo/Baja</span>`;
-          else if (data === "4")
+          else if (data === 4)
             return `<span class="badge text-bg-primary" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">Egresado</span>`;
           else
             return `<span class="badge text-bg-secondary" data-id="${row.studentId}" data-name="${row.name}" data-status="${data}">${data}</span>`;
         },
       },
       {
-        data: "actions",
+        data: "permissions",
         render: function (data, type, row) {
-          if (!data) return ""; // si no hay permiso, celda vacía
+          if (!canManageStudents) return ""; // si no hay permiso, celda vacía
           return `
                         <div class="dropdown">
                             <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -88,6 +93,8 @@ function initializeStudentDataTable() {
 }
 
 function initializeStudentPaymentDataTable() {
+  let canManageStudents = false;
+
   $("#studentPaymentTable").DataTable({
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
@@ -96,19 +103,19 @@ function initializeStudentPaymentDataTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../../backend/students/routes.php",
-      type: "POST",
-      data: { action: "getStudents" },
+      url: `${BASE_URL}/student/getAllStudents`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        canManageStudents = data.permissions.canManageStudents;
+        return data.data;
       },
     },
     columns: [
@@ -120,9 +127,9 @@ function initializeStudentPaymentDataTable() {
         defaultContent: "No asignado",
       },
       {
-        data: "actions",
+        data: "permissions",
         render: function (data, type, row) {
-          if (!data) return ""; // si no hay permiso, celda vacía
+          if (!canManageStudents) return ""; // si no hay permiso, celda vacía
           return `<button data-id="${row.studentId}" data-name="${row.name}" class="btn btn-primary btn-circle viewPayments" data-bs-toggle="modal" data-bs-target="#studentPaymentsModal"><i class="bi bi-eye"></i></button>`;
         },
         className: "text-center",
@@ -140,19 +147,18 @@ function initializeStudentsUsersTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../../backend/students/routes.php",
-      type: "POST",
-      data: { action: "getStudentsUsers" },
+      url: `${BASE_URL}/student/getAllStudentsUsers`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -174,7 +180,11 @@ function initializeStudentsUsersTable() {
             badgeClass = "text-bg-secondary";
           }
           return (
-            '<span class="badge ' + badgeClass + '">' + statusText + "</span>"
+            '<span class="badge ' +
+            badgeClass +
+            ' m-1">' +
+            statusText +
+            "</span>"
           );
         },
       },
@@ -189,9 +199,9 @@ function initializeStudentsUsersTable() {
               row.name +
               '" data-user="' +
               row.user +
-              '" class="btn btn-primary btn-circle editStudentUser" data-bs-toggle="modal" data-bs-target="#StutentUserEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
+              '" class="btn btn-primary btn-circle m-1 editStudentUser" data-bs-toggle="modal" data-bs-target="#StutentUserEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
               row.id +
-              '" class="btn btn-danger btn-circle desactivateStudentUser"><i class="bi bi-arrow-down-square-fill"></i></button>'
+              '" class="btn btn-danger btn-circle m-1 desactivateStudentUser"><i class="bi bi-arrow-down-square-fill"></i></button>'
             );
           } else if (row.status == "Inactivo") {
             return (
@@ -236,19 +246,18 @@ function initializeStudentsMicrosoftUsersTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../../backend/students/routes.php",
-      type: "POST",
-      data: { action: "getStudentsMicrosoftUsers" },
+      url: `${BASE_URL}/student/getStudentsMicrosoftUsers`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -280,19 +289,19 @@ function initializeStudentGrades(studentIdGroup) {
     paging: true,
     processing: true,
     ajax: {
-      url: "../../backend/students/routes.php",
-      type: "POST",
-      data: { studentId: studentIdGroup, action: "getStudentGrades" },
+      url: `${BASE_URL}/student/getStudentGrades`,
+      type: "GET",
+      data: { studentId: studentIdGroup },
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -411,19 +420,18 @@ function initializeTeachersDataTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../backend/teachers/routes.php",
-      type: "POST",
-      data: { action: "getTeachers" },
+      url: `${BASE_URL}/teacher/getAllTeachers`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -440,9 +448,9 @@ function initializeTeachersDataTable() {
             row.id +
             '" data-name="' +
             row.name +
-            '" class="btn btn-primary btn-circle editTeacher" data-bs-toggle="modal" data-bs-target="#TeacherEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
+            '" class="btn btn-primary btn-circle m-1 editTeacher" data-bs-toggle="modal" data-bs-target="#TeacherEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
             row.id +
-            '" class="btn btn-danger btn-circle deleteTeacher"><i class="bi bi-trash-fill"></i></button>'
+            '" class="btn btn-danger btn-circle m-1 deleteTeacherById"><i class="bi bi-trash-fill"></i></button>'
           );
         },
         className: "text-center",
@@ -460,19 +468,18 @@ function initializeTeachersUsersTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../../backend/teachers/routes.php",
-      type: "POST",
-      data: { action: "getTeachersUsers" },
+      url: `${BASE_URL}/teacher/getAllTeachersUsers`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -492,15 +499,15 @@ function initializeTeachersUsersTable() {
               row.name +
               '" data-user="' +
               row.user +
-              '" class="btn btn-primary btn-circle editTeacherUser" data-bs-toggle="modal" data-bs-target="#TeacherUserEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
+              '" class="btn btn-primary btn-circle m-1 editTeacherUser" data-bs-toggle="modal" data-bs-target="#TeacherUserEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
               row.id +
-              '" class="btn btn-danger btn-circle desactivateTeacherUser"><i class="bi bi-arrow-down-square-fill"></i></button>'
+              '" class="btn btn-danger btn-circle m-1 desactivateTeacherUser"><i class="bi bi-arrow-down-square-fill"></i></button>'
             );
           } else if (row.status == "Inactivo") {
             return (
               '<button data-id="' +
               row.id +
-              '" class="btn btn-warning btn-circle reactivateTeacherUser"><i class="bi bi-arrow-clockwise"></i></button>'
+              '" class="btn btn-warning btn-circle m-1 reactivateTeacherUser"><i class="bi bi-arrow-clockwise"></i></button>'
             );
           }
           return (
@@ -508,7 +515,7 @@ function initializeTeachersUsersTable() {
             row.id +
             '" data-name="' +
             row.name +
-            '" class="btn btn-primary btn-circle addUserTeachers" data-bs-toggle="modal" data-bs-target="#teacherUserModal"><i class="bi bi-arrow-up-square-fill"></i></button>'
+            '" class="btn btn-primary btn-circle m-1 addUserTeachers" data-bs-toggle="modal" data-bs-target="#teacherUserModal"><i class="bi bi-arrow-up-square-fill"></i></button>'
           );
         },
         className: "text-center",
@@ -526,25 +533,24 @@ function initializeCarreersDataTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../backend/carreers/routes.php",
-      type: "POST",
-      data: { action: "getCareers" },
+      url: `${BASE_URL}/carreer/getAllCarreers`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
       // Define las columnas
       { data: "id", className: "text-center" },
-      { data: "name", className: "text-center" },
+      { data: "nombre", className: "text-center" },
       { data: "area", className: "text-center" },
       { data: "subarea", className: "text-center" },
       {
@@ -553,7 +559,7 @@ function initializeCarreersDataTable() {
           return (
             '<button data-id="' +
             row.id +
-            '" class="btn btn-primary btn-circle subjectsCarreer" data-bs-toggle="modal" data-bs-target="#subjectsModal"><i class="bi bi-plus"></i></button>'
+            '" class="btn btn-primary btn-circle m-1 subjectsCarreer" data-bs-toggle="modal" data-bs-target="#subjectsModal"><i class="bi bi-plus"></i></button>'
           );
         },
         className: "text-center",
@@ -564,9 +570,9 @@ function initializeCarreersDataTable() {
           return (
             '<button data-id="' +
             row.id +
-            '" class="btn btn-primary btn-circle editCarreer" data-bs-toggle="modal" data-bs-target="#CareerEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
+            '" class="btn btn-primary btn-circle m-1 editCarreer" data-bs-toggle="modal" data-bs-target="#CareerEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
             row.id +
-            '" class="btn btn-danger btn-circle deleteCarreer"><i class="bi bi-trash-fill"></i></button>'
+            '" class="btn btn-danger btn-circle m-1 deleteCarreerById"><i class="bi bi-trash-fill"></i></button>'
           );
         },
         className: "text-center",
@@ -576,6 +582,8 @@ function initializeCarreersDataTable() {
 }
 
 function initializeGroupsDataTable() {
+  let canManageGroups = false;
+
   $("#groupsTable").DataTable({
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
@@ -584,38 +592,38 @@ function initializeGroupsDataTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../backend/groups/routes.php",
-      type: "POST",
-      data: { action: "getGroups" },
+      url: `${BASE_URL}/group/getAllGroups`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        canManageGroups = data.permissions.canManageGroups;
+        return data.data;
       },
     },
     columns: [
       // Define las columnas
       { data: "id", className: "text-center" },
-      { data: "id_carreer", className: "text-center" },
-      { data: "key", className: "text-center" },
+      { data: "nombre_carrera", className: "text-center" },
+      { data: "clave", className: "text-center" },
       { data: "name", className: "text-center" },
       {
         data: "members",
         render: function (data, type, row) {
-          return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} Miembro(s)</a></span>`;
+          return `<span class="badge text-bg-light"><a href="#" class="groupDetails" data-id="${row.id}">${data} miembro(s)</a></span>`;
         },
         className: "text-center",
       },
       {
-        data: "actions",
+        data: "permissions",
         render: function (data, type, row) {
-          if (!data) return ""; // si no hay permiso, celda vacía
+          if (!canManageGroups) return ""; // si no hay permiso, celda vacía
           return `
                         <div class="dropdown">
                             <button class="btn btn-secondary btn-circle dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -638,7 +646,7 @@ function initializeGroupsDataTable() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item deleteGroup" href="#" data-id="${row.id}">
+                                    <a class="dropdown-item deleteGroupById" href="#" data-id="${row.id}">
                                         <i class="bi bi-trash-fill"></i> Eliminar
                                     </a>
                                 </li>
@@ -661,19 +669,19 @@ function initializeGroupsStudentsDataTable(groupId) {
     paging: true,
     processing: true,
     ajax: {
-      url: "../../backend/groups/routes.php",
-      type: "POST",
-      data: { groupId: groupId, action: "getGroupsStudents" },
+      url: `${BASE_URL}/group/getStudentsByGroupId`,
+      type: "GET",
+      data: { groupId: groupId },
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -687,7 +695,7 @@ function initializeGroupsStudentsDataTable(groupId) {
             '</button><button data-id="' +
             row.student_id +
             '" data-group="' +
-            row.id_group +
+            row.group_id +
             '" class="btn btn-danger btn-circle deleteGroupStudent"><i class="bi bi-trash-fill"></i></button>'
           );
         },
@@ -706,20 +714,19 @@ function initializeSubjectsDataTable() {
     paging: true,
     processing: true,
     ajax: {
-      url: "../backend/subjects/routes.php",
-      type: "POST",
-      data: { action: "getSubjects" },
+      url: `${BASE_URL}/subject/getAllSubjects`,
+      type: "GET",
       dataSrc: function (data) {
-        if (!data[0].success) {
+        if (!data.success) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: data[0].message,
+            text: data.message,
           });
 
           return [];
         }
-        return data;
+        return data.data;
       },
     },
     columns: [
@@ -729,14 +736,32 @@ function initializeSubjectsDataTable() {
         data: null,
         className: "text-center",
         render: function (data, type, row) {
-          if (row.child == "No asignado") return `<h6>${row.name}</h6>`;
+          if (row.child === null) return `<h6>${row.name}</h6>`;
           else
             return `<h6>${row.name}</h6>
                             <p><a data-idFather="${row.id}" data-idChild="${row.id_child}" class="link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover subjectChildInfo" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#childSubjectsModal">${row.child}</a></p>`;
         },
       },
-      { data: "career", className: "text-center" },
-      { data: "description", className: "text-center" },
+      {
+        data: "career",
+        className: "text-center",
+        render: function (data) {
+          if (data === null || data === "" || data === undefined) {
+            return "Aún no asignada";
+          }
+          return data;
+        },
+      },
+      {
+        data: "description",
+        className: "text-center",
+        render: function (data) {
+          if (data === null || data === "" || data === undefined) {
+            return "Sin descripción";
+          }
+          return data;
+        },
+      },
       {
         data: null,
         render: function (data, type, row) {
@@ -747,9 +772,9 @@ function initializeSubjectsDataTable() {
             row.name +
             '" data-carrerid="' +
             row.id_carrer +
-            '" class="btn btn-primary btn-circle addChildSubject" data-bs-toggle="modal" data-bs-target="#SubjectsChildAddModal"><i class="bi bi-capslock-fill"></i></button><button data-id="' +
-            row.id +
-            '" class="btn btn-warning btn-circle editChildSubject"><i class="bi bi-pencil-fill"></i></button>'
+            '" class="btn btn-primary btn-circle m-1 addChildSubject" data-bs-toggle="modal" data-bs-target="#SubjectsChildAddModal"><i class="bi bi-capslock-fill"></i></button><button data-id="'
+            // row.id +
+            // '" class="btn btn-warning btn-circle editChildSubject"><i class="bi bi-pencil-fill"></i></button>'
           );
         },
         className: "text-center",
@@ -760,9 +785,9 @@ function initializeSubjectsDataTable() {
           return (
             '<button data-id="' +
             row.id +
-            '" class="btn btn-primary btn-circle editSubject" data-bs-toggle="modal" data-bs-target="#SubjectsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
+            '" class="btn btn-primary btn-circle m-1 editSubject" data-bs-toggle="modal" data-bs-target="#SubjectsEditModal"><i class="bi bi-pencil-square"></i></button><button data-id="' +
             row.id +
-            '" class="btn btn-danger btn-circle deleteSubject"><i class="bi bi-trash-fill"></i></button>'
+            '" class="btn btn-danger btn-circle m-1 deleteSubjectById"><i class="bi bi-trash-fill"></i></button>'
           );
         },
         className: "text-center",
@@ -779,15 +804,14 @@ function initializeDuplicatesDataTable() {
     ordering: false,
     processing: true,
     ajax: {
-      url: "../../backend/groups/routes.php",
-      type: "POST",
-      data: { action: "getDuplicateStudents" },
+      url: `${BASE_URL}/group/getDuplicateStudents`,
+      type: "GET",
       dataSrc: function (data) {
         if (!data.success) {
           Swal.fire({ icon: "error", title: "Error", text: data.message });
           return [];
         }
-        return data.results;
+        return data.data;
       },
     },
     columns: [

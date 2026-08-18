@@ -12,7 +12,7 @@
         Swal.fire({
             icon: "error",
             title: "Error",
-            text: "Error al verificar el ID del estudiante'",
+            text: "Error al verificar el ID del alumno'",
             backdrop: "rgba(37,54,166,10)",
             showConfirmButton: false,
             timer: 4000
