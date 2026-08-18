@@ -1,136 +1,241 @@
 <?php
 namespace Vendor\Schoolarsystem\Controllers;
 
+use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\PermissionHelper;
+use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\GroupsModel;
+use Vendor\Schoolarsystem\Models\LoginModel;
 
 class GroupsController
 {
-    private $connection;
-    private $groups;
+    private DBConnection $connection;
+    private GroupsModel $groups;
+    private LoginModel $login;
 
-    public function __construct(DBConnection $dbConnection)
+    public function __construct()
     {
-        $this->connection = $dbConnection;
-        $this->groups = new GroupsModel($dbConnection);
+        $this->connection = DBConnection::getInstance();
+        $this->groups = new GroupsModel($this->connection);
+        $this->login = new LoginModel($this->connection);
     }
 
-    public function getNoGroupStudentsList()
+    public function getGroupById(int $groupId): array
     {
-        $search = $_POST['search'] ?? '';
-        $page = intval($_POST['page'] ?? 1);
-        $limit = 30;
-        $groupId = intval($_POST['groupId'] ?? 0);
-
-        $studentsList = $this->groups->getNoGroupStudentsList($search, $page, $limit, $groupId);
-        $studentsTotal = $this->groups->getGroupsCount($search);
-
-        $students = array();
-
-        if (!$studentsList !== NULL) {
-            while ($row = $studentsList->fetch_assoc()) {
-                $students[] = array(
-                    'id' => $row['id'],
-                    'text' => $row['nombre'] // Cambiado a 'text' para compatibilidad con Select2
-                );
-            }
-            return array(
-                'results' => $students,
-                'pagination' => array(
-                    'more' => ($page * $limit) < $studentsTotal
-                ),
-                'total_count' => $studentsTotal
-            );
-        } else {
-            return array(
-                'results' => [],
-                'pagination' => array(
-                    'more' => false
-                ),
-                'total_count' => 0
-            );
+        if ($error = Validation::id($groupId)) {
+            return $error;
         }
+
+        return $this->groups->getGroupById($groupId);
     }
 
-    public function addSchedule($data)
+    public function getAllGroups(): array
     {
-        $addSchedule = $this->groups->addSchedule($data);
-        return $addSchedule;
+        $response = $this->groups->getAllGroups();
+
+        if (!$response['success']) {
+            return $response;
+        }
+
+        $user = auth::user();
+
+        return [
+            "success" => $response['success'],
+            "permissions" => [
+                "canManageGroups" => PermissionHelper::canAccess(
+                    ['edit_groups', 'delete_groups'],
+                    $user['permissions'] ?? [],
+                    $user['isAdmin'] ?? false
+                )
+            ],
+            "data" => $response['data'],
+            "message" => $response['message'] ?? ''
+        ];
     }
 
-    public function getSchedulesGroup($groupId)
+    public function addGroup(array $groupData): array
     {
-        $schedulesGroup = $this->groups->getSchedulesGroup($groupId);
-        return $schedulesGroup;
+        if ($error = Validation::requiredArray($groupData)) {
+            return $error;
+        }
+
+        return $this->groups->addGroup($groupData);
     }
 
-    public function getGroups()
+    public function updateGroup(array $groupUpdateData): array
     {
-        return $this->groups->getGroups();
+        if ($error = Validation::requiredArray($groupUpdateData)) {
+            return $error;
+        }
+
+        return $this->groups->updateGroup($groupUpdateData);
     }
 
-    public function getGroupsStudents($groupId)
+    public function deleteGroupById(int $groupId, string $password): array
     {
-        return $this->groups->getGroupsStudents($groupId);
+        if ($error = Validation::id($groupId)) {
+            return $error;
+        }
+
+        if ($error = Validation::password($password)) {
+            return $error;
+        }
+
+        $userId = $_SESSION['userId'];
+
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta."
+            ];
+        }
+
+        return $this->groups->deleteGroupById($groupId);
     }
 
-    public function getStudentsNames()
+    public function getStudentsByGroupId(int $groupId): array
     {
-        return $this->groups->getStudentsNames();
+        if ($error = Validation::id($groupId)) {
+            return $error;
+        }
+
+        return $this->groups->getStudentsByGroupId($groupId);
     }
 
-    public function getGroupData($groupId)
+    public function addStudentToGroup(int $groupId, array $studentId): array
     {
-        return $this->groups->getGroupData($groupId);
+        if ($error = Validation::id($groupId)) {
+            return $error;
+        }
+
+        if ($error = Validation::requiredArray($studentId)) {
+            return $error;
+        }
+
+        return $this->groups->addStudentToGroup($groupId, $studentId);
     }
 
-    public function getGroupsJson()
+    public function removeStudentFromGroup(int $groupId, int $studentId, string $password): array
     {
-        return $this->groups->getGroupsJson();
+        if ($error = Validation::id($groupId)) {
+            return $error;
+        }
+
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
+        if ($error = Validation::password($password)) {
+            return $error;
+        }
+
+        $userId = $_SESSION['userId'];
+
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta."
+            ];
+        }
+
+        return $this->groups->removeStudentFromGroup($groupId, $studentId);
     }
 
-    public function addGroup($groupDataArray)
+    public function getCarreersForGroupCreation(): array
     {
-        return $this->groups->addGroup($groupDataArray);
+        return $this->groups->getCarreersForGroupCreation();
     }
 
-    public function updateGroup($groupDataEditArray)
-    {
-        return $this->groups->updateGroup($groupDataEditArray);
-    }
-
-    public function deleteGroup($groupId)
-    {
-        return $this->groups->deleteGroup($groupId);
-    }
-
-    public function addStudentGroup($groupId, $studentId)
-    {
-        return $this->groups->addStudentGroup($groupId, $studentId);
-    }
-
-    public function deleteStudentGroup($groupId, $studentId, $password)
-    {
-        return $this->groups->deleteStudentGroup($groupId, $studentId, $password);
-    }
-
-    public function getDuplicateStudents()
+    public function getDuplicateStudents(): array
     {
         return $this->groups->getDuplicateStudents();
     }
 
-    public function getStudentDuplicateGroups($studentId)
+    public function getStudentDuplicateGroups(int $studentId): array
     {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
         return $this->groups->getStudentDuplicateGroups($studentId);
     }
 
-    public function resolveDuplicate($studentId, $correctGroupId)
+    public function resolveDuplicate(int $studentId, int $correctGroupId): array
     {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
+        if ($error = Validation::id($correctGroupId)) {
+            return $error;
+        }
+
         return $this->groups->resolveDuplicate($studentId, $correctGroupId);
     }
 
-    public function getGroupCareer($studentId)
+    // *****************************************************************************************
+    // API Methods
+    // *****************************************************************************************
+
+    public function getNoGroupStudentsList(): array
     {
+        $search = $_GET["search"] ?? "";
+        $page = max(1, (int) ($_GET["page"] ?? 1));
+        $limit = 30;
+        $groupId = (int) ($_GET["groupId"] ?? 0);
+
+        $students = $this->groups->getNoGroupStudentsList(
+            $search,
+            $page,
+            $limit,
+            $groupId
+        );
+
+        $total = $this->groups->getGroupsCount($search);
+
+        $results = array_map(
+            static fn($student) => [
+                "id" => $student["id"],
+                "text" => $student["nombre"]
+            ],
+            $students
+        );
+
+        return [
+            "results" => $results,
+            "pagination" => [
+                "more" => ($page * $limit) < $total
+            ],
+            "total_count" => $total
+        ];
+    }
+
+    public function getGroupCareer(int $studentId): array
+    {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
         return $this->groups->getGroupCareer($studentId);
+    }
+
+    public function getGroupSchedules(int $groupId): array
+    {
+        if ($error = Validation::id($groupId)) {
+            return $error;
+        }
+
+        return $this->groups->getGroupSchedules($groupId);
+    }
+
+    public function addSchedule(array $scheduleData): array
+    {
+        if ($error = Validation::requiredArray($scheduleData)) {
+            return $error;
+        }
+
+        $addSchedule = $this->groups->addSchedule($scheduleData);
+        return $addSchedule;
     }
 }

@@ -1,14 +1,14 @@
 <?php
-require __DIR__.'/../../backend/vendor/autoload.php';
-include __DIR__.'/../../backend/views/mainMenu.php';
+require __DIR__ . '/../../backend/vendor/autoload.php';
+include __DIR__ . '/../../backend/views/mainMenu.php';
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\PermissionHelper;
 
 $VerifySession = auth::check();
 
-$isAdmin       = $VerifySession['isAdmin']       ?? false;
-$userPerms     = $VerifySession['permissions']   ?? [];
+$isAdmin = $VerifySession['isAdmin'] ?? false;
+$userPerms = $VerifySession['permissions'] ?? [];
 
 if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     header('Location: ../dashboard.php');
@@ -17,6 +17,7 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,20 +25,21 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/allMain.min.css">
-    <link rel="stylesheet" href="../assets/css/groups.css">
-    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">    
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.0.7/datatables.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
     <title>Horarios</title>
 </head>
+
 <body>
-      
+
     <div id="content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Horarios/Clases programadas</h2>
                 <a href="../grupos.php" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver a la lista de grupos
+                    Volver al listado de grupos
                 </a>
             </div>
 
@@ -51,7 +53,8 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                             <form id="formAddSchedule" class="row g-3">
                                 <div class="col-md-4" hidden>
                                     <label for="groupId" class="form-label">Grupo: </label>
-                                    <input type="text" class="form-control" id="groupId" name="groupId" value="<?php echo $_GET['id'] ?? NULL; ?>" required>
+                                    <input type="text" class="form-control" id="groupId" name="groupId"
+                                        value="<?php echo $_GET['id'] ?? NULL; ?>" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="title" class="form-label">Titulo: </label>
@@ -71,7 +74,8 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                                 </div>
                                 <div class="col-md-12">
                                     <label for="description" class="form-label">Descripción: </label>
-                                    <textarea class="form-control" id="description" name="description" required rows="5"></textarea>
+                                    <textarea class="form-control" id="description" name="description" required
+                                        rows="5"></textarea>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary">Agregar</button>
@@ -109,17 +113,24 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
     </div>
 
 </body>
+
 </html>
 
+<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
+
 <!-- Boostrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- jquery -->
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js" integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"
+    integrity="sha256-J8ay84czFazJ9wcTuSDLpPmwpMXOm573OUtZHPQqpEU=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
 
 <!-- datables -->
