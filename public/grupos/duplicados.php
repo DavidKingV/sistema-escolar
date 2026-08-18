@@ -18,14 +18,6 @@
 </head>
 
 <body>
-    <div id="globalLoader"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(33,37,41,0.5); z-index: 2000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">Cargando...</span>
-            </div>
-        </div>
-    </div>
 
     <div id="content">
         <div class="container-fluid">
@@ -100,6 +92,8 @@
 </body>
 
 </html>
+
+<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
 
 <!-- Boostrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
