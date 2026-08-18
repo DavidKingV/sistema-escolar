@@ -40,7 +40,7 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Detalles del grupo</h2>
                 <a href="../grupos.php" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver al listado de grupos
+                    <i class="fas fa-arrow-left"></i> Volver a la lista de grupos
                 </a>
             </div>
 
@@ -66,11 +66,11 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                                     <p id="groupNameDetails"></p>
                                 </div>
                                 <div class="col-md py-3">
-                                    <h5>Fecha de inicio:</h5>
+                                    <h5>Fecha de Inicio:</h5>
                                     <p id="groupInitialDateDetails"></p>
                                 </div>
                                 <div class="col-md py-3">
-                                    <h5>Fecha de término:</h5>
+                                    <h5>Fecha de Termino:</h5>
                                     <p id="groupFinalDateDetails"></p>
                                 </div>
                             </div>
@@ -95,8 +95,8 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                                 </li>
                                 <li class="nav-item">
                                     <button class="nav-link" id="addStudentTab" data-bs-toggle="tab"
-                                        data-bs-target="#addStudentToGroup" type="button" role="tab"
-                                        aria-controls="addStudentToGroup" aria-selected="false">Agregar</button>
+                                        data-bs-target="#addStudentGroup" type="button" role="tab"
+                                        aria-controls="addStudentGroup" aria-selected="false">Agregar</button>
                                 </li>
                             </ul>
                         </div>
@@ -118,8 +118,8 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade" id="addStudentToGroup" role="tabpanel"
-                                    aria-labelledby="addStudentToGroup" tabindex="0">
+                                <div class="tab-pane fade" id="addStudentGroup" role="tabpanel"
+                                    aria-labelledby="addStudentGroup" tabindex="0">
                                     <h4 class="card-title py-3">Agregar alumno al grupo</h4>
                                     <form id="addStudentGroupForm">
                                         <div class="row g-2">
@@ -138,6 +138,8 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
                                             </div>
                                         </div>
                                         <div class="col-md py-1">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cerrar</button>
                                             <button type="submit" class="btn btn-primary">Agregar</button>
                                         </div>
                                     </form>
@@ -154,7 +156,6 @@ if (!PermissionHelper::canAccess('manage_groups', $userPerms, $isAdmin)) {
 
 </html>
 
-<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
 
 <!-- Boostrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

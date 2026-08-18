@@ -3,7 +3,7 @@ function FillTable(response) {
     $("#idGroupDB").val(response.id);
     $("#idCarreerHidden").val(response.id_carreer);
     $("#carreerNameGroupEdit").val(response.carreer_name);
-    $("#keyGroupEdit").val(response.clave);
+    $("#keyGroupEdit").val(response.key);
     $("#nameGroupEdit").val(response.name);
 
     var birthdateISO = response.startDate.split("/").reverse().join("-");
@@ -17,7 +17,7 @@ function FillTable(response) {
 
 function FillDivsGroups(response) {
     $("#groupCarreerNameDetails").text(response.carreer_name);
-    $("#groupKeyDetails").text(response.clave);
+    $("#groupKeyDetails").text(response.key);
     $("#groupNameDetails").text(response.name);
     $("#groupInitialDateDetails").text(response.startDate);
     $("#groupFinalDateDetails").text(response.endDate);
