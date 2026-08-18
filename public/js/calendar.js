@@ -3,7 +3,6 @@ import { initializeDataTable } from "./global/dataTables.js";
 import { loadingSpinner } from "./global/alerts.js";
 
 var element = "#calendar";
-var api = "/api.php";
 
 $(function () {
   const calendarEl = document.getElementById("calendar");

@@ -2,9 +2,6 @@
 namespace Vendor\Schoolarsystem\Models;
 
 
-use Google\Client as GoogleClient;
-use Google\Service\Calendar;
-use Google\Service\Calendar\Event;
 use Vendor\Schoolarsystem\loadEnv;
 
 date_default_timezone_set('America/Monterrey');
@@ -13,9 +10,15 @@ setlocale(LC_TIME, 'spanish');
 
 loadEnv::cargar();
 
-class GoogleCalendarModel{
+class GoogleCalendarModel
+{
 
-    public function addEventCalendar($tittle, $date, $startEvent, $endEvent){
+    public function addEventCalendar(
+        string $title,
+        string $date,
+        string $startEvent,
+        string $endEvent
+    ): array {
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/calendario-alumnos.json');
 
         $client = new \Google\Client();
@@ -26,12 +29,14 @@ class GoogleCalendarModel{
         $datetimeStart = new \DateTime($date . ' ' . $startEvent);
         $datetimeEnd = new \DateTime($date . ' ' . $endEvent);
 
-        $timeStartFormat =$datetimeStart->format(\DateTime::RFC3339);
+        $timeStartFormat = $datetimeStart->format(\DateTime::RFC3339);
         $timeEndFormat = $datetimeEnd->format(\DateTime::RFC3339);
 
-       $event = new \Google\Service\Calendar\Event();
-        $event->setSummary($tittle);
-        $event->setDescription('Alumno '.$tittle. ' se registra para practicas clinicas');
+        $event = new \Google\Service\Calendar\Event();
+        $event->setSummary($title);
+        $event->setDescription(
+            'Alumno ' . $title . ' se registra para prácticas clínicas'
+        );
 
         $start = new \Google\Service\Calendar\EventDateTime();
         $start->setDateTime($timeStartFormat);
@@ -43,7 +48,7 @@ class GoogleCalendarModel{
 
         $event->setEnd($end);
 
-        try{
+        try {
             $createdEvent = $calendarService->events->insert($_ENV['CALENDAR_ID'], $event);
             $eventId = $createdEvent->getId();
             $eventLink = $createdEvent->getHtmlLink();
@@ -53,14 +58,11 @@ class GoogleCalendarModel{
                 'eventId' => $eventId,
                 'eventLink' => $eventLink
             ];
-        }catch (Exception $e){
+        } catch (\Throwable $e) {
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'No fue posible registrar el evento en Google Calendar.'
             ];
-
-            http_response_code(500);
-            exit;
         }
     }
 

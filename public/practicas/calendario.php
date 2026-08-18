@@ -21,7 +21,6 @@
 
 <body>
 
-
     <div id="content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -80,6 +79,9 @@
 </body>
 
 </html>
+
+<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
+
 <!-- Boostrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"

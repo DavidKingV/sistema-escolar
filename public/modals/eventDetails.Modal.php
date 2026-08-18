@@ -79,7 +79,6 @@ $dateTime = $_POST['dateTime'] ?? null;
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
     import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
 
-    let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     let eventId = '<?php echo $eventId; ?>';
 
     $(function () {
@@ -88,7 +87,7 @@ $dateTime = $_POST['dateTime'] ?? null;
         const $format = 'h:mm A';
         const $totalHours = $('#totalHours');
 
-        sendFetch(api, 'POST', { action: 'getEventDetails', eventId: eventId })
+        sendFetch(`${BASE_URL}/api/getEventDetails`, 'GET', { eventId: eventId })
             .then(async data => {
                 if (data.success && data.confirmed === false) {
                     $start.val(data.data.start);
@@ -214,7 +213,7 @@ $dateTime = $_POST['dateTime'] ?? null;
 
     const confirmHours = async (data) => {
         loadingAlert();
-        sendFetch(api, 'POST', { action: 'confirmHours', hoursData: data })
+        sendFetch(`${BASE_URL}/api/confirmHours`, 'POST', { hoursData: data })
             .then(async data => {
                 if (data.success) {
                     successAlertNoReload(data.message);
@@ -244,8 +243,7 @@ $dateTime = $_POST['dateTime'] ?? null;
 
                 loadingAlert();
 
-                sendFetch(api, 'POST', {
-                    action: 'deleteEvent',
+                sendFetch(`${BASE_URL}/api/deleteEvent`, 'POST', {
                     hoursData: data
                 })
                     .then(async data => {

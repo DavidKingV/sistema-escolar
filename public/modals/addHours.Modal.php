@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../backend/vendor/autoload.php');
+require_once(__DIR__ . '/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -26,9 +26,9 @@ $studentId = $_POST['id'] ?? NULL;
 
 ?>
 <form id="addHoursForm">
-    <!-- Encabezado estudiante -->
+    <!-- Encabezado alumno -->
     <div class="text-center mb-3">
-        <h4 id="studentNameH" class="fw-bold text-primary">Nombre del estudiante</h4>
+        <h4 id="studentNameH" class="fw-bold text-primary">Nombre del alumno</h4>
     </div>
 
     <!-- Fecha -->
@@ -62,8 +62,7 @@ $studentId = $_POST['id'] ?? NULL;
             <button type="button" id="btn_menos" data-ajuste="-30" class="btn btn-outline-danger">
                 <i class="bi bi-dash-lg"></i>
             </button>
-            <input type="text" name="totalHours" id="totalHours" 
-                   class="form-control text-center fw-bold" readonly>
+            <input type="text" name="totalHours" id="totalHours" class="form-control text-center fw-bold" readonly>
             <button type="button" id="btn_mas" data-ajuste="30" class="btn btn-outline-success">
                 <i class="bi bi-plus-lg"></i>
             </button>
@@ -82,16 +81,15 @@ $studentId = $_POST['id'] ?? NULL;
     import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
     import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/dataTables.js';
 
-    const callback = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     const studentId = '<?php echo $studentId; ?>';
 
     let format = 'HH:mm';
 
-    $(function() {
+    $(function () {
         getStudentName(studentId);
         configurarTimepickers();
 
-        $('#addHoursForm').on('submit', function(e) {
+        $('#addHoursForm').on('submit', function (e) {
             e.preventDefault();
 
             let data = $(this).serialize() + `&studentId=${studentId}`;
@@ -102,41 +100,39 @@ $studentId = $_POST['id'] ?? NULL;
     });
 
     const getStudentName = async (studentId) => {
-        try{
-            sendFetch(callback, 'POST', { action: 'getStudentName', studentId: studentId })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                        }
-                        return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            $("#studentNameH").text(data.studentName);
-                            $("#placeholderStudent").attr("class", "studentName");
-                        } else {
-                            errorAlert(data.message);
-                        }
-                    });     
-        }catch(error){
-            errorAlert(error);
+        try {
+            const data = await sendFetch(
+                `${BASE_URL}/api/getStudentName`,
+                'GET',
+                { studentId }
+            );
+
+            if (data.success) {
+                $("#studentNameH").text(data.studentName);
+                $("#placeholderStudent").attr("class", "studentName");
+            } else {
+                errorAlert(data.message);
+            }
+
+        } catch (error) {
+            errorAlert(error.message);
         }
     }
 
-    const addStudentHours = async (data) =>{
+    const addStudentHours = async (data) => {
         loadingAlert();
-        try{
-            sendFetch(callback, 'POST', { action: 'addStudentHours', data })
-                    .then(data => {
-                        if (data.success) {
-                            $("#addHoursModal").modal('hide');
-                            $("#studentHoursDataTable").DataTable().ajax.reload();
-                            successAlert(data.message);
-                        } else {
-                            errorAlert(data.message);
-                        }
-                    });     
-        }catch(error){
+        try {
+            sendFetch(`${BASE_URL}/api/addStudentHours`, 'POST', { data })
+                .then(data => {
+                    if (data.success) {
+                        $("#addHoursModal").modal('hide');
+                        $("#studentHoursDataTable").DataTable().ajax.reload();
+                        successAlert(data.message);
+                    } else {
+                        errorAlert(data.message);
+                    }
+                });
+        } catch (error) {
             errorAlert(error);
         }
     }
@@ -153,24 +149,24 @@ $studentId = $_POST['id'] ?? NULL;
     }
 
     // Manejador de eventos para 'hora_salida'
-    $('#end').on('changeTime', function() {
+    $('#end').on('changeTime', function () {
         if ($('#start').val() === '') {
             infoAlert("Por favor ingrese la hora de entrada");
-        }else{
+        } else {
             calcularHoras(format);
         }
     });
 
-     // Manejador de eventos para 'start'
-     $('#start').on('changeTime', function() {
+    // Manejador de eventos para 'start'
+    $('#start').on('changeTime', function () {
         if ($('#end').val()) {
             calcularHoras(format);
         }
     });
 
     //funcion para que al borrarse la hora de salida se borre la hora total
-    $('#end').on('keyup', function() {
-        if($('#end').val() == ''){
+    $('#end').on('keyup', function () {
+        if ($('#end').val() == '') {
             $('#totalHours').val('');
         }
     });
@@ -184,7 +180,7 @@ $studentId = $_POST['id'] ?? NULL;
         $('#totalHours').val(horaAjustada);
     }
 
-    $('#btn_mas, #btn_menos').click(function() {
+    $('#btn_mas, #btn_menos').click(function () {
         // Obtiene el valor del data attribute 'ajuste' para saber si incrementar o decrementar
         var ajuste = parseInt($(this).data('ajuste'), 10);
         ajustarHora(ajuste);

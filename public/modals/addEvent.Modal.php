@@ -74,8 +74,6 @@ $date = $_POST['date'] ?? NULL;
     import { fullCalendar } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fullcalendar/index.js';
     import { validateForm } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/validate/index.js';
 
-    let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
-
     $(function () {
         configurarTimepickers();
 
@@ -99,8 +97,7 @@ $date = $_POST['date'] ?? NULL;
                 .then((result) => {
                     if (!result.isConfirmed) return;
                     loadingAlert();
-                    sendFetch(api, 'POST', {
-                        action: 'addEvent',
+                    sendFetch(`${BASE_URL}/api/addEvent`, 'POST', {
                         eventData
                     })
                         .then(data => {
@@ -163,13 +160,12 @@ $date = $_POST['date'] ?? NULL;
                 theme: "bootstrap-5",
                 placeholder: 'Selecciona el paciente',
                 ajax: {
-                    url: api,
-                    type: 'POST',
+                    url: `${BASE_URL}/api/getStudentsListSelect`,
+                    type: 'GET',
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
                         return {
-                            action: 'getStudentsListSelect',
                             search: params.term, // término de búsqueda
                             page: params.page || 1
                         };
@@ -230,7 +226,7 @@ $date = $_POST['date'] ?? NULL;
                 required: "Por favor, selecciona la fecha del evento.",
             },
             student: {
-                required: "Por favor, selecciona el estudiante.",
+                required: "Por favor, selecciona el alumno.",
             },
             start: {
                 required: "Por favor, selecciona la hora de ingreso."
