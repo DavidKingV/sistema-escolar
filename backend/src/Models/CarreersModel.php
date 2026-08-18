@@ -2,258 +2,157 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\auth;
-require_once(__DIR__ . '/../../login/index.php');
+use Vendor\Schoolarsystem\Core\DatabaseHelper;
 
-class CarreersModel{
+class CarreersModel
+{
     private $connection;
-    private $loginControl;
 
-    public function __construct(DBConnection $dbConnection) {
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection->getConnection();
-        $this->loginControl = new \LoginControl($dbConnection);
     }
 
-    public function getCareers(){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $sql = "SELECT * FROM carreers";
-            $query = $this->connection->query($sql);
-
-            if(!$query){
-                return array("success" => false, "message" => "Error al obtener las carreras");
-            }else{
-                $careers = array();
-                if($query->num_rows > 0){
-                    while($row = $query->fetch_assoc()){
-                        $careers[] = array(
-                            "success" => true,
-                            "id" => $row['id'],
-                            "name" => $row['nombre'],
-                            "area" => $row['area'],
-                            "subarea" => $row['subarea'],
-                            "description" => $row['descripcion']
-                        );
-                    }
-                }else{
-                    $careers[] = array("success" => false, "message" => "No hay carreras registradas");
-                }
-                $this->connection->close();
-                return $careers;
-            }
-        }
+    public function getCarreerById(int $carreerId): array
+    {
+        return DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT
+                    id,
+                    nombre AS name,
+                    area,
+                    subarea,
+                    descripcion AS description
+                FROM carreers
+                WHERE id = ?;
+            ",
+            "i",
+            [$carreerId]
+        );
     }
 
-    public function getCareer($idCarreer){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $sql = "SELECT * FROM carreers WHERE id = ?";
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('i', $idCarreer);
-            $stmt->execute();
+    public function getAllCarreers(): array
+    {
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT
+                    id,
+                    nombre,
+                    area,
+                    subarea
+                FROM carreers;
+            "
+        );
+    }
 
-            $result = $stmt->get_result();
-            if($result->num_rows === 0) {
-                return array("success" => false, "message" => "Carrera no encontrada");
-            }
-            $row = $result->fetch_assoc();
+    public function addCarreer(array $carreerDataArray): array
+    {
+        return DatabaseHelper::insert(
+            $this->connection,
+            "
+                INSERT INTO carreers (
+                    nombre,
+                    area,
+                    subarea,
+                    descripcion
+                ) VALUES (?, ?, ?, ?);
+            ",
+            "ssss",
+            [
+                $carreerDataArray["careerName"],
+                $carreerDataArray["careerArea"],
+                $carreerDataArray["careerSubarea"],
+                $carreerDataArray["careerDes"]
+            ]
+        );
+    }
 
-            $carreer = array(
-                "success" => true,
-                "id" => $row['id'],
-                "name" => $row['nombre'],
-                "area" => $row['area'],
-                "subarea" => $row['subarea'],
-                "description" => $row['descripcion']
+    public function updateCarreer(array $carreerUpdateDataArray): array
+    {
+        $id = $carreerUpdateDataArray['idCarreerDB'];
+
+        try {
+            $currentData = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT
+                        nombre,
+                        area,
+                        subarea,
+                        descripcion
+                    FROM carreers
+                    WHERE id = ?;
+                ",
+                "i",
+                [$id]
             );
-            $stmt->close();
-            $this->connection->close();
 
-            return $carreer;
-        }
-    }
-
-    public function addCarreer($carreerData){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $sql = "INSERT INTO carreers (nombre, area, subarea, descripcion) VALUES (?, ?, ?, ?)";
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('ssss', $carreerData['careerName'], $carreerData['careerArea'], $carreerData['careerSubarea'], $carreerData['careerDes']);
-            $stmt->execute();
-
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Carrera agregada correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al agregar la carrera");
-            }
-        }
-    }
-
-    public function updateCarreer($carreerDataEditArray){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $sql = "UPDATE carreers SET nombre = ?, area = ?, subarea = ?, descripcion = ? WHERE id = ?";
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('ssssi', $carreerDataEditArray['careerNameEdit'], $carreerDataEditArray['carreerAreaEdit'], $carreerDataEditArray['careerSubareaEdit'], $carreerDataEditArray['careerComentsEdit'], $carreerDataEditArray['idCarreerDB']);
-            $stmt->execute();
-
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Carrera actualizada correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al actualizar la carrera");
-            }
-        }
-    }
-
-    public function deleteCarreer($idCarreer, $password){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $userId = $_SESSION['userId'];
-
-            $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
-
-            if (!$isValidPassword) {
+            if (!$currentData["success"]) {
                 return [
                     "success" => false,
-                    "message" => "Contraseña incorrecta"
+                    "message" => $currentData["message"],
+                    "data" => null
                 ];
             }
 
-            $sql = "DELETE FROM carreers WHERE id = ?";
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('i', $idCarreer);
-            $stmt->execute();
+            $newData = [
+                "nombre" => $carreerUpdateDataArray['careerNameEdit'],
+                "area" => $carreerUpdateDataArray['carreerAreaEdit'],
+                "subarea" => $carreerUpdateDataArray['careerSubareaEdit'],
+                "descripcion" => $carreerUpdateDataArray['careerComentsEdit'],
+            ];
 
-            if($stmt->affected_rows > 0){
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => true, "message" => "Carrera eliminada correctamente");
-            }else{
-                $stmt->close();
-                $this->connection->close();
-                return array("success" => false, "message" => "Error al eliminar la carrera");
+            if ($currentData["data"] == $newData) {
+                return [
+                    "success" => false,
+                    "message" => "No se detectaron cambios para guardar.",
+                    "data" => null
+                ];
             }
+
+            return DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE carreers
+                    SET
+                        nombre = ?,
+                        area = ?,
+                        subarea = ?,
+                        descripcion = ?
+                    WHERE id = ?;
+                ",
+                "ssssi",
+                [
+                    $newData["nombre"],
+                    $newData["area"],
+                    $newData["subarea"],
+                    $newData["descripcion"],
+                    $id
+                ]
+            );
+
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error inesperado al actualizar los datos de la carrera.",
+                "data" => null
+            ];
         }
     }
 
-    public function getSubjects($carreerId){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $sql = "SELECT s.id, s.clave, s.nombre FROM subjects s LEFT JOIN carreers_subjects sc ON s.id = sc.id_subject AND sc.id_carreer = ? WHERE sc.id_subject IS NULL;";
-            $query = $this->connection->prepare($sql);
-            $query->bind_param('i', $carreerId);
-            $query->execute();
-
-            $result = $query->get_result();
-
-            if($result->num_rows === 0){
-                return array("success" => false, "message" => "No hay materias disponibles para agregar a la carrera");
-            }else{
-                $subjects = array();
-
-                while($row = $result->fetch_assoc()){
-                    $subjects[] = array(
-                        "success" => true,
-                        "subjectId" => $row['id'],
-                        "subjectClave" => $row['clave'],
-                        "subjectName" => $row['nombre']
-                    );
-                }
-
-                $this->connection->close();
-                return $subjects;
-            }
-        }
-    }
-
-    public function getChildSubjects($subjectID){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            $sql = "SELECT * FROM subject_child WHERE id_subject = ?";
-            $query = $this->connection->prepare($sql);
-            $query->bind_param('i', $subjectID);
-            $query->execute();
-
-            $result = $query->get_result();
-
-            if($result->num_rows === 0){
-                return array("success" => false, "message" => "Sin materias hijas");
-            }else{
-                $childSubjects = array();
-
-                while($row = $result->fetch_assoc()){
-                    $childSubjects[] = array(
-                        "success" => true,
-                        "childSubjectId" => $row['id'],
-                        "childSubjectClave" => $row['clave'],
-                        "childSubjectName" => $row['nombre']
-                    );
-                }
-
-                $this->connection->close();
-                return $childSubjects;
-            }
-        }
-    }
-
-    public function addSubjectsCarreer($subjectsCarreerArray){
-        $VerifySession = auth::check();
-        if(!$VerifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }else{
-            if(isset($subjectsCarreerArray['childSubjectName'])){
-                $sql = "INSERT INTO carreers_subjects (id_subject, id_child_subject, id_carreer) VALUES (?, ?)";
-                $stmt = $this->connection->prepare($sql);
-                $stmt->bind_param('iii', $subjectsCarreerArray['childSubjectName'], $subjectsCarreerArray['childSubjectName'], $subjectsCarreerArray['carreerId']);
-                $stmt->execute();
-
-                if($stmt->affected_rows > 0){
-                    $stmt->close();
-                    $this->connection->close();
-                    return array("success" => true, "message" => "Materia hija agregada a la carrera correctamente");
-                }else{
-                    $stmt->close();
-                    $this->connection->close();
-                    return array("success" => false, "message" => "Error al agregar la materia hija a la carrera");
-                }
-            }else{
-                $sql = "INSERT INTO carreers_subjects (id_subject, id_carreer) VALUES (?, ?)";
-                $stmt = $this->connection->prepare($sql);
-                $stmt->bind_param('ii', $subjectsCarreerArray['subjectName'], $subjectsCarreerArray['carreerId']);
-                $stmt->execute();
-
-                if($stmt->affected_rows > 0){
-                    $stmt->close();
-                    $this->connection->close();
-                    return array("success" => true, "message" => "Materia agregada a la carrera correctamente");
-                }else{
-                    $stmt->close();
-                    $this->connection->close();
-                    return array("success" => false, "message" => "Error al agregar la materia a la carrera");
-                }
-            }
-        }
+    public function deleteCarreerById(int $carreerId): array
+    {
+        return DatabaseHelper::delete(
+            $this->connection,
+            "
+                DELETE
+                FROM carreers
+                WHERE id = ?;
+            ",
+            "i",
+            [$carreerId]
+        );
     }
 }

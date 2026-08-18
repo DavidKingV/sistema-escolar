@@ -2,44 +2,74 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\CarreersModel;
+use Vendor\Schoolarsystem\Models\LoginModel;
 
-class CarreersController{
-    private $carreers;
+class CarreersController
+{
+    private DBConnection $connection;
+    private CarreersModel $carreers;
+    private LoginModel $login;
 
-    public function __construct(DBConnection $dbConnection){
-        $this->carreers = new CarreersModel($dbConnection);
+    public function __construct()
+    {
+        $this->connection = DBConnection::getInstance();
+        $this->carreers = new CarreersModel($this->connection);
+        $this->login = new LoginModel($this->connection);
     }
 
-    public function getCareers(){
-        return $this->carreers->getCareers();
+    public function getCarreerById(int $carreerId): array
+    {
+        if ($error = Validation::id($carreerId)) {
+            return $error;
+        }
+
+        return $this->carreers->getCarreerById($carreerId);
     }
 
-    public function getCareer($idCarreer){
-        return $this->carreers->getCareer($idCarreer);
+    public function getAllCarreers(): array
+    {
+        return $this->carreers->getAllCarreers();
     }
 
-    public function addCarreer($carreerData){
+    public function addCarreer(array $carreerData): array
+    {
+        if ($error = Validation::requiredArray($carreerData)) {
+            return $error;
+        }
+
         return $this->carreers->addCarreer($carreerData);
     }
 
-    public function updateCarreer($carreerDataEditArray){
-        return $this->carreers->updateCarreer($carreerDataEditArray);
+    public function updateCarreer(array $carreerUpdateData): array
+    {
+        if ($error = Validation::requiredArray($carreerUpdateData)) {
+            return $error;
+        }
+
+        return $this->carreers->updateCarreer($carreerUpdateData);
     }
 
-    public function deleteCarreer($idCarreer, $password){
-        return $this->carreers->deleteCarreer($idCarreer, $password);
-    }
+    public function deleteCarreerById(int $carreerId, string $password): array
+    {
+        if ($error = Validation::id($carreerId)) {
+            return $error;
+        }
 
-    public function getSubjects($carreerId){
-        return $this->carreers->getSubjects($carreerId);
-    }
+        if ($error = Validation::password($password)) {
+            return $error;
+        }
 
-    public function getChildSubjects($subjectID){
-        return $this->carreers->getChildSubjects($subjectID);
-    }
+        $userId = $_SESSION['userId'];
 
-    public function addSubjectsCarreer($subjectsCarreerArray){
-        return $this->carreers->addSubjectsCarreer($subjectsCarreerArray);
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta."
+            ];
+        }
+
+        return $this->carreers->deleteCarreerById($carreerId);
     }
 }
