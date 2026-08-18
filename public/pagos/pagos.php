@@ -20,11 +20,11 @@
     <div id="content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">Lista de pagos por estudiante</h2>
+                <h2 class="mb-0">Lista de pagos por alumno</h2>
             </div>
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-users"></i> Estudiantes Con Pagos Registrados
+                    <i class="fas fa-users"></i> Alumnos Con Pagos Registrados
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -109,7 +109,7 @@
                         </div>
                     </div>
 
-                     <div class="row g-2 py-1">
+                    <div class="row g-2 py-1">
                         <div class="col-12">
                             <label class="text-muted small">Tipo de comprobante</label>
                             <p class="form-control-plaintext fw-bold ms-1" id="paymentInvoice"></p>
@@ -194,12 +194,14 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancelReasonBack">Cancelar</button>
                 <button type="button" class="btn btn-danger" id="confirmCancelReceipt">Confirmar cancelación</button>
+                <button type="button" class="btn btn-secondary" id="cancelReasonBack">Cancelar</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
 
 <!-- Boostrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

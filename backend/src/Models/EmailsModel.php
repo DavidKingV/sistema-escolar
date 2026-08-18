@@ -1,24 +1,26 @@
 <?php
 namespace Vendor\Schoolarsystem\Models;
 
-use Vendor\Schoolarsystem\loadEnv;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Twig\TwigFunction;
 
 class EmailsModel
 {
-    private $mail;
+    private PHPMailer $mail;
 
     public function __construct()
     {
         $this->mail = new PHPMailer(true);
     }
 
-    public function SendEventEmail($eventId, $eventDateTime, $eventType, $email)
-    {
+    public function SendEventEmail(
+        string $eventId,
+        string $eventDateTime,
+        string $eventType,
+        string $email
+    ): array {
         try {
             $loader = new FilesystemLoader(__DIR__ . '/../../views'); // Directorio donde están tus plantillas
             $twig = new Environment($loader);
@@ -32,7 +34,7 @@ class EmailsModel
             //Server settings
             $this->mail->SMTPDebug = 0;                      // Enable verbose debug output
             $this->mail->isSMTP();                                            // Send using SMTP
-            $this->Debugoutput = 'html';
+            $this->mail->Debugoutput = 'html';
             $this->mail->Host = $_ENV['EMAIL_HOST'];                     // Set the SMTP server to send through
             $this->mail->SMTPAuth = true;                                   // Enable SMTP authentication
             $this->mail->Username = $_ENV['EMAIL_USER'];                     // SMTP username
@@ -67,8 +69,13 @@ class EmailsModel
         }
     }
 
-    public function SendPaymentEmail($paymentId, $paymentData, $url, $pdfPassword, $email)
-    {
+    public function SendPaymentEmail(
+        int $paymentId,
+        array $paymentData,
+        string $url,
+        ?string $pdfPassword,
+        string $email
+    ): array {
         try {
             $loader = new FilesystemLoader(__DIR__ . '/../../views/emails'); // Directorio donde están tus plantillas
             $twig = new Environment($loader);
@@ -79,16 +86,24 @@ class EmailsModel
                 : [
                     implode(' ', array_filter([
                         $paymentData['concept'],
-                        $paymentData['concept_subject'] ? '- Materia: ' . $paymentData['concept_subject'] : null,
-                        $paymentData['concept_subject_child'] ? '| Submateria: ' . $paymentData['concept_subject_child'] : null,
-                        $paymentData['concept_carreer'] ? '| ' . $paymentData['concept_carreer'] : null,
-                        $paymentData['concept_month'],
+                        !empty($paymentData['concept_subject'])
+                        ? '- Materia: ' . $paymentData['concept_subject']
+                        : null,
+                        !empty($paymentData['concept_subject_child'])
+                        ? '| Submateria: ' . $paymentData['concept_subject_child']
+                        : null,
+                        !empty($paymentData['concept_carreer'])
+                        ? '| ' . $paymentData['concept_carreer']
+                        : null,
+                        $paymentData['concept_month'] ?? null,
                     ]))
                 ];
 
             $subtotals = is_array($paymentData['total'])
                 ? $paymentData['total']
                 : [$paymentData['total']];
+
+            $productos = [];
 
             foreach ($products as $i => $producto) {
                 $productos[] = [
@@ -108,7 +123,7 @@ class EmailsModel
             //Server settings
             $this->mail->SMTPDebug = 0;                      // Enable verbose debug output
             $this->mail->isSMTP();                                            // Send using SMTP
-            $this->Debugoutput = 'html';
+            $this->mail->Debugoutput = 'html';
             $this->mail->Host = $_ENV['EMAIL_HOST'];                     // Set the SMTP server to send through
             $this->mail->SMTPAuth = true;                                   // Enable SMTP authentication
             $this->mail->Username = $_ENV['EMAIL_USER'];                     // SMTP username

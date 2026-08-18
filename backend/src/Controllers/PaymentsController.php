@@ -2,25 +2,151 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\PaymentsModel;
 use Vendor\Schoolarsystem\Models\StudentsModel;
 use Vendor\Schoolarsystem\Models\EmailsModel;
-use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\Models\LoginModel;
 use Facturapi\Facturapi;
 use Facturapi\Exceptions\Facturapi_Exception;
-require_once(__DIR__ . '/../../login/index.php');
 
 class PaymentsController
 {
-    private $connection;
-    private $payments;
-    private $loginControl;
+    private DBConnection $connection;
+    private PaymentsModel $payments;
+    private LoginModel $login;
 
-    public function __construct(DBConnection $dbConnection)
+    public function __construct()
     {
-        $this->connection = $dbConnection;
-        $this->payments = new PaymentsModel($dbConnection);
-        $this->loginControl = new \LoginControl($dbConnection);
+        $this->connection = DBConnection::getInstance();
+        $this->payments = new PaymentsModel($this->connection);
+        $this->login = new LoginModel($this->connection);
+    }
+
+    public function getPaymentHistory(int $studentId): array
+    {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
+        return $this->payments->getPaymentHistory($studentId);
+    }
+
+    public function getPaymentById(int $studentId, int $paymentId): array
+    {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
+        if ($error = Validation::id($paymentId)) {
+            return $error;
+        }
+
+        return $this->payments->getPaymentById($studentId, $paymentId);
+    }
+
+    public function addPayment(string $paymentData): array
+    {
+        if ($error = Validation::string($paymentData)) {
+            return $error;
+        }
+
+        parse_str($paymentData, $paymentDataArray);
+
+        if ($error = Validation::requiredArray($paymentDataArray)) {
+            return $error;
+        }
+
+        $concept = trim($paymentDataArray['paymentConcept']);
+        $concept_subject = !empty($paymentDataArray['subjectConcept']) ? trim($paymentDataArray['subjectConcept']) : NULL;
+        $concept_subject_child = !empty($paymentDataArray['childSubjectName']) ? trim($paymentDataArray['childSubjectName']) : NULL;
+        $concept_carreer = !empty($paymentDataArray['careerName']) ? trim($paymentDataArray['careerName']) : NULL;
+        $concept_month = trim($paymentDataArray['paymentMonth']);
+        $date = !empty($paymentDataArray['paymentDate'])
+            ? $paymentDataArray['paymentDate']
+            : date('Y-m-d');
+
+        $year = date('Y', strtotime($date));
+        $concept_month = "$concept_month $year";
+
+        $extra = $paymentDataArray['paymentExtra'] ?? 0;
+        $registredBy = $_SESSION['userId'] ?? NULL;
+
+        $isInvoice = ($paymentDataArray['paymentInvoice'] ?? '0') === '1';
+
+        return $this->payments->addPayment(
+            $paymentDataArray['studentName'],
+            $date,
+            $paymentDataArray['paymentMethod'],
+            $isInvoice,
+            $concept,
+            $concept_subject,
+            $concept_subject_child,
+            $concept_carreer,
+            preg_replace('/\s+/', ' ', trim($concept_month)),
+            $paymentDataArray['paymentPrice'],
+            $extra,
+            $paymentDataArray['paymentTotal'],
+            $paymentDataArray['paymentComments'] ?? '',
+            $registredBy
+        );
+    }
+
+    public function updatePayment(string $paymentData): array
+    {
+        if ($error = Validation::string($paymentData)) {
+            return $error;
+        }
+
+        parse_str($paymentData, $paymentDataArray);
+
+        if ($error = Validation::requiredArray($paymentDataArray)) {
+            return $error;
+        }
+
+        return $this->payments->updatePayment(
+            $paymentDataArray['idPayment'],
+            $paymentDataArray['paymentPrice'],
+            $paymentDataArray['paymentExtra'] ?? 0.00,
+            $paymentDataArray['paymentTotal'],
+            $paymentDataArray['paymentMethod'],
+            $paymentDataArray['paymentComments'] ?? ''
+        );
+    }
+
+    public function deletePaymentById(int $paymentId, string $password): array
+    {
+        if ($error = Validation::id($paymentId)) {
+            return $error;
+        }
+
+        if ($error = Validation::password($password)) {
+            return $error;
+        }
+
+        $userId = $_SESSION['userId'];
+
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta"
+            ];
+        }
+
+        return $this->payments->softdeletePaymentById($paymentId);
+    }
+
+    public function cancelPaymentById(int $paymentId, string $comments): array
+    {
+        if ($error = Validation::id($paymentId)) {
+            return $error;
+        }
+
+        if ($error = Validation::string($comments)) {
+            return $error;
+        }
+
+        return $this->payments->cancelPaymentById($paymentId, $comments);
     }
 
     // ─── Recordatorios de pago (cron) ─────────────────────────────────────────
@@ -70,9 +196,18 @@ class PaymentsController
             : "Recordatorio: tu mensualidad vence en {$diasRestantes} días – ESMEFIS";
 
         $meses = [
-            1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
-            5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
-            9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+            1 => 'enero',
+            2 => 'febrero',
+            3 => 'marzo',
+            4 => 'abril',
+            5 => 'mayo',
+            6 => 'junio',
+            7 => 'julio',
+            8 => 'agosto',
+            9 => 'septiembre',
+            10 => 'octubre',
+            11 => 'noviembre',
+            12 => 'diciembre'
         ];
 
         $mesVencimiento = (int) $fechaObjetivo->format('n');
@@ -162,23 +297,15 @@ class PaymentsController
         echo "  Finalizado.\n\n";
     }
 
-    public function verifyPassword($password)
+    public function verifyPassword(string $password): array
     {
-        $verifySession = auth::check();
-
-        if (!$verifySession['success']) {
-            return [
-                "success" => false,
-                "message" => "Sesión expirada"
-            ];
+        if ($error = Validation::password($password)) {
+            return $error;
         }
 
         $userId = $_SESSION['userId'];
 
-        $isValidPassword = $this->loginControl
-            ->verifyUserPassword($userId, $password);
-
-        if (!$isValidPassword) {
+        if (!$this->login->verifyUserPassword($userId, $password)) {
             return [
                 "success" => false,
                 "message" => "Contraseña incorrecta"
@@ -191,21 +318,21 @@ class PaymentsController
         ];
     }
 
-    public function verifyTaxData($studentId)
+    public function verifyTaxData(int $studentId): array
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::id($studentId)) {
+            return $error;
         }
+
         return $this->payments->verifyTaxData($studentId);
     }
 
-    public function getFacturApiData($clientId)
+    public function getFacturApiData(string $clientId): array|object
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::string($clientId)) {
+            return $error;
         }
+
         try {
             $facturapi = new Facturapi($_ENV['FACTURAPI_KEY']);
             $response = $facturapi->Customers->retrieve($clientId);
@@ -215,18 +342,21 @@ class PaymentsController
         return $response;
     }
 
-    public function addFactuarapi($clientId, $taxSystem, $invoiceData)
-    {
+    public function addFactuarapi(
+        string $clientId,
+        int $taxSystem,
+        array $invoiceData
+    ): array {
         $use = " ";
         $validTaxSystems = [605, 606, 608, 611, 612, 614, 607, 615, 625];
         $generalTaxSystems = [601, 603, 620, 621, 622, 623, 624, 626];
         $extraTaxSystems = [610, 616];
 
-        if (in_array($taxSystem, $validTaxSystems)) {
+        if (in_array($taxSystem, $validTaxSystems, true)) {
             $use = "D10";
-        } elseif (in_array($taxSystem, $extraTaxSystems)) {
+        } elseif (in_array($taxSystem, $extraTaxSystems, true)) {
             $use = "S01";
-        } elseif (in_array($taxSystem, $generalTaxSystems)) {
+        } elseif (in_array($taxSystem, $generalTaxSystems, true)) {
             $use = "G03";
         }
 
@@ -264,195 +394,81 @@ class PaymentsController
         }
     }
 
-    public function addPayment($paymentDataArray)
+    public function getStudentsPayMount(): array
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }
-
-        $concept = trim($paymentDataArray['paymentConcept']);
-        $concept_subject = !empty($paymentDataArray['subjectConcept']) ? trim($paymentDataArray['subjectConcept']) : NULL;
-        $concept_subject_child = !empty($paymentDataArray['childSubjectName']) ? trim($paymentDataArray['childSubjectName']) : NULL;
-        $concept_carreer = !empty($paymentDataArray['careerName']) ? trim($paymentDataArray['careerName']) : NULL;
-        $concept_month = trim($paymentDataArray['paymentMonth']);
-        $date = !empty($paymentDataArray['paymentDate'])
-            ? $paymentDataArray['paymentDate']
-            : date('Y-m-d');
-
-        $year = date('Y', strtotime($date));
-        $concept_month = "$concept_month $year";
-
-        $extra = $paymentDataArray['paymentExtra'] ?? 0;
-        $registredBy = $_SESSION['userId'] ?? NULL;
-
-        $this->convertDate($date);
-
-        $paymentInvoice = $paymentDataArray['paymentInvoice'] === '1';
-        $isInvoice = $paymentInvoice ? true : false;
-
-        return $this->payments->addPayment(
-            $paymentDataArray['studentName'],
-            $date,
-            $paymentDataArray['paymentMethod'],
-            $isInvoice,
-            $concept,
-            $concept_subject,
-            $concept_subject_child,
-            $concept_carreer,
-            $concept_month = preg_replace('/\s+/', ' ', trim($concept_month)),
-            $paymentDataArray['paymentPrice'],
-            $extra,
-            $paymentDataArray['paymentTotal'],
-            $paymentDataArray['paymentComments'] ?? '',
-            $registredBy
-        );
-    }
-
-    public function updatePayment($paymentDataArray)
-    {
-        $verifySession = auth::check();
-
-        if (!$verifySession['success']) {
-            return [
-                "success" => false,
-                "message" => "Sesión expirada"
-            ];
-        }
-
-        return $this->payments->updatePayment(
-            $paymentDataArray['idPayment'],
-            $paymentDataArray['paymentPrice'],
-            $paymentDataArray['paymentExtra'] ?? 0.00,
-            $paymentDataArray['paymentTotal'],
-            $paymentDataArray['paymentMethod'],
-            $paymentDataArray['paymentComments'] ?? ''
-        );
-    }
-
-    public function deletePayment($paymentId, $password)
-    {
-        $verifySession = auth::check();
-
-        if (!$verifySession['success']) {
-            return [
-                "success" => false,
-                "message" => "Sesión expirada"
-            ];
-        }
-
-        $userId = $_SESSION['userId'];
-
-        // validar password
-        $isValidPassword = $this->loginControl
-            ->verifyUserPassword($userId, $password);
-
-        if (!$isValidPassword) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta"
-            ];
-        }
-
-        return $this->payments->softDeletePayment($paymentId);
-    }
-
-    public function cancelPayment($paymentId, $comments)
-    {
-        $verifySession = auth::check();
-
-        if (!$verifySession['success']) {
-            return [
-                "success" => false,
-                "message" => "Sesión expirada"
-            ];
-        }
-
-        return $this->payments->cancelPayment($paymentId, $comments);
-    }
-
-    private function convertDate($date)
-    {
-        $year = date('Y', strtotime($date));
-        $month = date('m', strtotime($date));
-        return array('year' => $year, 'month' => $month);
-    }
-
-    public function getStudentsPayMount()
-    {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }
         return $this->payments->getStudentsPayMount();
     }
 
-    public function savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount)
+    public function savePaymentDays(array $data): array
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::requiredArray($data)) {
+            return $error;
         }
-        return $this->payments->savePaymentDays($studentId, $paymentDay, $paymentConcept, $paymentAmount);
-    }
 
-    public function setStudentPayMount($studentId, $amount)
-    {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }
-        return $this->payments->setStudentPayMount($studentId, $amount);
-    }
+        $paymentData = $data['data'] ?? $data;
 
-    public function verifyMonthlyPayment($studentId)
-    {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
-        }
-        return $this->payments->verifyMonthlyPayment($studentId);
-    }
-
-    public function getPaymentHistory($studentId, $paymentId = null)
-    {
-        $verifySession = auth::check();
-
-        if (!$verifySession['success']) {
+        if (!is_array($paymentData)) {
             return [
                 "success" => false,
-                "message" => "No se ha iniciado sesión o la sesión ha expirado"
+                "message" => "Los datos de pago son inválidos."
             ];
         }
 
-        return $this->payments->getPaymentHistory($studentId, $paymentId);
+        return $this->payments->savePaymentDays($paymentData);
     }
 
-    public function checkIfPaymentMade($studentId, $paymentDay)
+    public function setStudentPayMount(int $studentId, float $amount): array
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::id($studentId)) {
+            return $error;
         }
+
+        return $this->payments->setStudentPayMount($studentId, $amount);
+    }
+
+    public function verifyMonthlyPayment(int $studentId): array
+    {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
+        return $this->payments->verifyMonthlyPayment($studentId);
+    }
+
+    public function checkIfPaymentMade(
+        int $studentId,
+        int $paymentDay
+    ): array {
+        if ($error = Validation::id($studentId)) {
+            return $error;
+        }
+
         return $this->payments->checkIfPaymentMade($studentId, $paymentDay);
-
     }
 
-    public function sendPaymentReceipt($studentId, $paymentId)
+    public function sendPaymentReceipt(int $studentId, int $paymentId): array
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::id($studentId)) {
+            return $error;
         }
+
+        if ($error = Validation::id($paymentId)) {
+            return $error;
+        }
+
         return $this->payments->sendPaymentReceipt($studentId, $paymentId);
     }
 
-    public function sendPaymentByEmail($studentId, $paymentId)
+    public function sendPaymentByEmail(int $studentId, int $paymentId): array
     {
-        $verifySession = auth::check();
-        if (!$verifySession['success']) {
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::id($studentId)) {
+            return $error;
         }
+
+        if ($error = Validation::id($paymentId)) {
+            return $error;
+        }
+
         return $this->payments->sendPaymentByEmail($studentId, $paymentId);
     }
 }

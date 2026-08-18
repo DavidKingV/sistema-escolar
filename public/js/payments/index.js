@@ -7,7 +7,7 @@
  * - Eliminación de redundancias y logs sensibles.
  */
 
-import { enviarPeticionAjaxAction } from "../utils/ajax.js";
+import { enviarPeticionAjax } from "../utils/ajax.js";
 import { sendFetch } from "../utils/fetch.js";
 import {
   successAlert,
@@ -21,13 +21,19 @@ import {
 } from "../global/validate/index.js";
 import { initializeDataTable } from "../global/dataTables.js";
 import { sendNewPayment } from "./newPayment.js";
+import { createFormObserver, serializeForm } from "../utils/formChanges.js";
+
+const paymentObserver = createFormObserver({
+  form: "#updateSubject",
+  saveButton: "#saveSubjectChanges",
+  getCurrentData: () => serializeForm("#updateSubject"),
+});
+
+paymentObserver.observe();
 
 // =======================
 // Config
 // =======================
-const phpPath = "../../backend/payments/routes.php";
-const studentsPath = "../../backend/students/routes.php";
-const apiPath = "../api.php";
 const DEBUG = false; // Cambia a true solo durante desarrollo
 
 // =======================
@@ -61,13 +67,10 @@ const toMysqlDateWithDay = (day) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const showLoader = () => $("#globalLoader").fadeIn(200);
-const hideLoader = () => $("#globalLoader").fadeOut(200);
-
 // Petición centralizada con sendFetch (mantiene cookies/CSRF definidos en tu helper)
-const requestJson = async (url, action, payload = {}) => {
+const requestJson = async (url, payload = {}) => {
   try {
-    const res = await sendFetch(url, "POST", { action, ...payload });
+    const res = await sendFetch(url, "POST", { ...payload });
     const data = await res.json();
     if (!data || typeof data !== "object")
       throw new Error("Respuesta inválida del servidor");
@@ -82,6 +85,8 @@ const requestJson = async (url, action, payload = {}) => {
 // Variable global para snapshot
 // =======================
 let originalPaymentData = {};
+
+let destroyHistoryTable = true;
 
 const hasPaymentChanges = () => {
   const currentData = getCurrentPaymentFormData();
@@ -104,19 +109,18 @@ const observePaymentChanges = () => {
 };
 
 // =======================
-// Flujo: Estudiantes
+// Flujo: Alumnos
 // =======================
 const getStudentsNames = async () => {
   try {
-    showLoader();
-    const students = await requestJson(studentsPath, "getStudentsNames");
+    const students = await requestJson(`${BASE_URL}/student/getStudentsNames`);
 
-    if (!Array.isArray(students) || students.length === 0) return;
+    if (!Array.isArray(students.data) || students.data.length === 0) return;
 
     const $select = $("#studentName");
     const fragment = $(document.createDocumentFragment());
 
-    students.forEach((student) => {
+    students.data.forEach((student) => {
       if (student && student.success !== false) {
         fragment.append(
           new Option(escapeHtml(student.name), String(student.id)),
@@ -134,13 +138,12 @@ const getStudentsNames = async () => {
       if (isValidId(studentId)) {
         await VerifyMonthlyPayment(studentId);
       } else {
-        infoAlert("Estudiante inválido.");
+        infoAlert("Alumno inválido.");
       }
     });
   } catch (error) {
-    errorAlert("No se pudieron cargar los estudiantes.");
+    errorAlert("No se pudieron cargar los alumnos.");
   } finally {
-    hideLoader();
   }
 };
 
@@ -165,14 +168,13 @@ function hideLoadedContent() {
 // Pagos
 // =======================
 const AddPayment = async (serializedForm) => {
-  // Mantenemos enviarPeticionAjaxAction para no romper backend existente que espera form-encoded
+  // Mantenemos enviarPeticionAjax para no romper backend existente que espera form-encoded
   loadingAlert();
   try {
-    const resp = await enviarPeticionAjaxAction(
-      phpPath,
+    const resp = await enviarPeticionAjax(
+      `${BASE_URL}/payment/addPayment`,
       "POST",
-      "AddPayment",
-      serializedForm,
+      { paymentData: serializedForm },
     );
     const response = typeof resp === "string" ? JSON.parse(resp) : resp;
 
@@ -226,11 +228,10 @@ const AddPayment = async (serializedForm) => {
 
 const UpdatePayment = async (serializedForm) => {
   try {
-    const resp = await enviarPeticionAjaxAction(
-      phpPath,
+    const resp = await enviarPeticionAjax(
+      `${BASE_URL}/payment/updatePayment`,
       "POST",
-      "UpdatePayment",
-      serializedForm,
+      { paymentData: serializedForm },
     );
 
     const response = typeof resp === "string" ? JSON.parse(resp) : resp;
@@ -255,14 +256,17 @@ const VerifyMonthlyPayment = async (studentId) => {
     loadingAlert();
 
     if (!isValidId(studentId)) {
-      infoAlert("Estudiante inválido.");
+      infoAlert("Alumno inválido.");
       resetPaymentDaysForm();
       return;
     }
 
-    const response = await requestJson(phpPath, "VerifyMonthlyPayment", {
-      studentId,
-    });
+    const response = await requestJson(
+      `${BASE_URL}/payment/verifyMonthlyPayment`,
+      {
+        studentId: studentId,
+      },
+    );
 
     if (!response.success) {
       infoAlert(
@@ -276,9 +280,9 @@ const VerifyMonthlyPayment = async (studentId) => {
     $("#paymentDaysCard").prop("hidden", false);
 
     if (
-      response.payment_day > 0 &&
-      response.concept?.trim() !== "0" &&
-      parseFloat(response.monthly_amount) > 0
+      response.data.payment_day > 0 &&
+      response.data.concept?.trim() !== "0" &&
+      parseFloat(response.data.monthly_amount) > 0
     ) {
       $("#savePaymentDays").prop("disabled", true);
       $("#updatePaymentDays").prop("disabled", false);
@@ -287,11 +291,17 @@ const VerifyMonthlyPayment = async (studentId) => {
       $("#updatePaymentDays").prop("disabled", true);
     }
 
-    $("#paymentDay").val(sanitize(response.payment_day));
-    $("#paymentConceptDay").val(sanitize(response.concept)).trigger("change");
-    $("#paymentAmountDay").val(sanitize(response.monthly_amount));
+    $("#paymentDay").val(sanitize(response.data.payment_day));
+    $("#paymentConceptDay")
+      .val(sanitize(response.data.concept))
+      .trigger("change");
+    $("#paymentAmountDay").val(sanitize(response.data.monthly_amount));
 
-    $("#paymentConcept").val(sanitize(response.concept)).trigger("change");
+    $("#paymentConcept")
+      .val(
+        response.data.concept?.trim() ? sanitize(response.data.concept) : "0",
+      )
+      .trigger("change");
 
     const currentMonth = new Date().toLocaleString("default", {
       month: "long",
@@ -301,14 +311,14 @@ const VerifyMonthlyPayment = async (studentId) => {
       .trigger("change");
     changeCurrentMonth();
 
-    $("#paymentPrice").val(sanitize(response.monthly_amount));
+    $("#paymentPrice").val(sanitize(response.data.monthly_amount));
     CalculateTotal();
 
     // Inicializar DataTable con renderers seguros
     initializeDataTable(
       "#paymentHistoryTable",
-      phpPath,
-      { action: "GetPaymentHistory", studentId },
+      `${BASE_URL}/payment/getPaymentHistory`,
+      { studentId: studentId },
       [
         {
           data: null,
@@ -403,13 +413,16 @@ const VerifyMonthlyPayment = async (studentId) => {
 const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
   try {
     if (!isValidId(studentId)) {
-      infoAlert("Estudiante inválido.");
+      infoAlert("Alumno inválido.");
       return;
     }
 
-    const response = await requestJson(phpPath, "VerifyMonthlyPayment", {
-      studentId,
-    });
+    const response = await requestJson(
+      `${BASE_URL}/payment/verifyMonthlyPayment`,
+      {
+        studentId: studentId,
+      },
+    );
 
     if (!response.success) {
       infoAlert(
@@ -424,8 +437,8 @@ const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
       // Inicializar DataTable con renderers seguros
       initializeDataTable(
         "#paymentHistoryStudentTable",
-        phpPath,
-        { action: "GetPaymentHistory", studentId },
+        `${BASE_URL}/payment/getPaymentHistory`,
+        { studentId: studentId },
         [
           {
             data: null,
@@ -563,23 +576,22 @@ const VerifyPaymentsForStudent = async (paymentId, studentId, action) => {
         ],
       );
     } else {
-      const paymentResponse = await requestJson(phpPath, "GetPaymentHistory", {
-        studentId,
-        paymentId,
-      });
+      const paymentResponse = await requestJson(
+        `${BASE_URL}/payment/getPaymentById`,
+        {
+          studentId: studentId,
+          paymentId: paymentId,
+        },
+      );
 
       // Validar respuesta
-      if (
-        !paymentResponse.success ||
-        !Array.isArray(paymentResponse.data) ||
-        paymentResponse.data.length === 0
-      ) {
+      if (!paymentResponse.success || !paymentResponse.data) {
         infoAlert("No se encontró el pago.");
         return;
       }
 
-      // Obtener el primer pago
-      const paymentData = paymentResponse.data[0];
+      // Obtener el pago
+      const paymentData = paymentResponse.data;
       const fullConcept = [
         paymentData.concept,
         paymentData.concept_subject
@@ -645,10 +657,13 @@ const sendPaymentByEmail = async (studentId, paymentId) => {
 
     loadingAlert();
 
-    const response = await requestJson(phpPath, "SendPaymentByEmail", {
-      studentId,
-      paymentId,
-    });
+    const response = await requestJson(
+      `${BASE_URL}/payment/sendPaymentByEmail`,
+      {
+        studentId,
+        paymentId,
+      },
+    );
 
     if (response.success) {
       successAlert(escapeHtml(response.message));
@@ -687,8 +702,11 @@ const toggleInput = (selector, disabled, value = null) => {
 const SurchargeForLatePayment = async (paymentDay, studentId) => {
   try {
     const mysqlDate = toMysqlDateWithDay(paymentDay);
-    const payload = { data: { studentId, paymentDay: mysqlDate } };
-    const response = await requestJson(phpPath, "CheckIfPaymentMade", payload);
+    const payload = { studentId, mysqlDate };
+    const response = await requestJson(
+      `${BASE_URL}/payment/checkIfPaymentMade`,
+      payload,
+    );
 
     if (!response.success) {
       return infoAlert(
@@ -733,7 +751,7 @@ const handlePaymentDayAction = async (actionType) => {
   const paymentConcept = $("#paymentConceptDay").val();
   const paymentAmount = $("#paymentAmountDay").val();
 
-  if (!isValidId(studentId)) return errorAlert("Estudiante inválido.");
+  if (!isValidId(studentId)) return errorAlert("Alumno inválido.");
   if (!isValidDay(Number(paymentDay)))
     return errorAlert("Por favor, ingrese un día válido (1-31).");
 
@@ -748,7 +766,10 @@ const handlePaymentDayAction = async (actionType) => {
 
   loadingAlert();
   try {
-    const resp = await requestJson(phpPath, "savePaymentDays", payload);
+    const resp = await requestJson(
+      `${BASE_URL}/payment/savePaymentDays`,
+      payload,
+    );
     if (resp.success) {
       successAlert(escapeHtml(resp.message));
 
@@ -784,7 +805,7 @@ const handlePaymentDayAction = async (actionType) => {
 const getGroupCareer = async (studentId) => {
   try {
     if (!isValidId(studentId)) throw new Error("ID inválido");
-    return await requestJson(apiPath, "getGroupCareer", { studentId });
+    return await requestJson(`${BASE_URL}/api/getGroupCareer`, { studentId });
   } catch (error) {
     log(error);
     return { success: false, message: "No se pudo obtener el grupo/carrera." };
@@ -793,9 +814,12 @@ const getGroupCareer = async (studentId) => {
 
 const GetChildSubject = async (subjectId) => {
   try {
-    const subjectsList = await requestJson(phpPath, "getChildSubject", {
-      subjectId,
-    });
+    const subjectsList = await requestJson(
+      `${BASE_URL}/payment/getChildSubject`,
+      {
+        subjectId,
+      },
+    );
     if (
       !subjectsList ||
       subjectsList.success === false ||
@@ -837,12 +861,11 @@ const getSubjectsList = async (input, careerId) => {
       theme: "bootstrap-5",
       placeholder: "Selecciona una materia",
       ajax: {
-        url: apiPath,
+        url: `${BASE_URL}/api/getSubjectsListSelect`,
         type: "POST",
         dataType: "json",
         delay: 250,
         data: (params) => ({
-          action: "getSubjectsListSelect",
           careerId,
           search: params.term,
           page: params.page || 1,
@@ -897,7 +920,7 @@ $(document).ready(function () {
       $("#childSubjectName").prop("disabled", true);
       $("#careerName").prop("readonly", true);
       $("#paymentConcept").val(0).trigger("change");
-      infoAlert("Por favor, seleccione un estudiante primero.");
+      infoAlert("Por favor, seleccione un alumno primero.");
     };
 
     if (concept === "Inscripción") {
@@ -908,10 +931,10 @@ $(document).ready(function () {
         if (response.success) {
           $("#subjectConceptDiv").prop("hidden", true);
           $("#careerDiv").prop("hidden", false);
-          $("#careerName").val(escapeHtml(response.careerName));
+          $("#careerName").val(escapeHtml(response.data.careerName));
           $("#careerName").prop("readonly", true);
         } else {
-          infoAlert("El estudiante no tiene un grupo asignado.");
+          infoAlert("El alumno no tiene un grupo asignado.");
         }
       } else {
         ensureStudentSelected();
@@ -924,10 +947,10 @@ $(document).ready(function () {
         if (response.success) {
           $("#subjectConceptDiv").prop("hidden", true);
           $("#careerDiv").prop("hidden", false);
-          $("#careerName").val(escapeHtml(response.careerName));
+          $("#careerName").val(escapeHtml(response.data.careerName));
           $("#careerName").prop("readonly", true);
         } else {
-          infoAlert("El estudiante no tiene un grupo asignado.");
+          infoAlert("El alumno no tiene un grupo asignado.");
         }
       } else {
         ensureStudentSelected();
@@ -940,12 +963,12 @@ $(document).ready(function () {
         if (response.success) {
           $("#subjectConceptDiv").prop("hidden", false);
           $("#careerDiv").prop("hidden", false);
-          $("#careerName").val(escapeHtml(response.careerName));
+          $("#careerName").val(escapeHtml(response.data.careerName));
           $("#careerName").prop("readonly", true);
-          getSubjectsList($("#subjectConcept"), response.careerId);
+          getSubjectsList($("#subjectConcept"), response.data.careerId);
           $("#subjectConcept").prop("disabled", false);
         } else {
-          infoAlert("El estudiante no tiene un grupo asignado.");
+          infoAlert("El alumno no tiene un grupo asignado.");
         }
       } else {
         ensureStudentSelected();
@@ -958,10 +981,10 @@ $(document).ready(function () {
         if (response.success) {
           $("#subjectConceptDiv").prop("hidden", true);
           $("#careerDiv").prop("hidden", false);
-          $("#careerName").val(escapeHtml(response.careerName));
+          $("#careerName").val(escapeHtml(response.data.careerName));
           $("#careerName").prop("readonly", true);
         } else {
-          infoAlert("El estudiante no tiene un grupo asignado.");
+          infoAlert("El alumno no tiene un grupo asignado.");
         }
       } else {
         ensureStudentSelected();
@@ -996,8 +1019,8 @@ $(document).ready(function () {
     },
     {
       studentName: {
-        required: "Por favor, seleccione un estudiante.",
-        valueNotEquals: "Por favor, seleccione un estudiante.",
+        required: "Por favor, seleccione un alumno.",
+        valueNotEquals: "Por favor, seleccione un alumno.",
       },
       paymentDate: {
         required: "Por favor, ingrese una fecha.",
@@ -1105,9 +1128,11 @@ $(document).ready(function () {
     $("#studentPaymentsModal").data("student-name", studentName);
     $("#studentPaymentsModal").modal("show");
 
-    $("#studentPaymentsModal").one("shown.bs.modal", async function () {
-      await VerifyPaymentsForStudent(null, studentId, "view");
-    });
+    $("#studentPaymentsModal")
+      .off("shown.bs.modal.loadPayments")
+      .one("shown.bs.modal.loadPayments", async function () {
+        await VerifyPaymentsForStudent(null, studentId, "view");
+      });
   });
 
   $("#paymentHistoryStudentTable").on(
@@ -1122,6 +1147,8 @@ $(document).ready(function () {
         $("#studentPaymentsModal").data("student-name") || "Alumno";
 
       const formattedDate = formatFullDate(paymentDate);
+
+      destroyHistoryTable = false;
 
       $("#studentPaymentEditModalLabel").html(
         `Editar pago de <strong>${studentName}</strong> del día <strong>${formattedDate}</strong>`,
@@ -1156,6 +1183,7 @@ $(document).ready(function () {
       const paymentsModal = bootstrap.Modal.getInstance(paymentsModalEl);
 
       // cerrar modal antes del swal
+      destroyHistoryTable = false;
       paymentsModal.hide();
 
       const result = await Swal.fire({
@@ -1189,10 +1217,13 @@ $(document).ready(function () {
       try {
         loadingAlert();
 
-        const response = await requestJson(phpPath, "DeletePayment", {
-          paymentId,
-          password: result.value,
-        });
+        const response = await requestJson(
+          `${BASE_URL}/payment/deletePaymentById`,
+          {
+            paymentId,
+            password: result.value,
+          },
+        );
 
         if (response.success) {
           successAlert(response.message);
@@ -1215,6 +1246,19 @@ $(document).ready(function () {
   $("#studentPaymentEditModal").on("hidden.bs.modal", function () {
     if (suppressPaymentsModalReopen) return;
     $("#studentPaymentsModal").modal("show");
+  });
+
+  $("#studentPaymentsModal").on("hidden.bs.modal", function () {
+    if (!destroyHistoryTable) {
+      destroyHistoryTable = true;
+      return;
+    }
+
+    if ($.fn.DataTable.isDataTable("#paymentHistoryStudentTable")) {
+      $("#paymentHistoryStudentTable").DataTable().clear().destroy();
+    }
+
+    $("#paymentHistoryStudentTable tbody").empty();
   });
 
   $("#cancelReceipt").on("click", async function () {
@@ -1255,9 +1299,12 @@ $(document).ready(function () {
     try {
       loadingAlert();
 
-      const authResponse = await requestJson(phpPath, "VerifyPassword", {
-        password: result.value,
-      });
+      const authResponse = await requestJson(
+        `${BASE_URL}/payment/verifyPassword`,
+        {
+          password: result.value,
+        },
+      );
 
       Swal.close();
 
@@ -1298,10 +1345,13 @@ $(document).ready(function () {
           loadingAlert();
 
           try {
-            const response = await requestJson(phpPath, "CancelPayment", {
-              paymentId,
-              comments: reason,
-            });
+            const response = await requestJson(
+              `${BASE_URL}/payment/cancelPaymentById`,
+              {
+                paymentId: paymentId,
+                comments: reason,
+              },
+            );
 
             if (response.success) {
               successAlert(response.message);
@@ -1310,6 +1360,12 @@ $(document).ready(function () {
               $("#paymentHistoryStudentTable")
                 .DataTable()
                 .ajax.reload(null, false);
+
+              await VerifyPaymentsForStudent(
+                paymentId,
+                $("#idStudentDB").val(),
+                "edit",
+              );
             } else {
               errorAlert(response.message);
             }
