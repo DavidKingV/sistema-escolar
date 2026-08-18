@@ -2,607 +2,474 @@
 namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
-require_once(__DIR__ . '/../../login/index.php');
+use Vendor\Schoolarsystem\Core\DatabaseHelper;
 
-class SubjectsModel{
+class SubjectsModel
+{
     private $connection;
-    private $loginControl;
 
-    public function __construct(DBConnection $dbConnection) {
+    public function __construct(DBConnection $dbConnection)
+    {
         $this->connection = $dbConnection->getConnection();
-        $this->loginControl = new \LoginControl($dbConnection);
     }
 
-    public function fetchSubjects(){
-        try {
-            $query = "SELECT DISTINCT
-    subjects.nombre,
-    subjects.descripcion,
-    subjects.id AS id_subject,
-    carreers_subjects.id_carreer AS id_carrera,
-    carreers.nombre AS nombre_carrera,
-    subject_child.nombre AS nombre_subject_child,
-    subject_child.id AS id_subjet_child
-FROM subjects
-LEFT JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject
-LEFT JOIN carreers ON carreers_subjects.id_carreer = carreers.id
-LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;";
-
-            $result = $this->connection->query($query);
-
-            if(!$result){
-                return array("success" => false, "message" => "Error al obtener las materias");
-            }
-
-            $subjects = array();
-
-            if($result->num_rows > 0){
-                while($row = $result->fetch_assoc()){
-                    $subjects[] = array(
-                        'success' => true,
-                        'id' => $row['id_subject'],
-                        'name' => $row['nombre'],
-                        'id_carrer' => $row['id_carrera'],
-                        'id_child' => $row['id_subjet_child'] ?? 'No asignado',
-                        'child' => $row['nombre_subject_child'] ?? 'No asignado',
-                        'career' => $row['nombre_carrera'],
-                        'description' => $row['descripcion']
-                    );
-                }
-            }else{
-                $subjects[] = array("success" => false, "message" => "No se encontraron materias");
-            }
-
-            $result->free();
-
-            return $subjects;
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al obtener las materias");
-        }
+    public function getSubjectById(int $subjectId): array
+    {
+        return DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT
+                    id,
+                    clave,
+                    nombre AS name,
+                    descripcion AS description
+                FROM subjects
+                WHERE id = ?;
+            ",
+            "i",
+            [$subjectId]
+        );
     }
 
-    public function findSubjectById($subjectId){
+    public function getAllSubjects(): array
+    {
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT DISTINCT
+                    subjects.nombre AS name,
+                    subjects.descripcion AS description,
+                    subjects.id,
+                    carreers_subjects.id_carreer AS id_carrer,
+                    carreers.nombre AS career,
+                    subject_child.nombre AS child,
+                    subject_child.id AS id_child
+                FROM subjects
+                LEFT JOIN carreers_subjects ON subjects.id = carreers_subjects.id_subject
+                LEFT JOIN carreers ON carreers_subjects.id_carreer = carreers.id
+                LEFT JOIN subject_child ON subjects.id = subject_child.id_subject;
+            "
+        );
+    }
+
+    public function addSubject(array $subjectDataArray): array
+    {
+        return DatabaseHelper::insert(
+            $this->connection,
+            "
+                INSERT INTO subjects (
+                    clave,
+                    nombre,
+                    descripcion
+                ) VALUES (?, ?, ?);
+            ",
+            "sss",
+            [
+                $subjectDataArray["subjectKey"],
+                $subjectDataArray["subjectName"],
+                $subjectDataArray["subjectDes"],
+            ]
+        );
+    }
+
+    public function updateSubject(array $subjectUpdateDataArray): array
+    {
+        $id = $subjectUpdateDataArray['idSubjectDB'];
+
         try {
-            $query = "SELECT * FROM subjects WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la consulta de materias");
-            }
-
-            $stmt->bind_param("i", $subjectId);
-            $stmt->execute();
-
-            $result = $stmt->get_result();
-
-            if(!$result){
-                $stmt->close();
-                return array("success" => false, "message" => "Error al obtener la materia");
-            }
-
-            if($result->num_rows === 0){
-                $stmt->close();
-                return array("success" => false, "message" => "Materia no encontrada");
-            }
-
-            $row = $result->fetch_assoc();
-            $stmt->close();
-
-            return array(
-                "success" => true,
-                "id" => $row['id'],
-                "key" => $row['clave'],
-                "name" => $row['nombre'],
-                "description" => $row['descripcion'],
+            $currentData = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT
+                       clave,
+                       nombre,
+                       descripcion
+                    FROM subjects
+                    WHERE id = ?;
+                ",
+                "i",
+                [$id]
             );
 
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al obtener la materia");
-        }
-    }
-
-    public function createSubject($subjectDataArray){
-        try {
-            $query = "INSERT INTO subjects (clave, nombre, descripcion) VALUES (?, ?, ?)";
-            $stmt = $this->connection->prepare($query);
-
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la creación de la materia");
+            if (!$currentData["success"]) {
+                return [
+                    "success" => false,
+                    "message" => $currentData["message"],
+                    "data" => null
+                ];
             }
 
-            $stmt->bind_param("sss", $subjectDataArray['subjectKey'], $subjectDataArray['subjectName'], $subjectDataArray['subjectDes']);
-            $stmt->execute();
+            $newData = [
+                "clave" => $subjectUpdateDataArray['subjectKeyEdit'],
+                "nombre" => $subjectUpdateDataArray['subjectNameEdit'],
+                "descripcion" => $subjectUpdateDataArray['descriptionSubjectEdit'],
+            ];
 
-            $affectedRows = $stmt->affected_rows;
-            $stmt->close();
-
-            if($affectedRows > 0){
-                return array("success" => true, "message" => "Materia agregada correctamente");
+            if ($currentData["data"] == $newData) {
+                return [
+                    "success" => false,
+                    "message" => "No se detectaron cambios para guardar.",
+                    "data" => null
+                ];
             }
 
-            return array("success" => false, "message" => "Error al agregar la materia");
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al agregar la materia");
-        }
-    }
-
-    public function updateSubject($subjectDataEditArray){
-        try {
-            $query = "UPDATE subjects SET clave = ?, nombre = ?, descripcion = ? WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la actualización de la materia");
-            }
-
-            $stmt->bind_param(
+            return DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE subjects
+                    SET
+                        clave = ?,
+                        nombre = ?,
+                        descripcion = ?
+                    WHERE id = ?;
+                ",
                 "sssi",
-                $subjectDataEditArray['subjectKeyEdit'],
-                $subjectDataEditArray['subjectNameEdit'],
-                $subjectDataEditArray['descriptionSubjectEdit'],
-                $subjectDataEditArray['idSubjectDB']
+                [
+                    $newData["clave"],
+                    $newData["nombre"],
+                    $newData["descripcion"],
+                    $id
+                ]
             );
 
-            $stmt->execute();
-
-            $affectedRows = $stmt->affected_rows;
-            $stmt->close();
-
-            if($affectedRows > 0){
-                return array("success" => true, "message" => "Datos de la materia actualizados correctamente");
-            }
-
-            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error inesperado al actualizar los datos de la materia.",
+                "data" => null
+            ];
         }
     }
 
-    public function deleteSubject($subjectId, $password){
-        try {
-            $userId = $_SESSION['userId'];
-
-            $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
-
-            if (!$isValidPassword) {
-                return [
-                    "success" => false,
-                    "message" => "Contraseña incorrecta"
-                ];
-            }
-
-            $query = "DELETE FROM subjects WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la eliminación de la materia");
-            }
-
-            $stmt->bind_param("i", $subjectId);
-            $stmt->execute();
-
-            $affectedRows = $stmt->affected_rows;
-            $stmt->close();
-
-            if($affectedRows > 0){
-                return array("success" => true, "message" => "Materia eliminada correctamente");
-            }
-
-            return array("success" => false, "message" => "Error al eliminar la materia");
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al eliminar la materia");
-        }
+    public function deleteSubjectById(int $subjectId): array
+    {
+        return DatabaseHelper::delete(
+            $this->connection,
+            "
+                DELETE
+                FROM subjects
+                WHERE id = ?;
+            ",
+            "i",
+            [$subjectId]
+        );
     }
 
-    public function createSubjectChild($subjectChildDataArray){
+    public function getChildSubjectFindById(int $subjectChildId, int $subjectFatherId): array
+    {
+        return DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT
+                    id,
+                    id_subject,
+                    nombre AS name,
+                    descripcion AS description
+                FROM subject_child
+                WHERE id = ?
+                    AND id_subject = ?;
+            ",
+            "ii",
+            [$subjectChildId, $subjectFatherId]
+        );
+    }
+
+    public function addSubjectChild(array $subjectChildDataArray): array
+    {
         try {
-            $query = "INSERT INTO subject_child (id_subject, clave, nombre, descripcion) VALUES (?, ?, ?, ?)";
-            $stmt = $this->connection->prepare($query);
+            $this->connection->begin_transaction();
 
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la creación de la submateria");
-            }
-
-            $stmt->bind_param(
+            $insert = DatabaseHelper::insert(
+                $this->connection,
+                "
+                    INSERT INTO subject_child (
+                        id_subject,
+                        clave,
+                        nombre,
+                        descripcion
+                    ) VALUES (?, ?, ?, ?);
+                ",
                 "isss",
-                $subjectChildDataArray['idMainSubject'],
-                $subjectChildDataArray['subjectChildKey'],
-                $subjectChildDataArray['subjectChildName'],
-                $subjectChildDataArray['descriptionChildSubject']
+                [
+                    $subjectChildDataArray["idMainSubject"],
+                    $subjectChildDataArray["subjectChildKey"],
+                    $subjectChildDataArray["subjectChildName"],
+                    $subjectChildDataArray["descriptionChildSubject"]
+                ]
             );
 
-            $stmt->execute();
+            if (!$insert["success"]) {
+                $this->connection->rollback();
 
-            $newlyCreatedId = $this->connection->insert_id;
-            $stmt->close();
-
-            if($newlyCreatedId <= 0){
-                return array("success" => false, "message" => "Error al agregar la materia a la carrera");
+                return [
+                    "success" => false,
+                    "message" => $insert["message"],
+                    "data" => null
+                ];
             }
 
-            $secondQuery = "UPDATE carreers_subjects SET id_child_subject = ? WHERE id_subject = ? AND id_carreer = ?";
-            $secondStmt = $this->connection->prepare($secondQuery);
+            $subjectChildId = $insert["insertedId"];
 
-            if(!$secondStmt){
-                return array("success" => false, "message" => "Error al preparar la asignación de la submateria");
+            if ($subjectChildId <= 0) {
+                $this->connection->rollback();
+
+                return [
+                    "success" => false,
+                    "message" => "No fue posible crear la submateria.",
+                    "data" => null
+                ];
             }
 
-            $secondStmt->bind_param(
+            $update = DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE carreers_subjects
+                    SET
+                        id_child_subject = ?
+                    WHERE id_subject = ?
+                        AND id_carreer = ?;
+                ",
                 "iii",
-                $newlyCreatedId,
-                $subjectChildDataArray['idMainSubject'],
-                $subjectChildDataArray['carrerId']
+                [
+                    $subjectChildId,
+                    $subjectChildDataArray["idMainSubject"],
+                    $subjectChildDataArray["carrerId"]
+                ]
             );
 
-            $secondStmt->execute();
+            if (!$update["success"]) {
+                $this->connection->rollback();
 
-            if ($secondStmt->errno) {
-                return array("success" => false, "message" => "Error en UPDATE: " . $secondStmt->error);
+                return [
+                    "success" => false,
+                    "message" => $update["message"],
+                    "data" => null
+                ];
             }
 
-            $affectedRows = $secondStmt->affected_rows;
-            $secondStmt->close();
+            $this->connection->commit();
 
-            // Si se ejecutó bien, aunque no haya cambiado nada
-            if($affectedRows >= 0){
-                return array("success" => true, "message" => "Materia y submateria agregadas correctamente");
-            }
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al agregar la submateria a la carrera". $e->getMessage());
-        }
-    }
-
-    public function findSubjectChild($subjectFatherId, $subjectChildId){
-        try {
-            $query = "SELECT * FROM subject_child WHERE id = ? AND id_subject = ?";
-            $stmt = $this->connection->prepare($query);
-
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la consulta de submateria");
-            }
-
-            $stmt->bind_param("ii", $subjectChildId , $subjectFatherId);
-            $stmt->execute();
-
-            $result = $stmt->get_result();
-
-            if(!$result){
-                $stmt->close();
-                return array("success" => false, "message" => "Error al obtener la materia");
-            }
-
-            if($result->num_rows === 0){
-                $stmt->close();
-                return array("success" => false, "message" => "Submateria no encontrada");
-            }
-
-            $row = $result->fetch_assoc();
-            $stmt->close();
-
-            return array(
+            return [
                 "success" => true,
-                "id" => $row['id'],
-                "id_subject" => $row['id_subject'],
-                "name" => $row['nombre'],
-                "description" => $row['descripcion'],
+                "message" => "Materia y submateria agregadas correctamente.",
+                "data" => [
+                    "idSubjectChild" => $subjectChildId
+                ]
+            ];
+
+        } catch (\Exception $e) {
+            $this->connection->rollback();
+
+            return [
+                "success" => false,
+                "message" => "Error inesperado al agregar la submateria.",
+                "data" => null
+            ];
+        }
+    }
+
+    // CHECK
+    public function updateSubjectChild(array $subjectChildUpdateDataArray): array
+    {
+        if ($subjectChildUpdateDataArray['subjectChildKey'] ?? null) {
+            return DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE subject_child
+                    SET
+                        clave = ?,
+                        nombre = ?,
+                        descripcion = ?
+                    WHERE id = ?
+                        AND id_subject = ?;
+                ",
+                "sssii",
+                [
+                    $subjectChildUpdateDataArray['subjectChildKey'],
+                    $subjectChildUpdateDataArray['subjectChildNameInfo'],
+                    $subjectChildUpdateDataArray['descriptionChildSubjectInfo'],
+                    $subjectChildUpdateDataArray['idMainSubjectInfo'],
+                    $subjectChildUpdateDataArray['idChildSubjectInfo']
+                ]
             );
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al obtener la materia");
+        } else {
+            return DatabaseHelper::update(
+                $this->connection,
+                "
+                    UPDATE subject_child
+                    SET
+                        nombre = ?,
+                        descripcion = ?
+                    WHERE id = ?
+                        AND id_subject = ?;
+                ",
+                "ssii",
+                [
+                    $subjectChildUpdateDataArray['subjectChildNameInfo'],
+                    $subjectChildUpdateDataArray['descriptionChildSubjectInfo'],
+                    $subjectChildUpdateDataArray['idMainSubjectInfo'],
+                    $subjectChildUpdateDataArray['idChildSubjectInfo']
+                ]
+            );
         }
     }
 
-    public function updateSubjectChild($subjectChildDataEditArray){
-        try {
-            $key = $subjectChildDataEditArray['subjectChildKey'] ?? null;
-
-            if($key !== null && $key !== ''){
-                $query = "UPDATE subject_child SET clave = ?, nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
-                $stmt = $this->connection->prepare($query);
-
-                if(!$stmt){
-                    return array("success" => false, "message" => "Error al preparar la actualización de la submateria");
-                }
-
-                $stmt->bind_param(
-                    "sssii",
-                    $key,
-                    $subjectChildDataEditArray['subjectChildNameInfo'],
-                    $subjectChildDataEditArray['descriptionChildSubjectInfo'],
-                    $subjectChildDataEditArray['idChildSubjectInfo'],
-                    $subjectChildDataEditArray['descriptionChildSubjectInfo']
-                );
-            }else{
-                $query = "UPDATE subject_child SET nombre = ?, descripcion = ? WHERE id = ? AND id_subject = ?";
-                $stmt = $this->connection->prepare($query);
-
-                if(!$stmt){
-                    return array("success" => false, "message" => "Error al preparar la actualización de la submateria");
-                }
-
-                $stmt->bind_param(
-                    "ssii",
-                    $subjectChildDataEditArray['subjectChildNameInfo'],
-                    $subjectChildDataEditArray['descriptionChildSubjectInfo'],
-                    $subjectChildDataEditArray['idMainSubjectInfo'],
-                    $subjectChildDataEditArray['idChildSubjectInfo']
-                );
-            }
-
-            $stmt->execute();
-
-            if ($stmt->errno) {
-                return array("success" => false, "message" => "Error en UPDATE: " . $stmt->error);
-            }
-
-            $affectedRows = $stmt->affected_rows;
-            $stmt->close();
-
-            // Si la query corrió sin error, aunque no cambió nada
-            if($affectedRows >= 0){
-                return array("success" => true, "message" => "Datos de la materia actualizados correctamente");
-            }
-
-            return array("success" => false, "message" => "Error desconocido al actualizar los datos de la materia");
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al actualizar los datos de la materia");
-        }
+    public function deleteSubjectChildById(int $subjectChildId): array
+    {
+        return DatabaseHelper::delete(
+            $this->connection,
+            "
+                DELETE
+                FROM subject_child
+                WHERE id = ?;
+            ",
+            "i",
+            [$subjectChildId]
+        );
     }
 
-    public function deleteSubjectChild($subjectChildId, $password){
-        try {
-            $userId = $_SESSION['userId'];
+    // *****************************************************************************************
+    // API Methods
+    // *****************************************************************************************
 
-            $isValidPassword = $this->loginControl->verifyUserPassword($userId, $password);
+    public function getSubjectsListSelect(
+        string $search,
+        int $page,
+        int $limit,
+        int $careerId
+    ): array {
+        $offset = (max(1, $page) - 1) * $limit;
 
-            if (!$isValidPassword) {
-                return [
-                    "success" => false,
-                    "message" => "Contraseña incorrecta"
-                ];
-            }
-            
-            $query = "DELETE FROM subject_child WHERE id = ?";
-            $stmt = $this->connection->prepare($query);
-            
-            if(!$stmt){
-                return array("success" => false, "message" => "Error al preparar la eliminación de la submateria");
-            }
-
-            $stmt->bind_param("i", $subjectChildId);
-            $stmt->execute();
-
-            $affectedRows = $stmt->affected_rows;
-            $stmt->close();
-
-            if($affectedRows > 0){
-                return array("success" => true, "message" => "Submateria eliminada correctamente");
-            }
-
-            return array("success" => false, "message" => "Error al eliminar la submateria");
-
-        } catch (Exception $e) {
-            return array("success" => false, "message" => "Error al eliminar la submateria");
-        }
-    }
-
-    public function getChildSubject($subjectId) {
-        try {
-            $sql = "SELECT id, clave, nombre FROM subject_child WHERE id_subject = ?";
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bind_param('i', $subjectId);
-            $stmt->execute();
-            
-            $result = $stmt->get_result();
-            $childSubjects = [];
-    
-            if ($result->num_rows === 0) {
-                $childSubjects[] = [
-                    "success" => false,
-                    "message" => "No se encontraron materias hijas"
-                ];
-            } else {
-                while ($row = $result->fetch_assoc()) {
-                    // Puedes agregar más validaciones o transformar datos si es necesario
-                    $childSubjects[] = [
-                        "success" => true,
-                        "childSubjectId" => $row['id'],
-                        "childSubjectClave" => $row['clave'],
-                        "childSubjectName" => $row['nombre']
-                    ];
-                }
-            }
-    
-            $stmt->close();
-            $this->connection->close();
-            return $childSubjects;
-        } catch (Exception $e) {
-            // Aquí se podría loguear el error para mayor detalle
-            return null;
-        }
-    }
-
-    public function getSubjectsListSelect($search = '', $page = 1, $limit = 30, $careerId){
-        try {
-            // Query base
-            $sql = "SELECT s.id, s.clave, s.nombre FROM subjects s LEFT JOIN carreers_subjects sc ON s.id = sc.id_subject AND sc.id_carreer = ? WHERE 1=1 AND sc.id_subject IS NULL";
-            $params = [$careerId];
-            $types = "i";
-            
-            // Agregar búsqueda si existe
-            if (!empty($search)) {
-                $sql .= " AND nombre LIKE ?";
-                $params[] = "%$search%";
-                $types .= "s";
-            }
-            
-            // Agregar ordenamiento
-            $sql .= " ORDER BY nombre ASC";
-            
-            // Agregar paginación
-            $offset = ($page - 1) * $limit;
-            $sql .= " LIMIT ? OFFSET ?";
-            $params[] = $limit;
-            $params[] = $offset;
-            $types .= "ii";
-            
-            $stmt = $this->connection->prepare($sql);
-            
-            if ($stmt) {
-                if (!empty($params)) {
-                    $stmt->bind_param($types, ...$params);
-                }
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $stmt->close();
-                return $result;
-            }
-            return null;
-        } catch(Exception $e) {
-            return null;
-        }
-    }
-
-    public function getSubjectsCount($search = '') {
-        try {
-            $sql = "SELECT COUNT(*) as total FROM subjects WHERE 1=1";
-            $params = [];
-            $types = "";
-            
-            if (!empty($search)) {
-                $sql .= " AND nombre LIKE ?";
-                $params[] = "%$search%";
-                $types .= "s";
-            }
-            
-            $stmt = $this->connection->prepare($sql);
-            
-            if ($stmt) {
-                if (!empty($params)) {
-                    $stmt->bind_param($types, ...$params);
-                }
-                $stmt->execute();
-                $result = $stmt->get_result()->fetch_assoc();
-                $stmt->close();
-                return $result['total'];
-            }
-            return 0;
-        } catch(Exception $e) {
-            return 0;
-        }
-    }
-
-    public function subjectsListTable($careerId) {
-        try {
-            // Definir la consulta SQL con alias para mayor claridad.
-            $sql = "SELECT 
-                        s.id, 
-                        s.clave AS claveSubject,
-                        sc.clave AS claveSubjectChild,
-                        s.nombre,
-                        sc.nombre AS subject_child_nombre
+        if ($search !== '') {
+            return DatabaseHelper::selectAll(
+                $this->connection,
+                "
+                    SELECT s.id, s.clave, s.nombre
                     FROM subjects s
-                    INNER JOIN carreers_subjects cs 
-                        ON s.id = cs.id_subject AND cs.id_carreer = ?
-                    LEFT JOIN subject_child sc 
-                        ON cs.id_child_subject = sc.id;";
-                        
-            // Preparar la consulta
-            $stmt = $this->connection->prepare($sql);
-
-            if (!$stmt) {
-                throw new Exception("Error en la preparación de la consulta: " . $this->connection->error);
-            }
-            
-            // Asignar los parámetros y ejecutar la consulta
-            $stmt->bind_param('i', $careerId);
-            $stmt->execute();
-            
-            // Obtener el resultado
-            $result = $stmt->get_result();
-            $subjects = array();
-            
-            // Verificar si se encontraron registros
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $subjects[] = array(
-                        'success' => true,
-                        'id' => $row['id'],
-                        'claveSubject' => $row['claveSubject'] ?? 'Sin clave',
-                        'claveSubjectChild' => $row['claveSubjectChild'] ?? 'Sin materias hijas',
-                        'nombre' => $row['nombre'],
-                        'subject_child_nombre' => $row['subject_child_nombre'] ?? 'Sin materias hijas'
-                    );
-                }
-            }
-            
-            // Cerrar la sentencia una vez que ya no es necesaria
-            $stmt->close();
-            
-            return [
-                'draw'            => 1,
-                'recordsTotal'    => count($subjects),
-                'recordsFiltered' => count($subjects),
-                'data'            => $subjects
-            ];
-            
-        } catch(Exception $e) {
-            return array(
-                'success' => false,
-                'message' => 'Error al obtener materias: ' . $e->getMessage()
+                    LEFT JOIN carreers_subjects cs
+                        ON s.id = cs.id_subject
+                        AND cs.id_carreer = ?
+                    WHERE cs.id_subject IS NULL
+                        AND s.nombre LIKE ?
+                    ORDER BY s.nombre ASC
+                    LIMIT ? OFFSET ?;
+                ",
+                "isii",
+                [$careerId, "%$search%", $limit, $offset]
             );
         }
+
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT s.id, s.clave, s.nombre
+                FROM subjects s
+                LEFT JOIN carreers_subjects cs
+                    ON s.id = cs.id_subject
+                    AND cs.id_carreer = ?
+                WHERE cs.id_subject IS NULL
+                ORDER BY s.nombre ASC
+                LIMIT ? OFFSET ?;
+            ",
+            "iii",
+            [$careerId, $limit, $offset]
+        );
     }
 
-    public function addSubjectCareer($subjectData) {
-        // Convertir y validar los datos de entrada
-        $subject    = (int)$subjectData['subjectName'];
-        $childSubject = isset($subjectData['childSubjectName']) ? (int)$subjectData['childSubjectName'] : NULL;
-        $careerId   = (int)$subjectData['careerId'];
-    
-        $sql = "INSERT INTO carreers_subjects (id_subject, id_child_subject, id_carreer) VALUES (?, ?, ?)";
-        
-        try {
-            $stmt = $this->connection->prepare($sql);
-            if (!$stmt) {
-                throw new Exception("Error en la preparación de la consulta: " . $this->connection->error);
-            }
-    
-            // Se utiliza bind_param para enlazar los valores, asumiendo que las columnas son de tipo entero.
-            // Si 'childSubject' puede ser null, es recomendable revisar la configuración de la BD para permitirlo.
-            if (!$stmt->bind_param('iii', $subject, $childSubject, $careerId)) {
-                throw new Exception("Error al enlazar los parámetros: " . $stmt->error);
-            }
-            
-            if (!$stmt->execute()) {
-                throw new Exception("Error en la ejecución de la consulta: " . $stmt->error);
-            }
-            
-            $affectedRows = $stmt->affected_rows;
-            $stmt->close();
-    
-            if ($affectedRows > 0) {
-                return [
-                    'success' => true,
-                    'message' => 'Materia agregada correctamente'
-                ];
-            }
-            return [
-                'success' => false,
-                'message'   => 'No se pudo agregar la materia'
-            ];
-    
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message'   => 'Error al agregar la materia: comprueba que se haya elegido una materia y su submateria'
-            ];
+    public function getSubjectsCount(string $search, int $careerId): int
+    {
+        if ($search !== '') {
+            return DatabaseHelper::selectValue(
+                $this->connection,
+                "
+                    SELECT COUNT(*) AS total
+                    FROM subjects s
+                    LEFT JOIN carreers_subjects cs
+                        ON s.id = cs.id_subject
+                        AND cs.id_carreer = ?
+                    WHERE cs.id_subject IS NULL
+                        AND s.nombre LIKE ?;
+                ",
+                'total',
+                'is',
+                [$careerId, "%$search%"]
+            );
         }
+
+        return DatabaseHelper::selectValue(
+            $this->connection,
+            "
+                SELECT COUNT(*) AS total
+                FROM subjects s
+                LEFT JOIN carreers_subjects cs
+                    ON s.id = cs.id_subject
+                    AND cs.id_carreer = ?
+                WHERE cs.id_subject IS NULL;
+            ",
+            'total',
+            'i',
+            [$careerId]
+        );
+    }
+
+    public function getChildSubject(int $subjectId): array
+    {
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT id, clave, nombre
+                FROM subject_child
+                WHERE id_subject = ?;
+            ",
+            'i',
+            [$subjectId]
+        );
+    }
+
+    public function subjectsListTable(int $careerId): array
+    {
+        return DatabaseHelper::selectAll(
+            $this->connection,
+            "
+                SELECT
+                    s.id,
+                    s.clave AS claveSubject,
+                    COALESCE(sc.clave, 'Sin materias hijas')
+                        AS claveSubjectChild,
+                    s.nombre,
+                    COALESCE(sc.nombre, 'Sin materias hijas')
+                        AS subject_child_nombre
+                FROM subjects s
+                INNER JOIN carreers_subjects cs
+                    ON s.id = cs.id_subject
+                    AND cs.id_carreer = ?
+                LEFT JOIN subject_child sc
+                    ON cs.id_child_subject = sc.id;
+            ",
+            'i',
+            [$careerId]
+        );
+    }
+
+    public function addSubjectCareer(array $subjectData): array
+    {
+        $subject = (int) $subjectData['subjectName'];
+        $childSubject = !empty($subjectData['childSubjectName'])
+            ? (int) $subjectData['childSubjectName']
+            : null;
+        $careerId = (int) $subjectData['careerId'];
+
+        return DatabaseHelper::insert(
+            $this->connection,
+            "
+                INSERT INTO carreers_subjects (
+                    id_subject,
+                    id_child_subject,
+                    id_carreer
+                ) VALUES (?, ?, ?);
+            ",
+            'iii',
+            [$subject, $childSubject, $careerId]
+        );
     }
 }

@@ -39,7 +39,7 @@ $careerId = $_POST['careerId'];
 <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active py-4" id="add_subject_tab" role="tabpanel">
         <form id="addSubjectCareer">
-            <!--<input type="text" id="carreerId" name="carreerId" value="" hidden>-->
+            <input type="text" id="carreerId" name="careerId" value="<?php echo $careerId; ?>" hidden>
             <div class="col-md">
                 <div class="form-floating">
                     <select class="form-select subjectName" name="subjectName" id="subjectName">
@@ -88,7 +88,6 @@ $careerId = $_POST['careerId'];
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
     import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/dataTables.js';
 
-    let api = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
     let careerId = <?php echo $careerId; ?>;
 
     $(function () {
@@ -96,7 +95,7 @@ $careerId = $_POST['careerId'];
     });
 
     $('#profile-tab').on('click', function () {
-        initializeDataTable('#subjectsListTable', api, { careerId: careerId, action: 'subjectsListTable' }, [
+        initializeDataTable('#subjectsListTable', `${BASE_URL}/api/subjectsListTable`, { careerId: careerId }, [
             {
                 data: 'claveSubject', render: function (data, type, row) {
                     return `<div>
@@ -127,13 +126,12 @@ $careerId = $_POST['careerId'];
                 theme: "bootstrap-5",
                 placeholder: 'Selecciona una materia',
                 ajax: {
-                    url: api,
+                    url: `${BASE_URL}/api/getSubjectsListSelect`,
                     type: 'POST',
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
                         return {
-                            action: 'getSubjectsListSelect',
                             careerId: careerId,
                             search: params.term, // término de búsqueda
                             page: params.page || 1
@@ -195,10 +193,9 @@ $careerId = $_POST['careerId'];
         const Childsubject = async () => {
             try {
                 const response = await $.ajax({
-                    url: api,
+                    url: `${BASE_URL}/api/getChildSubject`,
                     type: 'POST',
                     data: {
-                        action: 'getChildSubject',
                         subjectId: subjectId
                     }
                 });
@@ -244,12 +241,9 @@ $careerId = $_POST['careerId'];
     $("#addSubjectCareer").on("submit", function (e) {
         e.preventDefault();
 
-        let subjectAddData = $(this).serialize();
-        subjectAddData += '&careerId=' + careerId;
-
         loadingAlert();
 
-        sendFetch(api, 'POST', { action: 'addSubjectCareer', subjectAddData })
+        sendFetch(`${BASE_URL}/api/addSubjectCareer`, 'POST', $(this).serialize())
             .then(data => {
                 if (data.success) {
                     if (data.error != null) infoAlert(data.error);

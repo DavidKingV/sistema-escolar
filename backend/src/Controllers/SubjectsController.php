@@ -2,160 +2,220 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\SubjectsModel;
-use Vendor\Schoolarsystem\auth;
+use Vendor\Schoolarsystem\Models\LoginModel;
 
-class SubjectsController{
-    private $connection;
-    private $subjects;
+class SubjectsController
+{
+    private DBConnection $connection;
+    private SubjectsModel $subjects;
+    private LoginModel $login;
 
-    public function __construct(DBConnection $dbConnection) {
-        $this->connection = $dbConnection;
-        $this->subjects = new SubjectsModel($dbConnection);
+    public function __construct()
+    {
+        $this->connection = DBConnection::getInstance();
+        $this->subjects = new SubjectsModel($this->connection);
+        $this->login = new LoginModel($this->connection);
     }
 
-    public function GetSubjects(){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    public function getSubjectById(int $subjectId): array
+    {
+        if ($error = Validation::id($subjectId)) {
+            return $error;
         }
 
-        return $this->subjects->fetchSubjects();
+        return $this->subjects->getSubjectById($subjectId);
     }
 
-    public function GetSubjectData($subjectId){
-        $verifySession = auth::check();
+    public function getAllSubjects(): array
+    {
+        return $this->subjects->getAllSubjects();
+    }
 
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    public function addSubject(array $subjectData): array
+    {
+        if ($error = Validation::requiredArray($subjectData)) {
+            return $error;
         }
 
-        return $this->subjects->findSubjectById($subjectId);
+        return $this->subjects->addSubject($subjectData);
     }
 
-    public function AddSubject($subjectDataArray){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    public function updateSubject(array $subjectUpdateData): array
+    {
+        if ($error = Validation::requiredArray($subjectUpdateData)) {
+            return $error;
         }
 
-        return $this->subjects->createSubject($subjectDataArray);
+        return $this->subjects->updateSubject($subjectUpdateData);
     }
 
-    public function UpdateSubjectData($subjectDataEditArray){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    public function deleteSubjectById(int $subjectId, string $password): array
+    {
+        if ($error = Validation::id($subjectId)) {
+            return $error;
         }
 
-        return $this->subjects->updateSubject($subjectDataEditArray);
-    }
-
-    public function DeleteSubject($subjectId, $password){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::password($password)) {
+            return $error;
         }
 
-        return $this->subjects->deleteSubject($subjectId, $password);
-    }
+        $userId = $_SESSION['userId'];
 
-    public function AddSubjectChild($subjectChildDataArray){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta."
+            ];
         }
 
-        return $this->subjects->createSubjectChild($subjectChildDataArray);
+        return $this->subjects->deleteSubjectById($subjectId);
     }
 
-    public function GetSubjectChildData($subjectFatherId, $subjectChildId){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    public function getChildSubjectFindById(int $subjectChildId, int $subjectFatherId): array
+    {
+        if ($error = Validation::id($subjectChildId)) {
+            return $error;
         }
 
-        return $this->subjects->findSubjectChild($subjectFatherId, $subjectChildId);
-    }
-
-    public function UpdateSubjectChild($subjectChildDataEditArray){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+        if ($error = Validation::id($subjectFatherId)) {
+            return $error;
         }
 
-        return $this->subjects->updateSubjectChild($subjectChildDataEditArray);
+        return $this->subjects->getChildSubjectFindById($subjectChildId, $subjectFatherId);
     }
 
-    public function DeleteSubjectChild($subjectChildId, $password){
-        $verifySession = auth::check();
-
-        if(!$verifySession['success']){
-            return array("success" => false, "message" => "No se ha iniciado sesión o la sesión ha expirado");
+    public function addSubjectChild(array $subjectChildData): array
+    {
+        if ($error = Validation::requiredArray($subjectChildData)) {
+            return $error;
         }
 
-        return $this->subjects->deleteSubjectChild($subjectChildId, $password);
+        return $this->subjects->addSubjectChild($subjectChildData);
     }
 
-    public function getSubjectsListSelect($careerId){
+    public function updateSubjectChild(array $subjectChildUpdateData): array
+    {
+        if ($error = Validation::requiredArray($subjectChildUpdateData)) {
+            return $error;
+        }
 
+        return $this->subjects->updateSubjectChild($subjectChildUpdateData);
+    }
+
+    public function deleteSubjectChildById(int $subjectChildId, string $password): array
+    {
+        if ($error = Validation::id($subjectChildId)) {
+            return $error;
+        }
+
+        if ($error = Validation::password($password)) {
+            return $error;
+        }
+
+        $userId = $_SESSION['userId'];
+
+        if (!$this->login->verifyUserPassword($userId, $password)) {
+            return [
+                "success" => false,
+                "message" => "Contraseña incorrecta."
+            ];
+        }
+
+        return $this->subjects->deleteSubjectChildById($subjectChildId);
+    }
+
+    // *****************************************************************************************
+    // API Methods
+    // *****************************************************************************************
+
+    public function getSubjectsListSelect(int $careerId): array
+    {
         $search = $_POST['search'] ?? '';
         $page = intval($_POST['page'] ?? 1);
-        $limit = 30; 
+        $limit = 30;
 
-        $subjectsList = $this->subjects->getSubjectsListSelect($search, $page, $limit, $careerId);
-        $subjectsTotal = $this->subjects->getSubjectsCount($search);
+        $subjectsList = $this->subjects->getSubjectsListSelect(
+            $search,
+            $page,
+            $limit,
+            $careerId
+        );
 
-        $subjects=array();
-
-        if(!$subjectsList !== NULL){
-            while ($row = $subjectsList->fetch_assoc()) {
-                $subjects[] = array(
-                    'id' => $row['id'],
-                    'text' => $row['nombre'] // Cambiado a 'text' para compatibilidad con Select2
-                );
-            }        
-            return array(
-                'results' => $subjects,
-                'pagination' => array(
-                    'more' => ($page * $limit) < $subjectsTotal
-                ),
-                'total_count' => $subjectsTotal
-            );
-        }else{
-            return array(
+        if (!$subjectsList['success']) {
+            return [
                 'results' => [],
-                'pagination' => array(
-                    'more' => false
-                ),
+                'pagination' => ['more' => false],
                 'total_count' => 0
-            );
+            ];
         }
+
+        $subjectsTotal = $this->subjects->getSubjectsCount(
+            $search,
+            $careerId
+        );
+
+        $subjects = array_map(
+            static fn($subject) => [
+                'id' => $subject['id'],
+                'text' => $subject['nombre']
+            ],
+            $subjectsList['data']
+        );
+
+        return [
+            'results' => $subjects,
+            'pagination' => [
+                'more' => ($page * $limit) < $subjectsTotal
+            ],
+            'total_count' => $subjectsTotal
+        ];
     }
 
-    public function getChildSubject($subjectId){
-        $childSubject = $this->subjects->getChildSubject($subjectId);
-        
-        return $childSubject;
+    public function getChildSubject(int $subjectId): array
+    {
+        if ($error = Validation::id($subjectId)) {
+            return $error;
+        }
+
+        $response = $this->subjects->getChildSubject($subjectId);
+
+        if (!$response['success'] || $response['data'] === []) {
+            return [[
+                'success' => false,
+                'message' => $response['message']
+                    ?? 'No se encontraron materias hijas.'
+            ]];
+        }
+
+        return array_map(
+            static fn($subject) => [
+                'success' => true,
+                'childSubjectId' => $subject['id'],
+                'childSubjectClave' => $subject['clave'],
+                'childSubjectName' => $subject['nombre']
+            ],
+            $response['data']
+        );
     }
 
-    public function subjectsListTable($careerId){
-        $subjectsListTable = $this->subjects->subjectsListTable($careerId);
-        
-        return $subjectsListTable;
+    public function subjectsListTable(int $careerId): array
+    {
+        if ($error = Validation::id($careerId)) {
+            return $error;
+        }
+
+        return $this->subjects->subjectsListTable($careerId);
     }
 
-    public function addSubjectCareer($subjectData){
-        $addSubjectCareer = $this->subjects->addSubjectCareer($subjectData);
-        
-        return $addSubjectCareer;
+    public function addSubjectCareer(array $subjectData): array
+    {
+        if ($error = Validation::requiredArray($subjectData)) {
+            return $error;
+        }
+
+        return $this->subjects->addSubjectCareer($subjectData);
     }
 
 }

@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../backend/vendor/autoload.php');
+require_once(__DIR__ . '/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -64,33 +64,31 @@ $studentId = $_POST['studentId'] ?? NULL;
     import { loadingAlert, errorAlert, successAlert, infoAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
 
-    const callback = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
-
     let makeOverId = '<?php echo $makeOverId; ?>';
     let makeOverChildId = '<?php echo $makeOverChildId; ?>';
 
-    $(function(){
-        
-        sendFetch(callback, 'POST', { action: 'getMakeOverDetails', makeOverId: makeOverId })
-                .then(async response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }                    
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
-                .then(async data => {
-                    if (data.success) {                                                                      
-                        // Remover placeholders y mostrar inputs
-                        $('#subjectName').val(data.grades[0].subject_nombre);
-                        $('#subjectChildName').val(data.grades[0].subject_child_nombre);
-                        $('#continuosGrade').val(data.grades[0].continuosGrade);
-                        $('#examGrade').val(data.grades[0].examGrade);
-                        $('#finalGrade').val(data.grades[0].finalGrade);
-                    } else {
-                        errorAlert(data.message);
-                        $('#makeOverViewModal').modal('hide');
-                    }
-                });
+    $(function () {
+
+        sendFetch(`${BASE_URL}/api/getMakeOverDetails`, 'GET', { makeOverId: makeOverId })
+            .then(async response => {
+                if (!response.ok) {
+                    throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
+                }
+                return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
+            })
+            .then(async data => {
+                if (data.success) {
+                    // Remover placeholders y mostrar inputs
+                    $('#subjectName').val(data.grades[0].subject_nombre);
+                    $('#subjectChildName').val(data.grades[0].subject_child_nombre);
+                    $('#continuosGrade').val(data.grades[0].continuosGrade);
+                    $('#examGrade').val(data.grades[0].examGrade);
+                    $('#finalGrade').val(data.grades[0].finalGrade);
+                } else {
+                    errorAlert(data.message);
+                    $('#makeOverViewModal').modal('hide');
+                }
+            });
 
     })
 

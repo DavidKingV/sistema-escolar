@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../backend/vendor/autoload.php');
+require_once(__DIR__ . '/../../backend/vendor/autoload.php');
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
@@ -38,12 +38,14 @@ $gradeId = $_POST['gradeId'];
             <!--<input type="text" id="carreerId" name="carreerId" value="" hidden>-->
             <div class="mb-3">
                 <label for="subjectName" class="form-labels">Materia</label>
-                <input type="text" class="form-control" id="subjectName" name="subjectName" value="<?php echo $subjectName; ?>" disabled>
+                <input type="text" class="form-control" id="subjectName" name="subjectName"
+                    value="<?php echo $subjectName; ?>" disabled>
             </div>
 
             <div class="mb-3">
                 <label for="subjectName" class="form-labels">Submateria</label>
-                <input type="text" class="form-control" id="subjectName" name="subjectName" value="<?php echo $subjectChildName; ?>" disabled>
+                <input type="text" class="form-control" id="subjectName" name="subjectName"
+                    value="<?php echo $subjectChildName; ?>" disabled>
             </div>
 
             <div class="mb-3">
@@ -60,7 +62,7 @@ $gradeId = $_POST['gradeId'];
                 <label for="finalGrade" class="form-labels">Calificación final</label>
                 <input type="text" class="form-control" id="finalGrade" name="finalGrade" value="">
             </div>
-            
+
 
             <div class="col-md">
                 <button type="submit" class="btn btn-success">Agregar</button>
@@ -88,9 +90,7 @@ $gradeId = $_POST['gradeId'];
     import { loadingAlert, errorAlert, successAlert, infoAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/alerts.js';
     import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
 
-    const callback = '<?php echo $_ENV['BASE_URL']; ?>/api.php';
-
-    $(function(){
+    $(function () {
         validateForm("#addMakeOverGrade", {
             subjectName: {
                 required: true,
@@ -115,66 +115,66 @@ $gradeId = $_POST['gradeId'];
                 maxlength: 4,
             }
         },
-        {
-            subjectName: {
-            required: "El nombre de la materia es requerido",
-            minlength: "El nombre de la materia debe tener al menos 3 caracteres"
-            },
-            subjectChildName: {
-                minlength: "El nombre de la submateria debe tener al menos 3 caracteres"
-            },
-            subjectGrade: {
-                required: "La calificación continua es requerida",
-                number: "La calificación continua debe ser un número",
-                maxlength: "La calificación continua no puede ser mayor a 3 caracteres"
-            },
-            subjectExam: {
-                required: "La calificación del examen es requerida",
-                number: "La calificación del examen debe ser un número",
-                maxlength: "La calificación del examen no puede ser mayor a 3 caracteres"
-            },
-            subjectFinalGrade: {
-                required: "La calificación final es requerida",
-                number: "La calificación final debe ser un número",
-                maxlength: "La calificación final no puede ser mayor a 4 caracteres"
+            {
+                subjectName: {
+                    required: "El nombre de la materia es requerido",
+                    minlength: "El nombre de la materia debe tener al menos 3 caracteres"
+                },
+                subjectChildName: {
+                    minlength: "El nombre de la submateria debe tener al menos 3 caracteres"
+                },
+                subjectGrade: {
+                    required: "La calificación continua es requerida",
+                    number: "La calificación continua debe ser un número",
+                    maxlength: "La calificación continua no puede ser mayor a 3 caracteres"
+                },
+                subjectExam: {
+                    required: "La calificación del examen es requerida",
+                    number: "La calificación del examen debe ser un número",
+                    maxlength: "La calificación del examen no puede ser mayor a 3 caracteres"
+                },
+                subjectFinalGrade: {
+                    required: "La calificación final es requerida",
+                    number: "La calificación final debe ser un número",
+                    maxlength: "La calificación final no puede ser mayor a 4 caracteres"
+                }
+            });
+
+        $("#addMakeOverGrade").on("submit", function (e) {
+            e.preventDefault();
+
+            let gradesData = $(this).serialize() + `&studentId=<?php echo $studentId; ?>&subjectId=<?php echo $subjectId; ?>&subjectChildId=<?php echo $subjectChildId; ?>&gradeId=<?php echo $gradeId; ?>`;
+
+            if ($(this).valid()) {
+                loadingAlert();
+                sendFetch(`${BASE_URL}/api/addMakeOverGrade`, 'POST', { makeOverData: gradesData })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
+                        }
+                        return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            if (data.error != null) infoAlert(data.error);
+                            successAlert(data.message);
+                            $('#makeOverExamModal').modal('hide');
+                        } else {
+                            errorAlert(data.message);
+                        }
+                    });
+            } else {
+                infoAlert('Por favor completa los campos correctamente');
             }
         });
 
-        $("#addMakeOverGrade").on("submit", function(e) {
-        e.preventDefault();
 
-        let gradesData = $(this).serialize() + `&studentId=<?php echo $studentId; ?>&subjectId=<?php echo $subjectId; ?>&subjectChildId=<?php echo $subjectChildId; ?>&gradeId=<?php echo $gradeId; ?>`;
-
-        if($(this).valid()){
-            loadingAlert();
-            sendFetch(callback, 'POST', { action: 'addMakeOverGrade', gradesData })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ocurrió un error al realizar la petición: ' + response.statusText);
-                    }
-                    return response.json();  // Asegúrate de que se está retornando la promesa con la conversión a JSON
-                })
-                .then(data => {
-                    if (data.success) {
-                        if(data.error != null)infoAlert(data.error);
-                        successAlert(data.message);
-                        $('#makeOverExamModal').modal('hide');
-                    } else {
-                        errorAlert(data.message);
-                    }
-                });
-        }else{
-            infoAlert('Por favor completa los campos correctamente');
-        }
-        });
-
-        
-        $("#continuosGrade, #examGrade").on("input", function(){
+        $("#continuosGrade, #examGrade").on("input", function () {
             AverageGrade();
         });
     })
 
-    function AverageGrade(){
+    function AverageGrade() {
         let continuos_grade = parseFloat($("#continuosGrade").val());
         let exam_grade = parseFloat($("#examGrade").val());
 
