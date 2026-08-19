@@ -16,6 +16,10 @@ import {
   loadingSpinner,
   confirmAlert,
 } from "../utils/alerts.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
 
 initializeGroupsDataTable();
 
@@ -60,35 +64,17 @@ function handleUpdateGroup(groupUpdateData) {
   });
 }
 
-$("#groupsTable").on("click", ".deleteGroupById", function () {
+$("#groupsTable").on("click", ".deleteGroupById", async function () {
   let groupId = $(this).data("id");
   if (groupId) {
-    Swal.fire({
+    const result = await confirmSensitiveAction({
       title: "¿Estás seguro de eliminar el grupo?",
-      text: "Ingresa tu contraseña para continuar",
-      icon: "warning",
-      input: "password",
-      inputPlaceholder: "Contraseña",
-      inputAttributes: {
-        autocapitalize: "off",
-        autocorrect: "off",
-      },
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-      allowOutsideClick: false,
-      inputValidator: (value) => {
-        if (!value) {
-          return "Debes ingresar tu contraseña";
-        }
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const password = result.value;
-        DeleteGroup(groupId, password);
-      }
     });
+
+      if (result.isConfirmed) {
+        DeleteGroup(groupId, result.password);
+      }
   } else {
     Swal.fire({
       icon: "error",
@@ -191,35 +177,13 @@ $("#groupStudentsTable").on("click", ".deleteGroupStudent", async function () {
   let studentId = $(this).data("id");
   let groupId = $(this).data("group");
 
-  console.log("Student ID:", studentId);
-  console.log("Group ID:", groupId);
-
-  const result = await Swal.fire({
+  const result = await confirmSensitiveAction({
     title: "¿Estás seguro de eliminar al alumno del grupo?",
-    text: "Ingresa tu contraseña para continuar",
-    icon: "warning",
-    input: "password",
-    inputPlaceholder: "Contraseña",
-    inputAttributes: {
-      autocapitalize: "off",
-      autocorrect: "off",
-    },
-    showCancelButton: true,
     confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    allowOutsideClick: false,
-    inputValidator: (value) => {
-      if (!value) {
-        return "Debes ingresar tu contraseña";
-      }
-    },
   });
 
   if (result.isConfirmed) {
-    const password = result.value;
-
-    DeleteStudentGroup(groupId, studentId, password);
+    DeleteStudentGroup(groupId, studentId, result.password);
   }
 });
 
@@ -243,7 +207,7 @@ const DeleteStudentGroup = async (groupId, studentId, password) => {
       });
       // Reload the table
       $("#groupStudentsTable").DataTable().ajax.reload();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       // Show an error message
       Swal.fire({
         icon: "error",
@@ -314,7 +278,7 @@ const DeleteGroup = async (groupId, password) => {
       });
       // Reload the table
       $("#groupsTable").DataTable().ajax.reload();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       // Show an error message
       Swal.fire({
         icon: "error",

@@ -2,21 +2,21 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\CarreersModel;
-use Vendor\Schoolarsystem\Models\LoginModel;
 
 class CarreersController
 {
     private DBConnection $connection;
     private CarreersModel $carreers;
-    private LoginModel $login;
+    private SensitiveActionAuthorizer $sensitiveActions;
 
     public function __construct()
     {
         $this->connection = DBConnection::getInstance();
         $this->carreers = new CarreersModel($this->connection);
-        $this->login = new LoginModel($this->connection);
+        $this->sensitiveActions = new SensitiveActionAuthorizer();
     }
 
     public function getCarreerById(int $carreerId): array
@@ -51,23 +51,16 @@ class CarreersController
         return $this->carreers->updateCarreer($carreerUpdateData);
     }
 
-    public function deleteCarreerById(int $carreerId, string $password): array
+    public function deleteCarreerById(int $carreerId, ?string $password = null): array
     {
         if ($error = Validation::id($carreerId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->carreers->deleteCarreerById($carreerId);

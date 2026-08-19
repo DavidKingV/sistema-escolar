@@ -2,9 +2,13 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Firebase\JWT\JWT;
+use myPHPnotes\Microsoft\Auth as MicrosoftAuth;
+use myPHPnotes\Microsoft\Handlers\Session as MicrosoftSession;
+use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Core\Response;
 use Vendor\Schoolarsystem\Core\Validation;
+use Vendor\Schoolarsystem\loadEnv;
 use Vendor\Schoolarsystem\Models\LoginModel;
 
 class LoginController
@@ -55,6 +59,8 @@ class LoginController
         }
 
         $_SESSION['userId'] = $login['data']['userId'];
+        $_SESSION['authSource'] = 'local';
+        $_SESSION['authenticatedAt'] = time();
 
         // Crear JWT
         $payload = [
@@ -109,5 +115,73 @@ class LoginController
     public function verifyUserPassword(int $userId, string $password): bool
     {
         return $this->login->verifyUserPassword($userId, $password);
+    }
+
+    public function startMicrosoftReauthentication(?string $returnUrl = null): Response
+    {
+        $identity = auth::user();
+
+        if (
+            !($identity['success'] ?? false)
+            || ($identity['authSource'] ?? null) !== 'microsoft'
+        ) {
+            return Response::json([
+                'success' => false,
+                'message' => 'La reautenticación de Microsoft no está disponible para esta sesión.'
+            ], 403);
+        }
+
+        loadEnv::cargar();
+
+        $tenant = (string) ($_ENV['TENANT_ID'] ?? '');
+        $clientId = (string) ($_ENV['CLIENT_ID'] ?? '');
+        $clientSecret = (string) ($_ENV['CLIENT_SECRET'] ?? '');
+        $callback = (string) ($_ENV['CALLBACK_PATH'] ?? '');
+        $scopes = ['User.ReadBasic.All', 'offline_access'];
+
+        if ($tenant === '' || $clientId === '' || $clientSecret === '' || $callback === '') {
+            return Response::json([
+                'success' => false,
+                'message' => 'La autenticación de Microsoft no está configurada correctamente.'
+            ], 500);
+        }
+
+        $microsoft = new MicrosoftAuth(
+            $tenant,
+            $clientId,
+            $clientSecret,
+            $callback,
+            $scopes
+        );
+
+        MicrosoftSession::set('state', bin2hex(random_bytes(32)));
+        MicrosoftSession::set('reauth_in_progress', true);
+        MicrosoftSession::set('reauth_expected_user_id', (string) $identity['userId']);
+        MicrosoftSession::set('reauth_return_url', $this->safeReturnUrl($returnUrl));
+
+        return Response::text('', 302)->header(
+            'Location',
+            $microsoft->getAuthUrl() . '&prompt=login'
+        );
+    }
+
+    private function safeReturnUrl(?string $returnUrl): string
+    {
+        $baseUrl = rtrim((string) ($_ENV['BASE_URL'] ?? ''), '/');
+        $fallback = $baseUrl . '/dashboard.php';
+
+        if (
+            $returnUrl === null
+            || $returnUrl === ''
+            || preg_match('/[\r\n]/', $returnUrl)
+        ) {
+            return $fallback;
+        }
+
+        if (str_starts_with($returnUrl, '/') && !str_starts_with($returnUrl, '//')) {
+            return $returnUrl;
+        }
+
+        return $fallback;
     }
 }

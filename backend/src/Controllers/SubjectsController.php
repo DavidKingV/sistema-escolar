@@ -2,21 +2,21 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\SubjectsModel;
-use Vendor\Schoolarsystem\Models\LoginModel;
 
 class SubjectsController
 {
     private DBConnection $connection;
     private SubjectsModel $subjects;
-    private LoginModel $login;
+    private SensitiveActionAuthorizer $sensitiveActions;
 
     public function __construct()
     {
         $this->connection = DBConnection::getInstance();
         $this->subjects = new SubjectsModel($this->connection);
-        $this->login = new LoginModel($this->connection);
+        $this->sensitiveActions = new SensitiveActionAuthorizer();
     }
 
     public function getSubjectById(int $subjectId): array
@@ -51,23 +51,16 @@ class SubjectsController
         return $this->subjects->updateSubject($subjectUpdateData);
     }
 
-    public function deleteSubjectById(int $subjectId, string $password): array
+    public function deleteSubjectById(int $subjectId, ?string $password = null): array
     {
         if ($error = Validation::id($subjectId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->subjects->deleteSubjectById($subjectId);
@@ -104,23 +97,16 @@ class SubjectsController
         return $this->subjects->updateSubjectChild($subjectChildUpdateData);
     }
 
-    public function deleteSubjectChildById(int $subjectChildId, string $password): array
+    public function deleteSubjectChildById(int $subjectChildId, ?string $password = null): array
     {
         if ($error = Validation::id($subjectChildId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->subjects->deleteSubjectChildById($subjectChildId);

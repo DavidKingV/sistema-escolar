@@ -2,11 +2,11 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\PaymentsModel;
 use Vendor\Schoolarsystem\Models\StudentsModel;
 use Vendor\Schoolarsystem\Models\EmailsModel;
-use Vendor\Schoolarsystem\Models\LoginModel;
 use Facturapi\Facturapi;
 use Facturapi\Exceptions\Facturapi_Exception;
 
@@ -14,13 +14,13 @@ class PaymentsController
 {
     private DBConnection $connection;
     private PaymentsModel $payments;
-    private LoginModel $login;
+    private SensitiveActionAuthorizer $sensitiveActions;
 
     public function __construct()
     {
         $this->connection = DBConnection::getInstance();
         $this->payments = new PaymentsModel($this->connection);
-        $this->login = new LoginModel($this->connection);
+        $this->sensitiveActions = new SensitiveActionAuthorizer();
     }
 
     public function getPaymentHistory(int $studentId): array
@@ -114,23 +114,16 @@ class PaymentsController
         );
     }
 
-    public function deletePaymentById(int $paymentId, string $password): array
+    public function deletePaymentById(int $paymentId, ?string $password = null): array
     {
         if ($error = Validation::id($paymentId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta"
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->payments->softdeletePaymentById($paymentId);
@@ -297,25 +290,9 @@ class PaymentsController
         echo "  Finalizado.\n\n";
     }
 
-    public function verifyPassword(string $password): array
+    public function verifyPassword(?string $password = null): array
     {
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
-
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta"
-            ];
-        }
-
-        return [
-            "success" => true,
-            "message" => "Contraseña verificada"
-        ];
+        return $this->sensitiveActions->authorize($password);
     }
 
     public function verifyTaxData(int $studentId): array

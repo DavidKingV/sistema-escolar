@@ -22,6 +22,10 @@ import {
 import { initializeDataTable } from "../global/dataTables.js";
 import { sendNewPayment } from "./newPayment.js";
 import { createFormObserver, serializeForm } from "../utils/formChanges.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
 
 const paymentObserver = createFormObserver({
   form: "#updateSubject",
@@ -1186,25 +1190,9 @@ $(document).ready(function () {
       destroyHistoryTable = false;
       paymentsModal.hide();
 
-      const result = await Swal.fire({
+      const result = await confirmSensitiveAction({
         title: "Eliminar pago",
-        text: "Ingresa tu contraseña para continuar",
-        input: "password",
-        inputPlaceholder: "Contraseña",
-        inputAttributes: {
-          autocapitalize: "off",
-          autocorrect: "off",
-        },
-        showCancelButton: true,
         confirmButtonText: "Eliminar",
-        cancelButtonText: "Cancelar",
-        confirmButtonColor: "#d33",
-        allowOutsideClick: false,
-        inputValidator: (value) => {
-          if (!value) {
-            return "Debes ingresar tu contraseña";
-          }
-        },
       });
 
       // si cancela -> reabrir modal
@@ -1221,7 +1209,7 @@ $(document).ready(function () {
           `${BASE_URL}/payment/deletePaymentById`,
           {
             paymentId,
-            password: result.value,
+            password: result.password,
           },
         );
 
@@ -1229,7 +1217,7 @@ $(document).ready(function () {
           successAlert(response.message);
 
           $("#paymentHistoryStudentTable").DataTable().ajax.reload(null, false);
-        } else {
+        } else if (!(await handleSensitiveActionResponse(response))) {
           errorAlert(response.message);
         }
       } catch (error) {
@@ -1274,20 +1262,9 @@ $(document).ready(function () {
       $(editModalEl).one("hidden.bs.modal", resolve),
     );
 
-    const result = await Swal.fire({
+    const result = await confirmSensitiveAction({
       title: "Cancelar recibo",
-      text: "Ingresa tu contraseña para continuar",
-      input: "password",
-      inputPlaceholder: "Contraseña",
-      inputAttributes: { autocapitalize: "off", autocorrect: "off" },
-      showCancelButton: true,
       confirmButtonText: "Continuar",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#d33",
-      allowOutsideClick: false,
-      inputValidator: (value) => {
-        if (!value) return "Debes ingresar tu contraseña";
-      },
     });
 
     if (!result.isConfirmed) {
@@ -1302,13 +1279,17 @@ $(document).ready(function () {
       const authResponse = await requestJson(
         `${BASE_URL}/payment/verifyPassword`,
         {
-          password: result.value,
+          password: result.password,
         },
       );
 
       Swal.close();
 
       if (!authResponse.success) {
+        if (await handleSensitiveActionResponse(authResponse)) {
+          return;
+        }
+
         errorAlert(authResponse.message || "Contraseña incorrecta.");
         suppressPaymentsModalReopen = false;
         editModal.show();

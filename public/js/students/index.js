@@ -30,6 +30,10 @@ import {
   capitalizeAll,
   inputLowerCase,
 } from "../global/validate/index.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
 
 initializeStudentDataTable();
 initializeStudentPaymentDataTable();
@@ -268,35 +272,17 @@ $("#studentPaymentTable").on("click", ".editStudentPayment", function () {
   }
 });
 
-$("#studentTable").on("click", ".deleteStudent", function () {
+$("#studentTable").on("click", ".deleteStudent", async function () {
   const studentId = $(this).data("id");
   if (studentId) {
-    Swal.fire({
+    const result = await confirmSensitiveAction({
       title: "¿Estás seguro de eliminar al alumno?",
-      text: "Ingresa tu contraseña para continuar",
-      icon: "warning",
-      input: "password",
-      inputPlaceholder: "Contraseña",
-      inputAttributes: {
-        autocapitalize: "off",
-        autocorrect: "off",
-      },
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-      allowOutsideClick: false,
-      inputValidator: (value) => {
-        if (!value) {
-          return "Debes ingresar tu contraseña";
-        }
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const password = result.value;
-        DeleteStudent(studentId, password);
-      }
     });
+
+      if (result.isConfirmed) {
+        DeleteStudent(studentId, result.password);
+      }
   } else {
     Swal.fire({
       icon: "error",
@@ -991,7 +977,7 @@ const UpdateStudent = async (studentData) => {
       });
       // Reload the table
       $("#studentTable").DataTable().ajax.reload();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       // Show an error message
       Swal.fire({
         icon: "error",

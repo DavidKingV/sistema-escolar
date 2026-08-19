@@ -17,6 +17,10 @@ import {
   capitalizeAll,
 } from "../global/validate/index.js";
 import { createFormObserver, serializeForm } from "../utils/formChanges.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
 
 const subjectObserver = createFormObserver({
   form: "#updateSubject",
@@ -91,26 +95,9 @@ $("#deleteSubjectChildById").on("click", async function () {
   // Esperar a que el modal termine de cerrarse antes de abrir Swal
   await new Promise((resolve) => $(modalEl).one("hidden.bs.modal", resolve));
 
-  const result = await Swal.fire({
+  const result = await confirmSensitiveAction({
     title: "¿Estás seguro de eliminar la materia hija?",
-    text: "Ingresa tu contraseña para continuar",
-    icon: "warning",
-    input: "password",
-    inputPlaceholder: "Contraseña",
-    inputAttributes: {
-      autocapitalize: "off",
-      autocorrect: "off",
-    },
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
     confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    allowOutsideClick: false,
-    inputValidator: (value) => {
-      if (!value) {
-        return "Debes ingresar tu contraseña";
-      }
-    },
   });
 
   // Si cancela, reabrir el modal
@@ -119,8 +106,7 @@ $("#deleteSubjectChildById").on("click", async function () {
     return;
   }
 
-  const password = result.value;
-  DeleteSubjectChild(subjectChildId, password);
+  DeleteSubjectChild(subjectChildId, result.password);
 });
 
 $("#subjectsTable").on("click", ".subjectChildInfo", async function () {
@@ -210,34 +196,16 @@ $("#updateSubject").submit(function (e) {
   });
 });
 
-$("#subjectsTable").on("click", ".deleteSubjectById", function () {
+$("#subjectsTable").on("click", ".deleteSubjectById", async function () {
   let subjectId = $(this).data("id");
-  Swal.fire({
+  const result = await confirmSensitiveAction({
     title: "¿Estás seguro de eliminar la materia?",
-    text: "Ingresa tu contraseña para continuar",
-    icon: "warning",
-    input: "password",
-    inputPlaceholder: "Contraseña",
-    inputAttributes: {
-      autocapitalize: "off",
-      autocorrect: "off",
-    },
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
     confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    allowOutsideClick: false,
-    inputValidator: (value) => {
-      if (!value) {
-        return "Debes ingresar tu contraseña";
-      }
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const password = result.value;
-      DeleteSubject(subjectId, password);
-    }
   });
+
+  if (result.isConfirmed) {
+    DeleteSubject(subjectId, result.password);
+  }
 });
 
 validateForm(
@@ -357,7 +325,7 @@ const DeleteSubject = async (subjectId, password) => {
       }).then(() => {
         $("#subjectsTable").DataTable().ajax.reload();
       });
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       Swal.fire({
         icon: "error",
         title: "Error al eliminar la materia",
@@ -523,7 +491,7 @@ const DeleteSubjectChild = async (subjectChildId, password) => {
         $("#subjectsTable").DataTable().ajax.reload();
         $("#childSubjectsModal").modal("hide");
       });
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       Swal.fire({
         icon: "error",
         title: "Error al eliminar la materia hija",

@@ -5,21 +5,21 @@ use Firebase\JWT\JWT;
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\PermissionHelper;
+use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\StudentsModel;
-use Vendor\Schoolarsystem\Models\LoginModel;
 
 class StudentsController
 {
     private DBConnection $connection;
     private StudentsModel $students;
-    private LoginModel $login;
+    private SensitiveActionAuthorizer $sensitiveActions;
 
     public function __construct()
     {
         $this->connection = DBConnection::getInstance();
         $this->students = new StudentsModel($this->connection);
-        $this->login = new LoginModel($this->connection);
+        $this->sensitiveActions = new SensitiveActionAuthorizer();
     }
 
     public function getStudentById(int $studentId): array
@@ -113,23 +113,16 @@ class StudentsController
         return $this->students->updateStudent($studentUpdateData);
     }
 
-    public function deleteStudentById(int $studentId, string $password): array
+    public function deleteStudentById(int $studentId, ?string $password = null): array
     {
         if ($error = Validation::id($studentId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->students->deleteStudentById($studentId);

@@ -4,21 +4,21 @@ namespace Vendor\Schoolarsystem\Controllers;
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\PermissionHelper;
+use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\GroupsModel;
-use Vendor\Schoolarsystem\Models\LoginModel;
 
 class GroupsController
 {
     private DBConnection $connection;
     private GroupsModel $groups;
-    private LoginModel $login;
+    private SensitiveActionAuthorizer $sensitiveActions;
 
     public function __construct()
     {
         $this->connection = DBConnection::getInstance();
         $this->groups = new GroupsModel($this->connection);
-        $this->login = new LoginModel($this->connection);
+        $this->sensitiveActions = new SensitiveActionAuthorizer();
     }
 
     public function getGroupById(int $groupId): array
@@ -72,23 +72,16 @@ class GroupsController
         return $this->groups->updateGroup($groupUpdateData);
     }
 
-    public function deleteGroupById(int $groupId, string $password): array
+    public function deleteGroupById(int $groupId, ?string $password = null): array
     {
         if ($error = Validation::id($groupId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->groups->deleteGroupById($groupId);
@@ -116,7 +109,7 @@ class GroupsController
         return $this->groups->addStudentToGroup($groupId, $studentId);
     }
 
-    public function removeStudentFromGroup(int $groupId, int $studentId, string $password): array
+    public function removeStudentFromGroup(int $groupId, int $studentId, ?string $password = null): array
     {
         if ($error = Validation::id($groupId)) {
             return $error;
@@ -126,17 +119,10 @@ class GroupsController
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->groups->removeStudentFromGroup($groupId, $studentId);

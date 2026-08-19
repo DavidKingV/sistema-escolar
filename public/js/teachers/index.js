@@ -19,6 +19,10 @@ import {
   capitalizeAllWords,
   capitalizeAll,
 } from "../global/validate/index.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
 
 initializeTeachersDataTable();
 initializeTeachersUsersTable();
@@ -421,35 +425,17 @@ $("#editTeacherForm").submit(function (e) {
   });
 });
 
-$("#teachersTable").on("click", ".deleteTeacherById", function () {
+$("#teachersTable").on("click", ".deleteTeacherById", async function () {
   let teacherId = $(this).data("id");
   if (teacherId) {
-    Swal.fire({
+    const result = await confirmSensitiveAction({
       title: "¿Estás seguro de eliminar al profesor?",
-      text: "Ingresa tu contraseña para continuar",
-      icon: "warning",
-      input: "password",
-      inputPlaceholder: "Contraseña",
-      inputAttributes: {
-        autocapitalize: "off",
-        autocorrect: "off",
-      },
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-      allowOutsideClick: false,
-      inputValidator: (value) => {
-        if (!value) {
-          return "Debes ingresar tu contraseña";
-        }
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const password = result.value;
-        DeleteTeacher(teacherId, password);
-      }
     });
+
+      if (result.isConfirmed) {
+        DeleteTeacher(teacherId, result.password);
+      }
   } else {
     Swal.fire({
       icon: "error",
@@ -595,7 +581,7 @@ const DeleteTeacher = async (teacherId, password) => {
         text: response.message,
       });
       $("#teachersTable").DataTable().ajax.reload();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       Swal.fire({
         icon: "error",
         title: "Error",

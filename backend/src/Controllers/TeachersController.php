@@ -2,21 +2,21 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
 use Vendor\Schoolarsystem\Models\TeachersModel;
-use Vendor\Schoolarsystem\Models\LoginModel;
 
 class TeachersController
 {
     private DBConnection $connection;
     private TeachersModel $teachers;
-    private LoginModel $login;
+    private SensitiveActionAuthorizer $sensitiveActions;
 
     public function __construct()
     {
         $this->connection = DBConnection::getInstance();
         $this->teachers = new TeachersModel($this->connection);
-        $this->login = new LoginModel($this->connection);
+        $this->sensitiveActions = new SensitiveActionAuthorizer();
     }
 
     public function getTeacherById(int $teacherId): array
@@ -51,23 +51,16 @@ class TeachersController
         return $this->teachers->updateTeacher($teacherUpdateData);
     }
 
-    public function deleteTeacherById(int $teacherId, string $password): array
+    public function deleteTeacherById(int $teacherId, ?string $password = null): array
     {
         if ($error = Validation::id($teacherId)) {
             return $error;
         }
 
-        if ($error = Validation::password($password)) {
-            return $error;
-        }
+        $authorization = $this->sensitiveActions->authorize($password);
 
-        $userId = $_SESSION['userId'];
-
-        if (!$this->login->verifyUserPassword($userId, $password)) {
-            return [
-                "success" => false,
-                "message" => "Contraseña incorrecta."
-            ];
+        if (!$authorization['success']) {
+            return $authorization;
         }
 
         return $this->teachers->deleteTeacherById($teacherId);

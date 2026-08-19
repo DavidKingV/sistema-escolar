@@ -22,6 +22,9 @@ class auth
 
                 $connection = DBConnection::getInstance()->getConnection();
                 $accessData = self::resolveAccessProfile($connection, (string) $decoded->userId, 'local');
+                $_SESSION['userId'] = $decoded->userId;
+                $_SESSION['authSource'] = 'local';
+                $_SESSION['authenticatedAt'] = $_SESSION['authenticatedAt'] ?? time();
 
                 return array_merge(
                     array(
@@ -42,6 +45,10 @@ class auth
 
             $userId = $microsoftActions->getUserId($microsoftAccessToken);
             if ($userId['success']) {
+                $_SESSION['userId'] = $userId['userId'];
+                $_SESSION['authSource'] = 'microsoft';
+                $_SESSION['authenticatedAt'] = $_SESSION['authenticatedAt'] ?? time();
+
                 $accessData = self::resolveAccessProfile($connection, (string) $userId['userId'], 'microsoft');
                 $verifyUserRegistration = $microsoftActions->getUserRegistration($userId['userId']);
 

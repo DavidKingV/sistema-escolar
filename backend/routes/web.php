@@ -32,6 +32,7 @@ $router->post('/group/resolveDuplicate', [Vendor\Schoolarsystem\Controllers\Grou
 // Login Routes ✅ COMPLETE
 $router->post('/login', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'login']);
 $router->post('/logout', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'logout']);
+$router->get('/auth/microsoft/reauth', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'startMicrosoftReauthentication'], [AuthMiddleware::class]);
 
 // Payments Routes ⚠️ CHECK
 $router->get('/payment/getPaymentHistory', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'getPaymentHistory'], [AuthMiddleware::class]);

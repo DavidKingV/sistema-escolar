@@ -13,6 +13,10 @@ import {
   capitalizeAll,
 } from "../global/validate/index.js";
 import { createFormObserver, serializeForm } from "../utils/formChanges.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
 
 const careerObserver = createFormObserver({
   form: "#updateCareer",
@@ -174,34 +178,16 @@ $("#updateCareer").on("submit", function (event) {
   });
 });
 
-$("#carreersTable").on("click", ".deleteCarreerById", function () {
+$("#carreersTable").on("click", ".deleteCarreerById", async function () {
   let carreerId = $(this).data("id");
-  Swal.fire({
+  const result = await confirmSensitiveAction({
     title: "¿Estás seguro de eliminar la carrera?",
-    text: "Ingresa tu contraseña para continuar",
-    icon: "warning",
-    input: "password",
-    inputPlaceholder: "Contraseña",
-    inputAttributes: {
-      autocapitalize: "off",
-      autocorrect: "off",
-    },
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
     confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    allowOutsideClick: false,
-    inputValidator: (value) => {
-      if (!value) {
-        return "Debes ingresar tu contraseña";
-      }
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const password = result.value;
-      DeleteCarreer(carreerId, password);
-    }
   });
+
+  if (result.isConfirmed) {
+    DeleteCarreer(carreerId, result.password);
+  }
 });
 
 const DeleteCarreer = async (carreerId, password) => {
@@ -223,7 +209,7 @@ const DeleteCarreer = async (carreerId, password) => {
       });
       // Reload the table
       $("#carreersTable").DataTable().ajax.reload();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       // Show an error message
       Swal.fire({
         icon: "error",
