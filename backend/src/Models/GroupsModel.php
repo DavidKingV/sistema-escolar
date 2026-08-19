@@ -364,7 +364,7 @@ class GroupsModel
             /*
              * Registrar alumnos en student_groups
              */
-            $isPrimary = $isCourseOrDiploma ? 0 : $groupId;
+            $isPrimary = $isCourseOrDiploma ? 0 : 1;
 
             $valuePlaceholders = [];
             $insertParams = [];

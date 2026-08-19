@@ -85,7 +85,7 @@ $careerId = $_POST['careerId'];
 
 <script type="module">
     import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/utils/alerts.js';
-    import { sendFetch } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
+    import { enviarPeticionAjax } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
     import { initializeDataTable } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/dataTables.js';
 
     let careerId = <?php echo $careerId; ?>;
@@ -243,7 +243,7 @@ $careerId = $_POST['careerId'];
 
         loadingAlert();
 
-        sendFetch(`${BASE_URL}/api/addSubjectCareer`, 'POST', $(this).serialize())
+        enviarPeticionAjax(`${BASE_URL}/api/addSubjectCareer`, 'POST', $(this).serialize())
             .then(data => {
                 if (data.success) {
                     if (data.error != null) infoAlert(data.error);
