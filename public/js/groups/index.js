@@ -20,6 +20,11 @@ import {
   confirmSensitiveAction,
   handleSensitiveActionResponse,
 } from "../utils/sensitiveActions.js";
+import { initUpdateGroupValidation } from "../utils/validate.js";
+import { createFormObserver, serializeForm } from "../utils/formChanges.js";
+import { loadModal, registerLazyModal } from "../utils/modalLoader.js";
+
+registerLazyModal({ modal: "#duplicatesModal", target: "#groupDuplicatesModalBody", url: `${BASE_URL}/group/modal/groupDuplicates` });
 
 initializeGroupsDataTable();
 
@@ -30,13 +35,14 @@ $("#groupsTable").on("click", ".editGroup", async function () {
   let groupId = $(this).data("id");
 
   if (groupId) {
-    await $.post(
-      "modals/GroupsEditModal.php",
-      { groupId: groupId },
-      function (data) {
-        $("#modalBodyEditGroup").html(data);
-      },
-    );
+    try {
+      await loadModal(`${BASE_URL}/api/modal/groupsEdit`, { groupId }, "#modalBodyEditGroup");
+      await initializeGroupEditModal();
+    } catch (error) {
+      $("#groupEditLoader").hide();
+      errorAlert(error.message);
+      $("#GroupsEditModal").modal("hide");
+    }
   } else {
     Swal.fire({
       icon: "error",
@@ -45,6 +51,47 @@ $("#groupsTable").on("click", ".editGroup", async function () {
     });
   }
 });
+
+async function initializeGroupEditModal() {
+  const groupId = $("#updateGroup").data("group-id");
+  const observer = createFormObserver({
+    form: "#updateGroup",
+    saveButton: "#saveGroupChanges",
+    getCurrentData: () => serializeForm("#updateGroup"),
+  });
+
+  observer.observe();
+  try {
+    const [groupResponse, careersResponse] = await Promise.all([
+      $.ajax({ url: `${BASE_URL}/group/getGroupById`, type: "GET", data: { groupId } }),
+      $.ajax({ url: `${BASE_URL}/group/getCarreersForGroupCreation`, type: "GET" }),
+    ]);
+    if (!groupResponse.success) throw new Error(groupResponse.message);
+    if (!careersResponse.success) throw new Error(careersResponse.message);
+
+    FillTable(groupResponse.data);
+    const defaultCareer = groupResponse.data.carreer_name;
+    const $select = $("#carreerNameGroupEdit");
+    $.each(careersResponse.data, function (area, subareas) {
+      const $group = $("<optgroup>", { label: area.replace(/_/g, " ") });
+      $.each(subareas, function (subarea, programs) {
+        $.each(programs, function (index, program) {
+          $group.append($("<option>", {
+            value: program.id,
+            text: program.nombre,
+            selected: program.nombre === defaultCareer,
+          }));
+        });
+      });
+      $select.append($group);
+    });
+    $select.select2({ theme: "bootstrap-5", dropdownParent: $("#GroupsEditModal") });
+    initUpdateGroupValidation(handleUpdateGroup);
+    observer.saveSnapshot();
+  } finally {
+    $("#groupEditLoader").hide();
+  }
+}
 
 // index.js - Solo lógica de update
 function handleUpdateGroup(groupUpdateData) {

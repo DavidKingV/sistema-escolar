@@ -61,7 +61,7 @@
                             </h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div class="modal-body" id="groupDuplicatesModalBody">
                             <p class="text-muted mb-3">
                                 Selecciona el grupo correcto para <strong id="duplicateStudentName"></strong>.
                                 Los demás grupos de carrera serán eliminados.

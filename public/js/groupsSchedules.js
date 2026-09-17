@@ -15,11 +15,11 @@ $(function () {
     `${BASE_URL}/api/getGroupSchedules`,
     { groupId: groupId },
     [
-      { data: "title", className: "text-center" },
-      { data: "date", className: "text-center" },
-      { data: "start", className: "text-center" },
-      { data: "end", className: "text-center" },
-      { data: "description", className: "text-center" },
+      { data: "title", className: "text-center", render: $.fn.dataTable.render.text() },
+      { data: "date", className: "text-center", render: $.fn.dataTable.render.text() },
+      { data: "start", className: "text-center", render: $.fn.dataTable.render.text() },
+      { data: "end", className: "text-center", render: $.fn.dataTable.render.text() },
+      { data: "description", className: "text-center", render: $.fn.dataTable.render.text() },
       {
         data: null,
         render: function (data, type, row) {

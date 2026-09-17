@@ -3,6 +3,7 @@ namespace Vendor\Schoolarsystem\Models;
 
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\Core\DatabaseHelper;
+use Vendor\Schoolarsystem\Core\DatabaseExecutor;
 
 class GroupsModel
 {
@@ -15,7 +16,7 @@ class GroupsModel
 
     public function getGroupById(int $groupId): array
     {
-        return DatabaseHelper::selectOne(
+        $result = DatabaseHelper::selectOne(
             $this->connection,
             "
                 SELECT
@@ -35,6 +36,13 @@ class GroupsModel
             "i",
             [$groupId]
         );
+
+        if (!$result["success"] && ($result["message"] ?? '') === 'No se encontró el registro solicitado.') {
+            $result["code"] = "GROUP_NOT_FOUND";
+            $result["message"] = "No se encontró el grupo solicitado.";
+        }
+
+        return $result;
     }
 
     public function getAllGroups(): array
@@ -61,6 +69,21 @@ class GroupsModel
 
     public function addGroup(array $groupDataArray): array
     {
+        $career = DatabaseHelper::selectOne(
+            $this->connection,
+            "SELECT id FROM carreers WHERE id = ?;",
+            "i",
+            [$groupDataArray["carreerNameGroup"]]
+        );
+
+        if (!$career["success"]) {
+            return [
+                "success" => false,
+                "code" => "CAREER_NOT_FOUND",
+                "message" => "No se encontró la carrera seleccionada."
+            ];
+        }
+
         return DatabaseHelper::insert(
             $this->connection,
             "
@@ -110,7 +133,24 @@ class GroupsModel
             if (!$currentData["success"]) {
                 return [
                     "success" => false,
-                    "message" => $currentData["message"],
+                    "code" => "GROUP_NOT_FOUND",
+                    "message" => "No se encontró el grupo solicitado.",
+                    "data" => null
+                ];
+            }
+
+            $career = DatabaseHelper::selectOne(
+                $this->connection,
+                "SELECT id FROM carreers WHERE id = ?;",
+                "i",
+                [$groupUpdateDataArray['carreerNameGroupEdit']]
+            );
+
+            if (!$career["success"]) {
+                return [
+                    "success" => false,
+                    "code" => "CAREER_NOT_FOUND",
+                    "message" => "No se encontró la carrera seleccionada.",
                     "data" => null
                 ];
             }
@@ -127,6 +167,7 @@ class GroupsModel
             if ($currentData["data"] == $newData) {
                 return [
                     "success" => false,
+                    "code" => "NO_CHANGES",
                     "message" => "No se detectaron cambios para guardar.",
                     "data" => null
                 ];
@@ -168,6 +209,43 @@ class GroupsModel
 
     public function deleteGroupById(int $groupId): array
     {
+        $group = DatabaseHelper::selectOne(
+            $this->connection,
+            "SELECT id FROM groups WHERE id = ?;",
+            "i",
+            [$groupId]
+        );
+
+        if (!$group["success"]) {
+            return [
+                "success" => false,
+                "code" => "GROUP_NOT_FOUND",
+                "message" => "No se encontró el grupo solicitado."
+            ];
+        }
+
+        $members = DatabaseHelper::selectValue(
+            $this->connection,
+            "
+                SELECT COUNT(*) AS total
+                FROM students s
+                LEFT JOIN student_groups sg
+                    ON sg.student_id = s.id AND sg.group_id = ?
+                WHERE s.id_group = ? OR sg.group_id IS NOT NULL;
+            ",
+            "total",
+            "ii",
+            [$groupId, $groupId]
+        );
+
+        if ($members > 0) {
+            return [
+                "success" => false,
+                "code" => "GROUP_HAS_STUDENTS",
+                "message" => "No se puede eliminar un grupo que todavía tiene alumnos asignados."
+            ];
+        }
+
         return DatabaseHelper::delete(
             $this->connection,
             "
@@ -182,6 +260,21 @@ class GroupsModel
 
     public function getStudentsByGroupId(int $groupId): array
     {
+        $group = DatabaseHelper::selectOne(
+            $this->connection,
+            "SELECT id FROM groups WHERE id = ?;",
+            "i",
+            [$groupId]
+        );
+
+        if (!$group["success"]) {
+            return [
+                "success" => false,
+                "code" => "GROUP_NOT_FOUND",
+                "message" => "No se encontró el grupo solicitado."
+            ];
+        }
+
         return DatabaseHelper::selectAll(
             $this->connection,
             "
@@ -204,35 +297,11 @@ class GroupsModel
 
     public function addStudentToGroup(int $groupId, array $studentIds): array
     {
-        if (empty($studentIds)) {
-            return [
-                "success" => false,
-                "message" => "No se proporcionaron alumnos válidos.",
-                "data" => null
-            ];
-        }
-
-        $ids = array_values(
-            array_filter(
-                array_unique(array_map('intval', $studentIds)),
-                fn($id) => $id > 0
-            )
-        );
-
-        if (empty($ids)) {
-            return [
-                "success" => false,
-                "message" => "No se proporcionaron alumnos válidos.",
-                "data" => null
-            ];
-        }
+        $ids = array_values(array_unique($studentIds));
 
         try {
             $this->connection->begin_transaction();
 
-            /*
-             * Determinar tipo de grupo
-             */
             $group = DatabaseHelper::selectOne(
                 $this->connection,
                 "
@@ -250,7 +319,8 @@ class GroupsModel
 
                 return [
                     "success" => false,
-                    "message" => $group["message"],
+                    "code" => "GROUP_NOT_FOUND",
+                    "message" => "No se encontró el grupo solicitado.",
                     "data" => null
                 ];
             }
@@ -261,11 +331,29 @@ class GroupsModel
                 true
             );
 
-            /*
-             * Obtener alumnos que ya están asignados
-             */
             $placeholders = implode(",", array_fill(0, count($ids), "?"));
             $types = str_repeat("i", count($ids));
+
+            $existingStudents = DatabaseHelper::selectAll(
+                $this->connection,
+                "SELECT id FROM students WHERE id IN ($placeholders);",
+                $types,
+                $ids
+            );
+
+            if (
+                !$existingStudents["success"]
+                || count($existingStudents["data"]) !== count($ids)
+            ) {
+                $this->connection->rollback();
+
+                return [
+                    "success" => false,
+                    "code" => "STUDENT_NOT_FOUND",
+                    "message" => "Uno o más alumnos seleccionados no existen.",
+                    "data" => null
+                ];
+            }
 
             if ($isCourseOrDiploma) {
                 $sql = "
@@ -283,10 +371,20 @@ class GroupsModel
                 );
             } else {
                 $sql = "
-                    SELECT id
-                    FROM students
-                    WHERE id IN ($placeholders)
-                        AND id_group IS NOT NULL
+                    SELECT s.id
+                    FROM students s
+                    WHERE s.id IN ($placeholders)
+                        AND (
+                            s.id_group IS NOT NULL
+                            OR EXISTS (
+                                SELECT 1
+                                FROM student_groups sg
+                                INNER JOIN groups g ON g.id = sg.group_id
+                                INNER JOIN carreers c ON c.id = g.id_carreer
+                                WHERE sg.student_id = s.id
+                                    AND LOWER(c.subarea) NOT IN ('cursos', 'diplomados')
+                            )
+                        )
                 ";
 
                 $alreadyAssigned = DatabaseHelper::selectAll(
@@ -321,6 +419,7 @@ class GroupsModel
 
                 return [
                     "success" => false,
+                    "code" => "STUDENT_ALREADY_ASSIGNED",
                     "message" => $isCourseOrDiploma
                         ? "Todos los alumnos seleccionados ya están registrados en este curso/diplomado."
                         : "Todos los alumnos seleccionados ya pertenecen a un grupo.",
@@ -328,9 +427,6 @@ class GroupsModel
                 ];
             }
 
-            /*
-             * Asignar grupo de carrera
-             */
             if (!$isCourseOrDiploma) {
                 $placeholders = implode(
                     ",",
@@ -361,9 +457,6 @@ class GroupsModel
                 }
             }
 
-            /*
-             * Registrar alumnos en student_groups
-             */
             $isPrimary = $isCourseOrDiploma ? 0 : 1;
 
             $valuePlaceholders = [];
@@ -416,9 +509,7 @@ class GroupsModel
             ];
 
         } catch (\Exception $e) {
-            if ($this->connection->errno === 0 || $this->connection->ping()) {
-                $this->connection->rollback();
-            }
+            $this->connection->rollback();
 
             return [
                 "success" => false,
@@ -433,24 +524,25 @@ class GroupsModel
         try {
             $this->connection->begin_transaction();
 
-            $update = DatabaseHelper::update(
+            $membership = DatabaseHelper::selectOne(
                 $this->connection,
                 "
-                    UPDATE students
-                    SET id_group = NULL
-                    WHERE id = ?
-                        AND id_group = ?;
+                    SELECT sg.id, sg.is_primary, s.id_group
+                    FROM student_groups sg
+                    INNER JOIN students s ON s.id = sg.student_id
+                    WHERE sg.student_id = ? AND sg.group_id = ?;
                 ",
                 "ii",
                 [$studentId, $groupId]
             );
 
-            if (!$update["success"]) {
+            if (!$membership["success"]) {
                 $this->connection->rollback();
 
                 return [
                     "success" => false,
-                    "message" => $update["message"],
+                    "code" => "MEMBERSHIP_NOT_FOUND",
+                    "message" => "El alumno no pertenece al grupo indicado.",
                     "data" => null
                 ];
             }
@@ -474,6 +566,25 @@ class GroupsModel
                     "message" => $delete["message"],
                     "data" => null
                 ];
+            }
+
+            if ((int) $membership['data']['id_group'] === $groupId) {
+                $update = DatabaseHelper::update(
+                    $this->connection,
+                    "UPDATE students SET id_group = NULL WHERE id = ? AND id_group = ?;",
+                    "ii",
+                    [$studentId, $groupId]
+                );
+
+                if (!$update["success"]) {
+                    $this->connection->rollback();
+
+                    return [
+                        "success" => false,
+                        "message" => $update["message"],
+                        "data" => null
+                    ];
+                }
             }
 
             $this->connection->commit();
@@ -510,6 +621,10 @@ class GroupsModel
         );
 
         $structuredData = [];
+
+        if (!$result["success"]) {
+            return $result;
+        }
 
         foreach ($result["data"] as $row) {
             $structuredData[$row["area"]][$row["subarea"]][] = [
@@ -548,6 +663,21 @@ class GroupsModel
 
     public function getStudentDuplicateGroups(int $studentId): array
     {
+        $student = DatabaseHelper::selectOne(
+            $this->connection,
+            "SELECT id FROM students WHERE id = ?;",
+            "i",
+            [$studentId]
+        );
+
+        if (!$student["success"]) {
+            return [
+                "success" => false,
+                "code" => "STUDENT_NOT_FOUND",
+                "message" => "No se encontró el alumno solicitado."
+            ];
+        }
+
         return DatabaseHelper::selectAll(
             $this->connection,
             "
@@ -575,6 +705,32 @@ class GroupsModel
     {
         try {
             $this->connection->begin_transaction();
+
+            $correctGroup = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT sg.id
+                    FROM student_groups sg
+                    INNER JOIN groups g ON sg.group_id = g.id
+                    INNER JOIN carreers c ON g.id_carreer = c.id
+                    WHERE sg.student_id = ?
+                        AND sg.group_id = ?
+                        AND LOWER(c.subarea) NOT IN ('cursos', 'diplomados');
+                ",
+                "ii",
+                [$studentId, $correctGroupId]
+            );
+
+            if (!$correctGroup["success"]) {
+                $this->connection->rollback();
+
+                return [
+                    "success" => false,
+                    "code" => "INVALID_CORRECT_GROUP",
+                    "message" => "El grupo seleccionado no pertenece al alumno o no es un grupo de carrera.",
+                    "data" => null
+                ];
+            }
 
             // Obtener grupos de carrera duplicados
             $groups = DatabaseHelper::selectAll(
@@ -607,6 +763,7 @@ class GroupsModel
 
                 return [
                     "success" => false,
+                    "code" => "DUPLICATE_NOT_FOUND",
                     "message" => "No se encontraron grupos duplicados a eliminar.",
                     "data" => null
                 ];
@@ -639,8 +796,24 @@ class GroupsModel
                 ];
             }
 
+            $primary = DatabaseExecutor::execute(
+                $this->connection,
+                "
+                    UPDATE student_groups
+                    SET is_primary = 1
+                    WHERE student_id = ? AND group_id = ?;
+                ",
+                "ii",
+                [$studentId, $correctGroupId]
+            );
+
+            if (!$primary["success"]) {
+                $this->connection->rollback();
+                return $primary;
+            }
+
             // Asignar el grupo correcto al alumno
-            $update = DatabaseHelper::update(
+            $update = DatabaseExecutor::execute(
                 $this->connection,
                 "
                     UPDATE students
@@ -692,29 +865,31 @@ class GroupsModel
         int $limit = 30,
         int $groupId = 0
     ): array {
-        $isCourseOrDiploma = false;
+        $groupType = DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT c.subarea
+                FROM groups g
+                INNER JOIN carreers c ON g.id_carreer = c.id
+                WHERE g.id = ?;
+            ",
+            "i",
+            [$groupId]
+        );
 
-        if ($groupId > 0) {
-            $groupType = DatabaseHelper::selectOne(
-                $this->connection,
-                "
-                    SELECT c.subarea
-                    FROM groups g
-                    INNER JOIN carreers c ON g.id_carreer = c.id
-                    WHERE g.id = ?;
-                ",
-                "i",
-                [$groupId]
-            );
-
-            if ($groupType["success"]) {
-                $isCourseOrDiploma = in_array(
-                    strtolower($groupType["data"]["subarea"]),
-                    ["cursos", "diplomados"],
-                    true
-                );
-            }
+        if (!$groupType["success"]) {
+            return [
+                "success" => false,
+                "code" => "GROUP_NOT_FOUND",
+                "message" => "No se encontró el grupo solicitado."
+            ];
         }
+
+        $isCourseOrDiploma = in_array(
+            strtolower($groupType["data"]["subarea"]),
+            ["cursos", "diplomados"],
+            true
+        );
 
         if ($isCourseOrDiploma) {
             $sql = "
@@ -759,40 +934,53 @@ class GroupsModel
             $params
         );
 
-        return $students["success"]
-            ? $students["data"]
-            : [];
-    }
-
-    public function getGroupsCount(string $search = ''): int
-    {
-        $sql = "
-            SELECT COUNT(*) AS total
-            FROM students
-            WHERE id_group IS NULL
-        ";
-
-        $params = [];
-        $types = "";
-
-        if ($search !== '') {
-            $sql .= " AND nombre LIKE ?";
-            $types = "s";
-            $params[] = "%{$search}%";
+        if (!$students["success"]) {
+            return $students;
         }
 
-        return DatabaseHelper::selectValue(
+        if ($isCourseOrDiploma) {
+            $countSql = "
+                SELECT COUNT(*) AS total
+                FROM students s
+                WHERE s.id NOT IN (
+                    SELECT student_id FROM student_groups WHERE group_id = ?
+                )
+            ";
+            $countTypes = "i";
+            $countParams = [$groupId];
+        } else {
+            $countSql = "SELECT COUNT(*) AS total FROM students WHERE id_group IS NULL";
+            $countTypes = "";
+            $countParams = [];
+        }
+
+        if ($search !== '') {
+            $countSql .= " AND nombre LIKE ?";
+            $countTypes .= "s";
+            $countParams[] = "%{$search}%";
+        }
+
+        $total = DatabaseHelper::selectValue(
             $this->connection,
-            $sql,
+            $countSql,
             "total",
-            $types,
-            $params
+            $countTypes,
+            $countParams
         );
+
+        return [
+            "success" => true,
+            "message" => "Alumnos disponibles obtenidos correctamente.",
+            "data" => [
+                "students" => $students["data"],
+                "total" => $total
+            ]
+        ];
     }
 
     public function getGroupCareer(int $studentId): array
     {
-        return DatabaseHelper::selectOne(
+        $result = DatabaseHelper::selectOne(
             $this->connection,
             "
                 SELECT
@@ -806,10 +994,32 @@ class GroupsModel
             "i",
             [$studentId]
         );
+
+        if (!$result["success"] && ($result["message"] ?? '') === 'No se encontró el registro solicitado.') {
+            $result["code"] = "STUDENT_NOT_FOUND";
+            $result["message"] = "El alumno no existe o no tiene un grupo de carrera asignado.";
+        }
+
+        return $result;
     }
 
     public function getGroupSchedules(int $groupId): array
     {
+        $group = DatabaseHelper::selectOne(
+            $this->connection,
+            "SELECT id FROM groups WHERE id = ?;",
+            "i",
+            [$groupId]
+        );
+
+        if (!$group["success"]) {
+            return [
+                "success" => false,
+                "code" => "GROUP_NOT_FOUND",
+                "message" => "No se encontró el grupo solicitado."
+            ];
+        }
+
         return DatabaseHelper::selectAll(
             $this->connection,
             "
@@ -830,6 +1040,21 @@ class GroupsModel
 
     public function addSchedule(array $data): array
     {
+        $group = DatabaseHelper::selectOne(
+            $this->connection,
+            "SELECT id FROM groups WHERE id = ?;",
+            "i",
+            [$data['groupId']]
+        );
+
+        if (!$group["success"]) {
+            return [
+                "success" => false,
+                "code" => "GROUP_NOT_FOUND",
+                "message" => "No se encontró el grupo solicitado."
+            ];
+        }
+
         return DatabaseHelper::insert(
             $this->connection,
             "
