@@ -94,6 +94,7 @@
             </div>
             <div class="modal-body">
                 <form id="updateStudent">
+                    <div id="admissionStudentEditModalFields">
                     <div class="row g-2">
                         <div class="col-md hidden">
                             <div class="form-floating">
@@ -243,6 +244,7 @@
                                 </p>
                             </div>
                         </div>
+                    </div>
                     </div>
             </div>
             <div class="modal-footer">

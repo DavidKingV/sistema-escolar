@@ -7,6 +7,9 @@ import {
 } from "../global/alerts.js";
 import { sendFetch } from "../global/fetchCall.js";
 import { capitalizeAll } from "../global/validate/index.js";
+import { registerLazyModal } from "../utils/modalLoader.js";
+
+registerLazyModal({ modal: "#StutentEditModal", target: "#admissionStudentEditModalFields", url: `${BASE_URL}/student/modal/studentEdit` });
 
 $(function () {
   let canApproveAdmissions = false;
@@ -257,6 +260,7 @@ $("#newAdmissionsTable").on("click", ".approveStudent", function (e) {
           data: rowData, // Enviamos todos los campos como objeto
         },
       )
+        .then((response) => response.json())
         .then((data) => {
           if (data.success) {
             successAlertAuto("Solicitud aprobada con éxito");
@@ -284,6 +288,7 @@ $("#newAdmissionsTable").on("click", ".deleteApplication", function (e) {
       sendFetch(`${BASE_URL}/admission/deleteAdmission`, "POST", {
         id: admissionId,
       })
+        .then((response) => response.json())
         .then((data) => {
           if (data.success) {
             successAlertAuto("Solicitud eliminada con éxito");
