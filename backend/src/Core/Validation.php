@@ -13,17 +13,41 @@ class Validation
             ];
         }
 
-        if (!is_numeric($id)) {
+        if (is_string($id)) {
+            $id = trim($id);
+        }
+
+        if ($id === '') {
             return [
                 "success" => false,
-                "message" => "El ID debe ser numérico."
+                "message" => "ID no especificado."
             ];
         }
 
-        if ((int) $id <= 0) {
+        if (!is_int($id) && !is_string($id)) {
             return [
                 "success" => false,
-                "message" => "ID inválido."
+                "message" => "El ID debe ser un número entero."
+            ];
+        }
+
+        if (
+            filter_var(
+                $id,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 1]]
+            ) === false
+        ) {
+            if (preg_match('/^-?\d+$/D', (string) $id) === 1 && (float) $id <= 0) {
+                return [
+                    "success" => false,
+                    "message" => "ID inválido."
+                ];
+            }
+
+            return [
+                "success" => false,
+                "message" => "El ID debe ser un número entero positivo."
             ];
         }
 

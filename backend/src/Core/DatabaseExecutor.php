@@ -52,9 +52,11 @@ class DatabaseExecutor
 
         } catch (\Exception $e) {
 
+            error_log($e->getMessage());
+
             return [
                 "success" => false,
-                "message" => "Error inesperado en la base de datos. $e"
+                "message" => "Error inesperado en la base de datos."
             ];
 
         }

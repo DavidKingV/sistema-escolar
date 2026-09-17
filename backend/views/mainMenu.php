@@ -46,6 +46,7 @@ $userPhoto = $_ENV['DEFAULT_PROFILE_PHOTO'];
 
 // 🔹 Validar permisos básicos antes de continuar
 if(!$isAdmin && empty($userRole)){
+    http_response_code(403);
     include __DIR__.'/alerts.php';
     exit();
 }
@@ -92,6 +93,7 @@ if ($authSource === 'microsoft' && $accessToken) {
 
 } else {
     // Caso: No tiene permisos
+    http_response_code(403);
     include __DIR__.'/alerts.php';
     exit();
 }
