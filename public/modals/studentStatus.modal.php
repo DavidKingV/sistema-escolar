@@ -1,82 +1,36 @@
 <?php
-require_once(__DIR__ . '/../../backend/vendor/autoload.php');
-
-use Vendor\Schoolarsystem\auth;
-use Vendor\Schoolarsystem\DBConnection;
-use Vendor\Schoolarsystem\userData;
-use Vendor\Schoolarsystem\MicrosoftActions;
-use Vendor\Schoolarsystem\loadEnv;
-
-session_start();
-
-loadEnv::cargar();
-$VerifySession = auth::check();
-
-$dbConnection = new DBConnection();
-$connection = $dbConnection->getConnection();
-
-if (!$VerifySession['success']) {
-    echo '<div class="alert alert-warning" role="alert">
-    La sesión a cadudado, por favor inicia sesión nuevamente
-    </div>';
-    exit();
+if (!isset($studentId, $studentStatus)) {
+    http_response_code(404);
+    exit;
 }
-
-$studentId = $_POST['studentId'] ?? NULL;
-$studentStatus = $_POST['studentStatus'] ?? NULL;
-
 ?>
 
-<form action="" id="addEvent">
-    <div class="form-group">
-        <div class="mb-3" hidden>
-            <label for="studentId">ID:</label>
-            <input class="form-control" id="studentId" name="studentId" type="text" placeholder=""
-                value="<?php echo $studentId ?>" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="studentStatus">Estatus:</label>
-            <select name="studentStatus" id="studentStatus" class="form-control">
-                <option value="0">Selección</option>
-                <option value="1" <?php echo $studentStatus === '1' ? 'selected' : '' ?>>Activo</option>
-                <option value="2" <?php echo $studentStatus === '2' ? 'selected' : '' ?>>Baja Temporal</option>
-                <option value="3" <?php echo $studentStatus === '3' ? 'selected' : '' ?>>Inactivo</option>
-                <option value="4" <?php echo $studentStatus === '4' ? 'selected' : '' ?>>Egresado</option>
-            </select>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="submit" id="updateStudentStatus" class="btn btn-success">Actualizar</button>
-        </div>
+<div class="form-group">
+    <div class="mb-3" hidden>
+        <label for="studentId">ID:</label>
+        <input
+            class="form-control"
+            id="studentId"
+            name="studentId"
+            type="text"
+            value="<?php echo htmlspecialchars((string) $studentId, ENT_QUOTES, 'UTF-8'); ?>"
+            readonly
+        >
     </div>
-</form>
 
-<script type="module">
-    import { errorAlert, successAlert, infoAlert, loadingSpinner, loadingAlert } from '<?php echo $_ENV['BASE_URL']; ?>/js/utils/alerts.js';
-    import { enviarPeticionAjax } from '<?php echo $_ENV['BASE_URL']; ?>/js/global/fetchCall.js';
+    <div class="mb-3">
+        <label for="studentStatus">Estatus:</label>
+        <select name="studentStatus" id="studentStatus" class="form-control">
+            <option value="0">Selección</option>
+            <option value="1" <?php echo $studentStatus === 1 ? 'selected' : ''; ?>>Activo</option>
+            <option value="2" <?php echo $studentStatus === 2 ? 'selected' : ''; ?>>Baja Temporal</option>
+            <option value="3" <?php echo $studentStatus === 3 ? 'selected' : ''; ?>>Inactivo</option>
+            <option value="4" <?php echo $studentStatus === 4 ? 'selected' : ''; ?>>Egresado</option>
+        </select>
+    </div>
 
-    $('#addEvent').submit(function (e) {
-        let formData = $(this).serialize();
-        e.preventDefault();
-
-        loadingAlert();
-
-        enviarPeticionAjax(`${BASE_URL}/api/updateStatus`, 'POST', formData)
-            .then(data => {
-                if (data.success) {
-                    if (data.error != null) infoAlert(data.error);
-                    successAlert(data.message);
-                    $('#statusModal').modal('hide');
-                    $('#studentTable').DataTable().ajax.reload();
-                } else {
-                    errorAlert(data.message);
-                }
-            })
-            .catch(error => {
-                errorAlert(error.message);
-            });
-    });
-
-</script>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="submit" id="updateStudentStatus" class="btn btn-success">Actualizar</button>
+    </div>
+</div>

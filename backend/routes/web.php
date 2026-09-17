@@ -4,18 +4,20 @@ use Vendor\Schoolarsystem\Core\Middleware\AuthMiddleware;
 
 $router->get('/', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'index']);
 
-// Admissions Routes ✅ COMPLETE
+// Admissions Routes
 $router->get('/admission/getAllNewAdmissions', [Vendor\Schoolarsystem\Controllers\AdmissionsController::class, 'getAllNewAdmissions'], [AuthMiddleware::class]);
 $router->post('/admission/deleteAdmission', [Vendor\Schoolarsystem\Controllers\AdmissionsController::class, 'deleteAdmission'], [AuthMiddleware::class]);
 
-// Carreers Routes ✅ COMPLETE
+// Carreers Routes
 $router->get('/carreer/getCarreerById', [Vendor\Schoolarsystem\Controllers\CarreersController::class, 'getCarreerById'], [AuthMiddleware::class]);
 $router->get('/carreer/getAllCarreers', [Vendor\Schoolarsystem\Controllers\CarreersController::class, 'getAllCarreers'], [AuthMiddleware::class]);
 $router->post('/carreer/addCarreer', [Vendor\Schoolarsystem\Controllers\CarreersController::class, 'addCarreer'], [AuthMiddleware::class]);
 $router->post('/carreer/updateCarreer', [Vendor\Schoolarsystem\Controllers\CarreersController::class, 'updateCarreer'], [AuthMiddleware::class]);
 $router->post('/carreer/deleteCarreerById', [Vendor\Schoolarsystem\Controllers\CarreersController::class, 'deleteCarreerById'], [AuthMiddleware::class]);
+// Carreers Modal Routes
+$router->post('/carreer/modal/careerEdit', [Vendor\Schoolarsystem\Controllers\CarreersController::class, 'careerEditModal'], [AuthMiddleware::class]);
 
-// Groups Routes ✅ COMPLETE
+// Groups Routes
 $router->get('/group/getGroupById', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'getGroupById'], [AuthMiddleware::class]);
 $router->get('/group/getAllGroups', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'getAllGroups'], [AuthMiddleware::class]);
 $router->post('/group/addGroup', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'addGroup'], [AuthMiddleware::class]);
@@ -28,13 +30,15 @@ $router->get('/group/getCarreersForGroupCreation', [Vendor\Schoolarsystem\Contro
 $router->get('/group/getDuplicateStudents', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'getDuplicateStudents'], [AuthMiddleware::class]);
 $router->get('/group/getStudentDuplicateGroups', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'getStudentDuplicateGroups'], [AuthMiddleware::class]);
 $router->post('/group/resolveDuplicate', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'resolveDuplicate'], [AuthMiddleware::class]);
+// Groups Modal Routes
+$router->post('/group/modal/groupDuplicates', [Vendor\Schoolarsystem\Controllers\GroupsController::class, 'groupDuplicatesModal'], [AuthMiddleware::class]);
 
-// Login Routes ✅ COMPLETE
+// Login Routes
 $router->post('/login', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'login']);
 $router->post('/logout', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'logout']);
 $router->get('/auth/microsoft/reauth', [Vendor\Schoolarsystem\Controllers\LoginController::class, 'startMicrosoftReauthentication'], [AuthMiddleware::class]);
 
-// Payments Routes ⚠️ CHECK
+// Payments Routes
 $router->get('/payment/getPaymentHistory', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'getPaymentHistory'], [AuthMiddleware::class]);
 $router->post('/payment/getPaymentById', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'getPaymentById'], [AuthMiddleware::class]);
 $router->post('/payment/addPayment', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'addPayment'], [AuthMiddleware::class]);
@@ -50,6 +54,11 @@ $router->post('/payment/verifyMonthlyPayment', [Vendor\Schoolarsystem\Controller
 $router->post('/payment/checkIfPaymentMade', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'checkIfPaymentMade'], [AuthMiddleware::class]);
 $router->post('/payment/sendPaymentReceipt', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'sendPaymentReceipt'], [AuthMiddleware::class]);
 $router->post('/payment/sendPaymentByEmail', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'sendPaymentByEmail'], [AuthMiddleware::class]);
+// Payments Modal Routes
+$router->post('/payment/modal/paymentAmount', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'paymentAmountModal'], [AuthMiddleware::class]);
+$router->post('/payment/modal/paymentHistory', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'paymentHistoryModal'], [AuthMiddleware::class]);
+$router->post('/payment/modal/paymentEdit', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'paymentEditModal'], [AuthMiddleware::class]);
+$router->post('/payment/modal/cancelReceipt', [Vendor\Schoolarsystem\Controllers\PaymentsController::class, 'cancelReceiptModal'], [AuthMiddleware::class]);
 
 // Students Routes
 $router->get('/student/getStudentById', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'getStudentById'], [AuthMiddleware::class]);
@@ -70,15 +79,19 @@ $router->get('/student/getStudentName', [Vendor\Schoolarsystem\Controllers\Stude
 $router->get('/student/verifyStudentGroup', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'verifyStudentGroup'], [AuthMiddleware::class]);
 $router->get('/student/getSubjectNames', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'getSubjectNames'], [AuthMiddleware::class]);
 $router->get('/student/getStudentGrades', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'getStudentGrades'], [AuthMiddleware::class]);
-// ⚠️ CHECK
 $router->get('/student/getChildSubjectNames', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'getChildSubjectNames'], [AuthMiddleware::class]);
 $router->post('/student/addStudentGrade', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'addStudentGrade'], [AuthMiddleware::class]);
 $router->get('/student/getGroupNames', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'getGroupNames'], [AuthMiddleware::class]);
 $router->post('/student/addStudentToGroup', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'addStudentToGroup'], [AuthMiddleware::class]);
 $router->get('/student/verifyStudentUser', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'verifyStudentUser'], [AuthMiddleware::class]);
 $router->post('/student/getStudentsNames', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'getStudentsNames'], [AuthMiddleware::class]);
+// Students Modal Routes
+$router->post('/student/modal/studentEdit', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'studentEditModal'], [AuthMiddleware::class]);
+$router->post('/student/modal/studentUserAdd', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'studentUserAddModal'], [AuthMiddleware::class]);
+$router->post('/student/modal/studentUserEdit', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'studentUserEditModal'], [AuthMiddleware::class]);
+$router->post('/student/modal/microsoftUser', [Vendor\Schoolarsystem\Controllers\StudentsController::class, 'microsoftUserModal'], [AuthMiddleware::class]);
 
-// Subjects Routes ⚠️ CHECK API METHODS
+// Subjects Routes
 $router->get('/subject/getSubjectById', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'getSubjectById'], [AuthMiddleware::class]);
 $router->get('/subject/getAllSubjects', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'getAllSubjects'], [AuthMiddleware::class]);
 $router->post('/subject/addSubject', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'addSubject'], [AuthMiddleware::class]);
@@ -88,8 +101,12 @@ $router->get('/subject/getChildSubjectFindById', [Vendor\Schoolarsystem\Controll
 $router->post('/subject/addSubjectChild', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'addSubjectChild'], [AuthMiddleware::class]);
 $router->post('/subject/updateSubjectChild', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'updateSubjectChild'], [AuthMiddleware::class]);
 $router->post('/subject/deleteSubjectChildById', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'deleteSubjectChildById'], [AuthMiddleware::class]);
+// Subjects Modal Routes
+$router->post('/subject/modal/subjectEdit', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'subjectEditModal'], [AuthMiddleware::class]);
+$router->post('/subject/modal/subjectChildAdd', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'subjectChildAddModal'], [AuthMiddleware::class]);
+$router->post('/subject/modal/subjectChildDetails', [Vendor\Schoolarsystem\Controllers\SubjectsController::class, 'subjectChildDetailsModal'], [AuthMiddleware::class]);
 
-// Teachers Routes ✅ COMPLETE
+// Teachers Routes
 $router->get('/teacher/getTeacherById', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'getTeacherById'], [AuthMiddleware::class]);
 $router->get('/teacher/getAllTeachers', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'getAllTeachers'], [AuthMiddleware::class]);
 $router->post('/teacher/addTeacher', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'addTeacher'], [AuthMiddleware::class]);
@@ -101,3 +118,7 @@ $router->post('/teacher/updateTeacherUserData', [Vendor\Schoolarsystem\Controlle
 $router->get('/teacher/verifyTeacherByUser', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'verifyTeacherByUser'], [AuthMiddleware::class]);
 $router->post('/teacher/desactivateTeacherUser', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'desactivateTeacherUser'], [AuthMiddleware::class]);
 $router->post('/teacher/reactivateTeacherUser', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'reactivateTeacherUser'], [AuthMiddleware::class]);
+// Teachers Modal Routes
+$router->post('/teacher/modal/teacherEdit', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'teacherEditModal'], [AuthMiddleware::class]);
+$router->post('/teacher/modal/teacherUserAdd', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'teacherUserAddModal'], [AuthMiddleware::class]);
+$router->post('/teacher/modal/teacherUserEdit', [Vendor\Schoolarsystem\Controllers\TeachersController::class, 'teacherUserEditModal'], [AuthMiddleware::class]);
