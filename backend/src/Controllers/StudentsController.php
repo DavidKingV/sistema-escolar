@@ -5,8 +5,10 @@ use Firebase\JWT\JWT;
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\DBConnection;
 use Vendor\Schoolarsystem\PermissionHelper;
+use Vendor\Schoolarsystem\Core\Response;
 use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
+use Vendor\Schoolarsystem\Core\View;
 use Vendor\Schoolarsystem\Models\StudentsModel;
 
 class StudentsController
@@ -20,6 +22,47 @@ class StudentsController
         $this->connection = DBConnection::getInstance();
         $this->students = new StudentsModel($this->connection);
         $this->sensitiveActions = new SensitiveActionAuthorizer();
+    }
+
+    public function studentStatusModal(array $modalData): Response
+    {
+        if ($error = Validation::id($modalData['studentId'] ?? null)) {
+            return Response::json($error, 422);
+        }
+
+        $status = filter_var($modalData['studentStatus'] ?? null, FILTER_VALIDATE_INT);
+
+        if ($status === false || !in_array($status, [1, 2, 3, 4], true)) {
+            return Response::json([
+                'success' => false,
+                'message' => 'El estatus del alumno no es válido.'
+            ], 422);
+        }
+
+        return Response::html(View::modal('studentStatus.modal.php', [
+            'studentId' => (int) $modalData['studentId'],
+            'studentStatus' => $status
+        ]));
+    }
+
+    public function studentEditModal(): Response
+    {
+        return Response::html(View::modal('studentEdit.modal.php'));
+    }
+
+    public function studentUserAddModal(): Response
+    {
+        return Response::html(View::modal('studentUserAdd.modal.php'));
+    }
+
+    public function studentUserEditModal(): Response
+    {
+        return Response::html(View::modal('studentUserEdit.modal.php'));
+    }
+
+    public function microsoftUserModal(): Response
+    {
+        return Response::html(View::modal('microsoftUser.modal.php'));
     }
 
     public function getStudentById(int $studentId): array

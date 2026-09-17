@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../backend/views/mainMenu.php'; ?>
+<?php include __DIR__ . '/../backend/src/Views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 

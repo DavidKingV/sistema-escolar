@@ -302,7 +302,7 @@ $("#studentTable").on("click", ".badge", async function () {
   );
 
   await $.post(
-    "../public/modals/studentStatus.modal.php",
+    `${BASE_URL}/api/modal/studentStatus`,
     { studentId: studentId, studentStatus: studentStatus },
     function (data) {
       $("#statusModal").modal("show");

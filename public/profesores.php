@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../backend/vendor/autoload.php';
-include __DIR__ . '/../backend/views/mainMenu.php';
+include __DIR__ . '/../backend/src/Views/mainMenu.php';
 
 use Vendor\Schoolarsystem\auth;
 use Vendor\Schoolarsystem\PermissionHelper;

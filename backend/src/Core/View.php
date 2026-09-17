@@ -15,7 +15,7 @@ class View
         $data['__modalView'] = true;
 
         return self::render(
-            dirname(__DIR__, 3) . '/public/modals/' . $modalName,
+            dirname(__DIR__) . '/Views/modals/' . $modalName,
             $data
         );
     }

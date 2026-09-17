@@ -2,8 +2,10 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Response;
 use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
+use Vendor\Schoolarsystem\Core\View;
 use Vendor\Schoolarsystem\Models\PaymentsModel;
 use Vendor\Schoolarsystem\Models\StudentsModel;
 use Vendor\Schoolarsystem\Models\EmailsModel;
@@ -21,6 +23,26 @@ class PaymentsController
         $this->connection = DBConnection::getInstance();
         $this->payments = new PaymentsModel($this->connection);
         $this->sensitiveActions = new SensitiveActionAuthorizer();
+    }
+
+    public function paymentAmountModal(): Response
+    {
+        return Response::html(View::modal('paymentAmount.modal.php'));
+    }
+
+    public function paymentHistoryModal(): Response
+    {
+        return Response::html(View::modal('paymentHistory.modal.php'));
+    }
+
+    public function paymentEditModal(): Response
+    {
+        return Response::html(View::modal('paymentEdit.modal.php'));
+    }
+
+    public function cancelReceiptModal(): Response
+    {
+        return Response::html(View::modal('cancelReceipt.modal.php'));
     }
 
     public function getPaymentHistory(int $studentId): array

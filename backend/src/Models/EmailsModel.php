@@ -22,7 +22,7 @@ class EmailsModel
         string $email
     ): array {
         try {
-            $loader = new FilesystemLoader(__DIR__ . '/../../views'); // Directorio donde están tus plantillas
+            $loader = new FilesystemLoader(__DIR__ . '/../Views'); // Directorio donde están tus plantillas
             $twig = new Environment($loader);
 
             $htmlContent = $twig->render('eventDetails.html', [
@@ -77,7 +77,7 @@ class EmailsModel
         string $email
     ): array {
         try {
-            $loader = new FilesystemLoader(__DIR__ . '/../../views/emails'); // Directorio donde están tus plantillas
+            $loader = new FilesystemLoader(__DIR__ . '/../Views/emails'); // Directorio donde están tus plantillas
             $twig = new Environment($loader);
 
             // Definir una función personalizada para formatear números como moneda
@@ -168,7 +168,7 @@ class EmailsModel
         string $paymentDate
     ): array {
         try {
-            $loader = new FilesystemLoader(__DIR__ . '/../../views/emails');
+            $loader = new FilesystemLoader(__DIR__ . '/../Views/emails');
             $twig = new Environment($loader);
 
             $productos = [];
