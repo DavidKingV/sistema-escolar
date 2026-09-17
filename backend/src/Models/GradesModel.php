@@ -38,6 +38,7 @@ class GradesModel
         if ($response["data"] === []) {
             return [
                 "success" => false,
+                "code" => "MAKEOVER_NOT_FOUND",
                 "message" => "No se encontraron calificaciones."
             ];
         }
@@ -49,30 +50,53 @@ class GradesModel
         ];
     }
 
+    public function getGradeTarget(
+        int $studentId,
+        int $subjectId,
+        ?int $subjectChildId,
+        int $gradeId
+    ): array {
+        return $this->findGradeTarget(
+            $studentId,
+            $subjectId,
+            $subjectChildId,
+            $gradeId
+        );
+    }
+
     public function addMakeOverGrade(array $data): array
     {
-        $studentId = (int) $data["studentId"];
-        $subjectId = (int) $data["subjectId"];
-        $subjectChildId = (int) ($data["subjectChildId"] ?? 0);
-        $gradeId = (int) $data["gradeId"];
-        $continuousGrade = (float) (
-            $data["continuousGrade"]
-            ?? $data["continuosGrade"]
-            ?? 0
-        );
+        $studentId = $data["studentId"];
+        $subjectId = $data["subjectId"];
+        $subjectChildId = $data["subjectChildId"];
+        $gradeId = $data["gradeId"];
+        $continuousGrade = $data["continuousGrade"];
         $examGrade = (float) $data["examGrade"];
         $finalGrade = (float) $data["finalGrade"];
 
         try {
             $this->connection->begin_transaction();
 
+            $gradeTarget = $this->findGradeTarget(
+                $studentId,
+                $subjectId,
+                $subjectChildId,
+                $gradeId,
+                true
+            );
+
+            if (!$gradeTarget["success"]) {
+                $this->connection->rollback();
+                return $gradeTarget;
+            }
+
             $makeOver = DatabaseHelper::insert(
                 $this->connection,
                 "
                     INSERT INTO makeOverGrades (
-                        studentId,
-                        subjectId,
-                        subjectChildId,
+                    studentId,
+                    subjectId,
+                    subjectChildId,
                         continuosGrade,
                         examGrade,
                         finalGrade
@@ -82,7 +106,7 @@ class GradesModel
                 [
                     $studentId,
                     $subjectId,
-                    $subjectChildId > 0 ? $subjectChildId : null,
+                    $subjectChildId,
                     $continuousGrade,
                     $examGrade,
                     $finalGrade
@@ -96,13 +120,14 @@ class GradesModel
 
             $makeOverId = (int) $makeOver["insertedId"];
 
-            if ($subjectChildId > 0) {
+            if ($subjectChildId !== null) {
                 $link = DatabaseHelper::update(
                     $this->connection,
                     "
                         UPDATE student_grades_child
                         SET makeOverId = ?
-                        WHERE id = ?;
+                        WHERE id = ?
+                            AND makeOverId IS NULL;
                     ",
                     "ii",
                     [$makeOverId, $gradeId]
@@ -113,7 +138,8 @@ class GradesModel
                     "
                         UPDATE student_grades
                         SET makeOver = ?
-                        WHERE id = ?;
+                        WHERE id = ?
+                            AND makeOver IS NULL;
                     ",
                     "ii",
                     [$makeOverId, $gradeId]
@@ -129,7 +155,8 @@ class GradesModel
 
             return [
                 "success" => true,
-                "message" => "Se ha insertado la calificación correctamente."
+                "message" => "Se ha insertado la calificación correctamente.",
+                "insertedId" => $makeOverId
             ];
         } catch (\Throwable $e) {
             $this->connection->rollback();
@@ -139,5 +166,86 @@ class GradesModel
                 "message" => "Error inesperado al insertar la calificación."
             ];
         }
+    }
+
+    private function findGradeTarget(
+        int $studentId,
+        int $subjectId,
+        ?int $subjectChildId,
+        int $gradeId,
+        bool $lockForUpdate = false
+    ): array {
+        if ($subjectChildId !== null) {
+            $response = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT
+                        sgc.id,
+                        sgc.final_grade AS finalGrade,
+                        sgc.makeOverId,
+                        s.nombre AS subjectName,
+                        sc.nombre AS subjectChildName
+                    FROM student_grades_child sgc
+                    INNER JOIN subjects s ON s.id = sgc.id_subject
+                    INNER JOIN subject_child sc ON sc.id = sgc.id_subject_child
+                    WHERE sgc.id = ?
+                        AND sgc.id_student = ?
+                        AND sgc.id_subject = ?
+                        AND sgc.id_subject_child = ?
+                    " . ($lockForUpdate ? "FOR UPDATE" : "") . ";
+                ",
+                "iiii",
+                [$gradeId, $studentId, $subjectId, $subjectChildId]
+            );
+        } else {
+            $response = DatabaseHelper::selectOne(
+                $this->connection,
+                "
+                    SELECT
+                        sg.id,
+                        sg.final_grade AS finalGrade,
+                        sg.makeOver AS makeOverId,
+                        s.nombre AS subjectName,
+                        NULL AS subjectChildName
+                    FROM student_grades sg
+                    INNER JOIN subjects s ON s.id = sg.id_subject
+                    WHERE sg.id = ?
+                        AND sg.id_student = ?
+                        AND sg.id_subject = ?
+                    " . ($lockForUpdate ? "FOR UPDATE" : "") . ";
+                ",
+                "iii",
+                [$gradeId, $studentId, $subjectId]
+            );
+        }
+
+        if (!$response["success"]) {
+            if (($response["message"] ?? "") === "No se encontró el registro solicitado.") {
+                $response["code"] = "GRADE_RECORD_NOT_FOUND";
+                $response["message"] = "No se encontró la calificación original indicada.";
+            }
+
+            return $response;
+        }
+
+        if ($response["data"]["makeOverId"] !== null) {
+            return [
+                "success" => false,
+                "code" => "MAKEOVER_ALREADY_EXISTS",
+                "message" => "La calificación ya cuenta con un recursamiento registrado."
+            ];
+        }
+
+        $originalFinalGrade = (float) $response["data"]["finalGrade"];
+
+        if ($originalFinalGrade <= 0 || $originalFinalGrade >= 6) {
+            return [
+                "success" => false,
+                "code" => "GRADE_NOT_ELIGIBLE",
+                "message" => "La calificación original no es elegible para recursamiento."
+            ];
+        }
+
+        return $response;
     }
 }
