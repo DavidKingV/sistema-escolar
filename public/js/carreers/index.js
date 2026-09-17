@@ -17,6 +17,9 @@ import {
   confirmSensitiveAction,
   handleSensitiveActionResponse,
 } from "../utils/sensitiveActions.js";
+import { registerLazyModal } from "../utils/modalLoader.js";
+
+registerLazyModal({ modal: "#CareerEditModal", target: "#careerEditModalFields", url: `${BASE_URL}/carreer/modal/careerEdit` });
 
 const careerObserver = createFormObserver({
   form: "#updateCareer",
@@ -25,6 +28,8 @@ const careerObserver = createFormObserver({
 });
 
 careerObserver.observe();
+
+$(document).on("modal:loaded", "#careerEditModalFields", () => careerObserver.observe());
 
 initializeCarreersDataTable();
 
@@ -218,10 +223,18 @@ const DeleteCarreer = async (carreerId, password) => {
       });
     }
   } catch (error) {
+    const response = error.responseJSON;
+
+    if (await handleSensitiveActionResponse(response)) {
+      return;
+    }
+
     Swal.fire({
       icon: "error",
       title: "Error al eliminar la carrera",
-      text: "Ocurrió un error al eliminar la carrera, por favor intenta de nuevo más tarde.",
+      text:
+        response?.message ||
+        "Ocurrió un error al eliminar la carrera, por favor intenta de nuevo más tarde.",
     });
   }
 };
@@ -255,7 +268,9 @@ const UpdateCarreer = async (carreerUpdateData) => {
     Swal.fire({
       icon: "error",
       title: "Error al actualizar la carrera",
-      text: "Ocurrió un error al actualizar la carrera, por favor intenta de nuevo más tarde.",
+      text:
+        error.responseJSON?.message ||
+        "Ocurrió un error al actualizar la carrera, por favor intenta de nuevo más tarde.",
     });
   }
 };
@@ -342,7 +357,11 @@ const GetCarreerData = async (carreerId) => {
       $("#careerSubareaEdit").val(selectedOption.data("subarea"));
     });
   } catch (error) {
-    console.error("Error: ", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error al consultar la carrera",
+      text: error.responseJSON?.message || error.message,
+    });
   } finally {
     // Cierra loader
     $("#careerEditLoader").hide();
@@ -380,7 +399,9 @@ const AddCareer = async (carreerData) => {
     Swal.fire({
       icon: "error",
       title: "Error al agregar la carrera",
-      text: "Ocurrió un error al agregar la carrera, por favor intenta de nuevo más tarde.",
+      text:
+        error.responseJSON?.message ||
+        "Ocurrió un error al agregar la carrera, por favor intenta de nuevo más tarde.",
     });
   }
 };

@@ -74,6 +74,7 @@
             </div>
             <div class="modal-body">
                 <form id="updateCareer">
+                    <div id="careerEditModalFields">
                     <div class="row g-2">
                         <div class="col-md hidden">
                             <div class="form-floating">
@@ -123,6 +124,7 @@
                             <label id="careerComentsEdit-error" class="error text-bg-danger" for="careerComentsEdit"
                                 style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                         </div>
+                    </div>
                     </div>
             </div>
             <div class="modal-footer">
