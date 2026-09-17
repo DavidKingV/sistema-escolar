@@ -2,8 +2,10 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Response;
 use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
+use Vendor\Schoolarsystem\Core\View;
 use Vendor\Schoolarsystem\Models\SubjectsModel;
 
 class SubjectsController
@@ -26,6 +28,21 @@ class SubjectsController
         }
 
         return $this->subjects->getSubjectById($subjectId);
+    }
+
+    public function subjectEditModal(): Response
+    {
+        return Response::html(View::modal('subjectEdit.modal.php'));
+    }
+
+    public function subjectChildAddModal(): Response
+    {
+        return Response::html(View::modal('subjectChildAdd.modal.php'));
+    }
+
+    public function subjectChildDetailsModal(): Response
+    {
+        return Response::html(View::modal('subjectChildDetails.modal.php'));
     }
 
     public function getAllSubjects(): array

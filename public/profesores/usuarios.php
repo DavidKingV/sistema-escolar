@@ -67,6 +67,7 @@
             </div>
             <div class="modal-body">
                 <form id="addTeachersUsers">
+                    <div id="teacherUserAddModalFields">
                     <div class="row g-2 py-3">
                         <div class="col-md">
                             <div class="form-floating">
@@ -110,6 +111,7 @@
                                 style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                         </div>
                     </div>
+                    </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -131,6 +133,7 @@
             </div>
             <div class="modal-body">
                 <form id="editTeachersUsers">
+                    <div id="teacherUserEditModalFields">
                     <div class="row g-2 py-3">
                         <div class="col-md">
                             <div class="form-floating">
@@ -176,6 +179,7 @@
                             <label id="teacherUserPassEdit-error" class="error text-bg-danger" for="teacherUserPassEdit"
                                 style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                         </div>
+                    </div>
                     </div>
             </div>
             <div class="modal-footer">

@@ -74,6 +74,7 @@
       </div>
       <div class="modal-body">
         <form id="updateSubject">
+          <div id="subjectEditModalFields">
           <div class="row g-2">
             <div class="col-md">
               <div class="form-floating">
@@ -107,6 +108,7 @@
                 style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
             </div>
           </div>
+          </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -128,6 +130,7 @@
       </div>
       <div class="modal-body">
         <form id="addSubjectChild">
+          <div id="subjectChildAddModalFields">
           <div class="row g-2">
             <div class="col-md">
               <div class="form-floating">
@@ -181,6 +184,7 @@
               </div>
             </div>
           </div>
+          </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -206,6 +210,7 @@
       </div>
       <div class="modal-body">
         <form id="subjectChildInfo">
+          <div id="subjectChildDetailsModalFields">
           <div class="row g-2">
             <div class="col-md">
               <div class="form-floating">
@@ -247,6 +252,7 @@
                 </p>
               </div>
             </div>
+          </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

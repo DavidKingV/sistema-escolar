@@ -86,6 +86,7 @@ if (!PermissionHelper::canAccess('manage_teachers', $userPerms, $isAdmin)) {
             <div class="modal-body
         ">
                 <form id="editTeacherForm">
+                    <div id="teacherEditModalFields">
                     <div class="row g-2 py-4">
                         <div class="col-md">
                             <div class="form-floating">
@@ -161,6 +162,7 @@ if (!PermissionHelper::canAccess('manage_teachers', $userPerms, $isAdmin)) {
                             <label id="teacherEmailEdit-error" class="error text-bg-danger" for="teacherEmailEdit"
                                 style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>
                         </div>
+                    </div>
                     </div>
             </div>
             <div class="modal-footer">

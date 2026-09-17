@@ -21,6 +21,11 @@ import {
   confirmSensitiveAction,
   handleSensitiveActionResponse,
 } from "../utils/sensitiveActions.js";
+import { registerLazyModal } from "../utils/modalLoader.js";
+
+registerLazyModal({ modal: "#SubjectsEditModal", target: "#subjectEditModalFields", url: `${BASE_URL}/subject/modal/subjectEdit` });
+registerLazyModal({ modal: "#SubjectsChildAddModal", target: "#subjectChildAddModalFields", url: `${BASE_URL}/subject/modal/subjectChildAdd` });
+registerLazyModal({ modal: "#childSubjectsModal", target: "#subjectChildDetailsModalFields", url: `${BASE_URL}/subject/modal/subjectChildDetails` });
 
 const subjectObserver = createFormObserver({
   form: "#updateSubject",
@@ -37,6 +42,9 @@ const childSubjectObserver = createFormObserver({
 });
 
 childSubjectObserver.observe();
+
+$(document).on("modal:loaded", "#subjectEditModalFields", () => subjectObserver.observe());
+$(document).on("modal:loaded", "#subjectChildDetailsModalFields", () => childSubjectObserver.observe());
 
 initializeSubjectsDataTable();
 

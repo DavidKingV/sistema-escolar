@@ -23,6 +23,11 @@ import {
   confirmSensitiveAction,
   handleSensitiveActionResponse,
 } from "../utils/sensitiveActions.js";
+import { registerLazyModal } from "../utils/modalLoader.js";
+
+registerLazyModal({ modal: "#TeacherEditModal", target: "#teacherEditModalFields", url: `${BASE_URL}/teacher/modal/teacherEdit` });
+registerLazyModal({ modal: "#teacherUserModal", target: "#teacherUserAddModalFields", url: `${BASE_URL}/teacher/modal/teacherUserAdd` });
+registerLazyModal({ modal: "#TeacherUserEditModal", target: "#teacherUserEditModalFields", url: `${BASE_URL}/teacher/modal/teacherUserEdit` });
 
 initializeTeachersDataTable();
 initializeTeachersUsersTable();
@@ -60,7 +65,7 @@ $("#teacherUsersTable").on("click", ".addUserTeachers", function () {
   }
 });
 
-$("#teacherUserAdd").on("blur", function () {
+$(document).on("blur", "#teacherUserAdd", function () {
   $(".userSuccess").text("");
   let teacherUserAdd = $(this).val();
   if (teacherUserAdd) {
@@ -72,7 +77,7 @@ $("#teacherUserAdd").on("blur", function () {
   }
 });
 
-$("#teacherUserAddEdit").on("blur", function () {
+$(document).on("blur", "#teacherUserAddEdit", function () {
   $(".userSuccess").text("");
   let teacherUserAdd = $(this).val();
   if (teacherUserAdd) {
@@ -628,7 +633,7 @@ const UpdateTeacherData = async (teacherUpdateData) => {
 };
 
 //miselaneos
-$("#showPasswordToggle").on("click", function () {
+$(document).on("click", "#showPasswordToggle", function () {
   let password = $("#teacherUserPass");
   if (password.attr("type") == "password") {
     password.attr("type", "text");
@@ -637,7 +642,7 @@ $("#showPasswordToggle").on("click", function () {
   }
 });
 
-$("#editUserNameteacher").on("click", function () {
+$(document).on("click", "#editUserNameteacher", function () {
   let inputuser = $("#teacherUserAddEdit");
   if (inputuser.attr("readonly")) {
     inputuser.attr("readonly", false);
@@ -646,7 +651,7 @@ $("#editUserNameteacher").on("click", function () {
   }
 });
 
-$("#showPasswordToggleEdit").on("click", function () {
+$(document).on("click", "#showPasswordToggleEdit", function () {
   let password = $("#teacherUserPassEdit");
   if (password.attr("type") == "password") {
     password.attr("type", "text");

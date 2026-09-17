@@ -2,8 +2,10 @@
 namespace Vendor\Schoolarsystem\Controllers;
 
 use Vendor\Schoolarsystem\DBConnection;
+use Vendor\Schoolarsystem\Core\Response;
 use Vendor\Schoolarsystem\Core\SensitiveActionAuthorizer;
 use Vendor\Schoolarsystem\Core\Validation;
+use Vendor\Schoolarsystem\Core\View;
 use Vendor\Schoolarsystem\Models\TeachersModel;
 
 class TeachersController
@@ -26,6 +28,21 @@ class TeachersController
         }
 
         return $this->teachers->getTeacherById($teacherId);
+    }
+
+    public function teacherEditModal(): Response
+    {
+        return Response::html(View::modal('teacherEdit.modal.php'));
+    }
+
+    public function teacherUserAddModal(): Response
+    {
+        return Response::html(View::modal('teacherUserAdd.modal.php'));
+    }
+
+    public function teacherUserEditModal(): Response
+    {
+        return Response::html(View::modal('teacherUserEdit.modal.php'));
     }
 
     public function getAllTeachers(): array
