@@ -609,31 +609,58 @@ function initUpdateGroupValidation(onValidSubmit) {
   $form.validate({
     rules: {
       carreerNameGroupEdit: { required: true, valueNotEquals: "0" },
-      keyGroupEdit: { required: true },
-      nameGroupEdit: { required: true, specialChars: true },
-      startDateEdit: { required: true, date: true },
-      endDateEdit: { required: true, date: true },
-      descriptionGroupEdit: { lettersonly: true },
-    },
-    messages: {
-      carreerNameGroupEdit: { required: "Por favor, selecciona una carrera" },
       keyGroupEdit: {
-        required: "Por favor, ingresa una clave",
-        specialChars: "Solo letras y números",
+        required: true,
+        specialChars: true,
+        minlength: 3,
+        maxlength: 10,
       },
       nameGroupEdit: {
-        required: "Por favor, ingresa un nombre",
-        specialChars: "Solo letras y números",
+        required: true,
+        specialChars: true,
+        minlength: 3,
+        maxlength: 50,
+      },
+      startDateEdit: { required: true, dateISO: true },
+      endDateEdit: { required: true, dateISO: true },
+      descriptionGroupEdit: {
+        required: true,
+        lettersonly: true,
+        minlength: 3,
+        maxlength: 255,
+      },
+    },
+    messages: {
+      carreerNameGroupEdit: {
+        required: "Por favor, selecciona una carrera.",
+        valueNotEquals: "Por favor, selecciona una opción.",
+      },
+      keyGroupEdit: {
+        required: "Por favor, ingresa la clave del grupo.",
+        specialChars: "Solo se admiten letras, números y espacios.",
+        minlength: "La clave del grupo debe tener al menos 3 caracteres.",
+        maxlength: "La clave del grupo no debe exceder los 10 caracteres.",
+      },
+      nameGroupEdit: {
+        required: "Por favor, ingresa el nombre del grupo.",
+        specialChars: "Solo se admiten letras, números y espacios.",
+        minlength: "El nombre del grupo debe tener al menos 3 caracteres.",
+        maxlength: "El nombre del grupo no debe exceder los 50 caracteres.",
       },
       startDateEdit: {
-        required: "Por favor, ingresa una fecha de inicio",
-        date: "Fecha válida",
+        required: "Por favor, ingresa la fecha de inicio.",
+        dateISO: "Por favor, ingresa una fecha válida (YYYY-MM-DD).",
       },
       endDateEdit: {
-        required: "Por favor, ingresa una fecha de término",
-        date: "Fecha válida",
+        required: "Por favor, ingresa la fecha de término.",
+        dateISO: "Por favor, ingresa una fecha válida (YYYY-MM-DD).",
       },
-      descriptionGroupEdit: { lettersonly: "Por favor, ingresa solo letras" },
+      descriptionGroupEdit: {
+        required: "Por favor, ingresa una descripción.",
+        lettersonly: "Solo se admiten letras.",
+        minlength: "La descripción debe tener al menos 3 caracteres.",
+        maxlength: "La descripción no debe exceder los 255 caracteres.",
+      },
     },
     errorPlacement: function (error, element) {
       $("#" + element.attr("id") + "-error").html(error);
@@ -798,7 +825,7 @@ $("#addSubjectChild").validate({
   },
 });
 
-$("#addGradeStudent").validate({
+$("#addStudentGrade").validate({
   rules: {
     subject: {
       required: true,

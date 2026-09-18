@@ -16,22 +16,33 @@ import {
   loadingSpinner,
   confirmAlert,
 } from "../utils/alerts.js";
+import {
+  confirmSensitiveAction,
+  handleSensitiveActionResponse,
+} from "../utils/sensitiveActions.js";
+import { initUpdateGroupValidation } from "../utils/validate.js";
+import { createFormObserver, serializeForm } from "../utils/formChanges.js";
+import { loadModal, registerLazyModal } from "../utils/modalLoader.js";
+
+registerLazyModal({ modal: "#duplicatesModal", target: "#groupDuplicatesModalBody", url: `${BASE_URL}/group/modal/groupDuplicates` });
 
 initializeGroupsDataTable();
 
-const showLoader = () => $("#globalLoader").fadeIn(200);
-
 $("#groupsTable").on("click", ".editGroup", async function () {
+  // Abre loader
+  $("#groupEditLoader").css("display", "flex");
+
   let groupId = $(this).data("id");
-  showLoader();
+
   if (groupId) {
-    await $.post(
-      "modals/GroupsEditModal.php",
-      { groupId: groupId },
-      function (data) {
-        $("#modalBodyEditGroup").html(data);
-      },
-    );
+    try {
+      await loadModal(`${BASE_URL}/api/modal/groupsEdit`, { groupId }, "#modalBodyEditGroup");
+      await initializeGroupEditModal();
+    } catch (error) {
+      $("#groupEditLoader").hide();
+      errorAlert(error.message);
+      $("#GroupsEditModal").modal("hide");
+    }
   } else {
     Swal.fire({
       icon: "error",
@@ -41,8 +52,49 @@ $("#groupsTable").on("click", ".editGroup", async function () {
   }
 });
 
+async function initializeGroupEditModal() {
+  const groupId = $("#updateGroup").data("group-id");
+  const observer = createFormObserver({
+    form: "#updateGroup",
+    saveButton: "#saveGroupChanges",
+    getCurrentData: () => serializeForm("#updateGroup"),
+  });
+
+  observer.observe();
+  try {
+    const [groupResponse, careersResponse] = await Promise.all([
+      $.ajax({ url: `${BASE_URL}/group/getGroupById`, type: "GET", data: { groupId } }),
+      $.ajax({ url: `${BASE_URL}/group/getCarreersForGroupCreation`, type: "GET" }),
+    ]);
+    if (!groupResponse.success) throw new Error(groupResponse.message);
+    if (!careersResponse.success) throw new Error(careersResponse.message);
+
+    FillTable(groupResponse.data);
+    const defaultCareer = groupResponse.data.carreer_name;
+    const $select = $("#carreerNameGroupEdit");
+    $.each(careersResponse.data, function (area, subareas) {
+      const $group = $("<optgroup>", { label: area.replace(/_/g, " ") });
+      $.each(subareas, function (subarea, programs) {
+        $.each(programs, function (index, program) {
+          $group.append($("<option>", {
+            value: program.id,
+            text: program.nombre,
+            selected: program.nombre === defaultCareer,
+          }));
+        });
+      });
+      $select.append($group);
+    });
+    $select.select2({ theme: "bootstrap-5", dropdownParent: $("#GroupsEditModal") });
+    initUpdateGroupValidation(handleUpdateGroup);
+    observer.saveSnapshot();
+  } finally {
+    $("#groupEditLoader").hide();
+  }
+}
+
 // index.js - Solo lógica de update
-function handleUpdateGroup(groupDataEdit) {
+function handleUpdateGroup(groupUpdateData) {
   Swal.fire({
     title: "¿Estás seguro de actualizar al grupo?",
     text: "Esta acción no se puede deshacer",
@@ -54,28 +106,22 @@ function handleUpdateGroup(groupDataEdit) {
     cancelButtonText: "Cancelar",
   }).then((result) => {
     if (result.isConfirmed) {
-      UpdateGroup(groupDataEdit);
+      UpdateGroup(groupUpdateData);
     }
   });
 }
 
-$("#groupsTable").on("click", ".deleteGroup", function () {
+$("#groupsTable").on("click", ".deleteGroupById", async function () {
   let groupId = $(this).data("id");
   if (groupId) {
-    Swal.fire({
-      title: "¿Estás seguro de eliminar al grupo?",
-      text: "Esta acción no se puede deshacer",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "rgb(48, 133, 214)",
-      cancelButtonColor: "rgb(221, 51, 51);",
+    const result = await confirmSensitiveAction({
+      title: "¿Estás seguro de eliminar el grupo?",
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        DeleteGroup(groupId);
-      }
     });
+
+      if (result.isConfirmed) {
+        DeleteGroup(groupId, result.password);
+      }
   } else {
     Swal.fire({
       icon: "error",
@@ -115,7 +161,6 @@ $(function () {
   let currentPath = window.location.pathname;
 
   if (currentPath.endsWith("/grupos/detalles.php")) {
-    //GetStudentsNames();
     const urlParams = new URLSearchParams(window.location.search);
     const groupId = urlParams.get("id");
 
@@ -135,14 +180,14 @@ $(function () {
 const GetDataGroupDetails = async (groupId) => {
   try {
     const response = await $.ajax({
-      url: "../../backend/groups/routes.php",
+      url: `${BASE_URL}/group/getGroupById`,
       type: "GET",
-      data: { groupId: groupId, action: "getGroupData" },
+      data: { groupId: groupId },
     });
     if (!response.success) {
       throw new Error(response.message);
     } else {
-      FillDivsGroups(response);
+      FillDivsGroups(response.data);
     }
   } catch (error) {
     console.error("Error: ", error);
@@ -179,45 +224,25 @@ $("#groupStudentsTable").on("click", ".deleteGroupStudent", async function () {
   let studentId = $(this).data("id");
   let groupId = $(this).data("group");
 
-  const result = await Swal.fire({
+  const result = await confirmSensitiveAction({
     title: "¿Estás seguro de eliminar al alumno del grupo?",
-    text: "Ingresa tu contraseña para continuar",
-    icon: "warning",
-    input: "password",
-    inputPlaceholder: "Contraseña",
-    inputAttributes: {
-      autocapitalize: "off",
-      autocorrect: "off",
-    },
-    showCancelButton: true,
     confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    allowOutsideClick: false,
-    inputValidator: (value) => {
-      if (!value) {
-        return "Debes ingresar tu contraseña";
-      }
-    },
   });
 
   if (result.isConfirmed) {
-    const password = result.value;
-
-    DeleteStudentGroup(groupId, studentId, password);
+    DeleteStudentGroup(groupId, studentId, result.password);
   }
 });
 
 const DeleteStudentGroup = async (groupId, studentId, password) => {
   try {
     const response = await $.ajax({
-      url: "../../backend/groups/routes.php",
+      url: `${BASE_URL}/group/removeStudentFromGroup`,
       type: "POST",
       data: {
         groupId: groupId,
         studentId: studentId,
         password: password,
-        action: "deleteStudentGroup",
       },
     });
     if (response.success) {
@@ -229,8 +254,7 @@ const DeleteStudentGroup = async (groupId, studentId, password) => {
       });
       // Reload the table
       $("#groupStudentsTable").DataTable().ajax.reload();
-      GetStudentsNames();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       // Show an error message
       Swal.fire({
         icon: "error",
@@ -250,14 +274,12 @@ const DeleteStudentGroup = async (groupId, studentId, password) => {
 const AddStudentGroup = async (groupId, studentId) => {
   try {
     const response = await $.ajax({
-      url: "../../backend/groups/routes.php",
+      url: `${BASE_URL}/group/addStudentToGroup`,
       type: "POST",
       data: {
         groupId: groupId,
         studentId: studentId,
-        action: "addStudentGroup",
       },
-      dataType: "json",
     });
     if (response.success) {
       // Show a success message
@@ -268,9 +290,8 @@ const AddStudentGroup = async (groupId, studentId) => {
       });
       // Reload the table
       $("#groupStudentsTable").DataTable().ajax.reload();
-      $("#addStudentGroup").validate().resetForm();
+      $("#addStudentToGroup").validate().resetForm();
       $("#studentIdGroup").val(null).trigger("change");
-      await GetStudentsNames();
     } else {
       // Show an error message
       Swal.fire({
@@ -288,12 +309,12 @@ const AddStudentGroup = async (groupId, studentId) => {
   }
 };
 
-const DeleteGroup = async (groupId) => {
+const DeleteGroup = async (groupId, password) => {
   try {
     const response = await $.ajax({
-      url: "../backend/groups/routes.php",
+      url: `${BASE_URL}/group/deleteGroupById`,
       type: "POST",
-      data: { groupId: groupId, action: "deleteGroup" },
+      data: { groupId: groupId, password: password },
     });
     if (response.success) {
       // Show a success message
@@ -304,7 +325,7 @@ const DeleteGroup = async (groupId) => {
       });
       // Reload the table
       $("#groupsTable").DataTable().ajax.reload();
-    } else {
+    } else if (!(await handleSensitiveActionResponse(response))) {
       // Show an error message
       Swal.fire({
         icon: "error",
@@ -322,12 +343,12 @@ const DeleteGroup = async (groupId) => {
   }
 };
 
-const UpdateGroup = async (groupDataEdit) => {
+const UpdateGroup = async (groupUpdateData) => {
   try {
     const response = await $.ajax({
-      url: "../backend/groups/routes.php",
+      url: `${BASE_URL}/group/updateGroup`,
       type: "POST",
-      data: { groupDataEdit: groupDataEdit, action: "updateGroup" },
+      data: groupUpdateData,
     });
     if (response.success) {
       // Show a success message
@@ -357,58 +378,6 @@ const UpdateGroup = async (groupDataEdit) => {
   }
 };
 
-const GetStudentsNames = async () => {
-  const GetStudentsSelect = async () => {
-    try {
-      const response = await $.ajax({
-        url: "../../../backend/groups/routes.php",
-        type: "GET",
-        data: { action: "getStudentsNames" },
-        dataType: "json",
-      });
-      return response;
-    } catch (error) {
-      console.error("Error al obtener los datos:", error);
-      throw new Error("Error al obtener los datos");
-    }
-  };
-
-  try {
-    const students = await GetStudentsSelect();
-
-    if (!students || students.length === 0) {
-      console.log("No se encontraron alumnos");
-      return;
-    }
-
-    let $select = $("#studentIdGroup");
-
-    // ← Destruir Select2 y limpiar opciones antes de repoblar
-    if ($select.hasClass("select2-hidden-accessible")) {
-      $select.select2("destroy");
-    }
-    $select.empty();
-
-    $.each(students, function (index, student) {
-      if (student.success !== false) {
-        $select.append(
-          $("<option>", {
-            value: student.id,
-            text: student.name,
-          }),
-        );
-      }
-    });
-
-    $select.select2({
-      theme: "bootstrap-5",
-      placeholder: "Selecciona uno o varios alumnos",
-    });
-  } catch (error) {
-    console.error("Error al procesar los datos:", error.message);
-  }
-};
-
 // const GetDataGroupEdit = async (groupId) => {
 //   try {
 //     // Función para obtener el valor predeterminado de la base de datos usando async/await
@@ -416,7 +385,7 @@ const GetStudentsNames = async () => {
 //       const response = await $.ajax({
 //         url: "../backend/groups/routes.php",
 //         type: "GET",
-//         data: { groupId: groupId, action: "getGroupData" },
+//         data: { groupId: groupId, action: "getGroupById" },
 //       });
 //       if (!response.success) {
 //         throw new Error(response.message);
@@ -427,11 +396,11 @@ const GetStudentsNames = async () => {
 //     };
 
 //     // Función para cargar el JSON de carreras
-//     const loadCareers = async () => {
+//     const loadCarreers = async () => {
 //       const response = await $.ajax({
 //         url: "../backend/groups/routes.php",
 //         type: "GET",
-//         data: { action: "getGroupsJson" },
+//         data: { action: "getCarreersForGroupCreation" },
 //       });
 //       if (!response) {
 //         throw new Error(response.message);
@@ -444,10 +413,10 @@ const GetStudentsNames = async () => {
 //     const defaultCareer = await getDefaultCareer();
 
 //     // Cargar el JSON de carreras
-//     const careers = await loadCareers();
+//     const carreers = await loadCarreers();
 
 //     let $selectEdit = $("#carreerNameGroupEdit");
-//     $.each(careers, function (area, subareas) {
+//     $.each(carreers, function (area, subareas) {
 //       let $mainOptgroup = $("<optgroup>", { label: area.replace(/_/g, " ") });
 //       $.each(subareas, function (subarea, programs) {
 //         let $subOptgroup = $("<optgroup>", {
@@ -486,24 +455,23 @@ const GetCarreerName = async () => {
     // Función para obtener el valor predeterminado de la base de datos usando async/await
 
     // Función para cargar el JSON de carreras
-    const loadCareers = async () => {
+    const loadCarreers = async () => {
       const response = await $.ajax({
-        url: "../../backend/groups/routes.php",
+        url: `${BASE_URL}/group/getCarreersForGroupCreation`,
         type: "GET",
-        data: { action: "getGroupsJson" },
       });
-      if (!response) {
+      if (!response.success) {
         throw new Error(response.message);
       } else {
-        return response;
+        return response.data;
       }
     };
 
     // Cargar el JSON de carreras
-    const careers = await loadCareers();
+    const carreers = await loadCarreers();
 
     let $select = $("#carreerNameGroup");
-    $.each(careers, function (area, subareas) {
+    $.each(carreers, function (area, subareas) {
       let $mainOptgroup = $("<optgroup>", { label: area.replace(/_/g, " ") });
 
       $.each(subareas, function (subarea, programs) {
@@ -541,10 +509,9 @@ GetCarreerName();
 const loadStudentDuplicateGroups = async (studentId) => {
   try {
     const response = await $.ajax({
-      url: "../../backend/groups/routes.php",
-      type: "POST",
-      data: { action: "getStudentDuplicateGroups", studentId },
-      dataType: "json",
+      url: `${BASE_URL}/group/getStudentDuplicateGroups`,
+      type: "GET",
+      data: { studentId: studentId },
     });
 
     if (!response.success) {
@@ -554,7 +521,7 @@ const loadStudentDuplicateGroups = async (studentId) => {
     const $list = $("#duplicateGroupsList");
     $list.empty();
 
-    response.results.forEach((group) => {
+    response.data.forEach((group) => {
       $list.append(`
                 <div class="form-check card p-3 mb-2 border">
                     <div class="d-flex align-items-start gap-3">
@@ -604,9 +571,9 @@ const resolveDuplicate = async (studentId) => {
 
   try {
     const response = await $.ajax({
-      url: "../../backend/groups/routes.php",
+      url: `${BASE_URL}/group/resolveDuplicate`,
       type: "POST",
-      data: { action: "resolveDuplicate", studentId, correctGroupId },
+      data: { studentId: studentId, correctGroupId: correctGroupId },
       dataType: "json",
     });
 
@@ -676,46 +643,4 @@ $("#GroupsEditModal").on("hidden.bs.modal", function () {
   CleanInputsGroupsEdit();
 });
 
-// =======================
-// Snapshot para grupos
-// =======================
-let originalGroupData = {};
-
-const normalizeValue = (val) => (val ?? "").toString().trim();
-
-const getCurrentGroupFormData = () => ({
-  idGroupDB: normalizeValue($("#idGroupDB").val()),
-  carreerNameGroupEdit: normalizeValue($("#carreerNameGroupEdit").val()),
-  keyGroupEdit: normalizeValue($("#keyGroupEdit").val()),
-  nameGroupEdit: normalizeValue($("#nameGroupEdit").val()),
-  startDateEdit: normalizeValue($("#startDateEdit").val()),
-  endDateEdit: normalizeValue($("#endDateEdit").val()),
-  descriptionGroupEdit: normalizeValue($("#descriptionGroupEdit").val()),
-});
-
-const hasGroupChanges = () => {
-  const currentData = getCurrentGroupFormData();
-  return Object.keys(originalGroupData).some(
-    (key) => currentData[key] !== originalGroupData[key],
-  );
-};
-
-const observeGroupChanges = () => {
-  $("#updateGroup")
-    .find("input, select")
-    .off("input change")
-    .on("input change", () => {
-      setTimeout(() => {
-        const changed = hasGroupChanges();
-        $("#saveGroupChanges").prop("disabled", !changed);
-      }, 0);
-    });
-};
-
-// Llama esto después de llenar el form con los datos del servidor
-const setGroupSnapshot = () => {
-  originalGroupData = getCurrentGroupFormData();
-  $("#saveGroupChanges").prop("disabled", true); // Inicia deshabilitado
-};
-
-export { handleUpdateGroup, observeGroupChanges, setGroupSnapshot };
+export { handleUpdateGroup };

@@ -34,13 +34,7 @@ if (!$result['success']) {
   die("No se encontraron datos para el recibo.");
 }
 
-$dataResult = $result['data'];
-$rows = [];
-
-// Almacenar todos los registros en un arreglo
-while ($row = $dataResult->fetch_assoc()) {
-  $rows[] = $row;
-}
+$rows = $result['data'];
 
 // Verificar que se haya obtenido al menos un registro
 if (empty($rows)) {

@@ -9,7 +9,8 @@ class PermissionHelper {
         $permissionMap = include __DIR__ . '/PermissionMap.php';
 
         // Expandir permisos según roles asignados
-        $expandedPerms = [];
+        // Conservar permisos directos y, además, expandir llaves de rol heredadas.
+        $expandedPerms = $userPerms;
         foreach ($userPerms as $role) {
             if (isset($permissionMap[$role])) {
                 $expandedPerms = array_merge($expandedPerms, $permissionMap[$role]);

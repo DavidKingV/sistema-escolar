@@ -1,4 +1,4 @@
-<?php include_once __DIR__ . '/../../backend/views/mainMenu.php'; ?>
+<?php include_once __DIR__ . '/../../backend/src/Views/mainMenu.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -20,7 +20,6 @@
 </head>
 
 <body>
-
 
     <div id="content">
         <div class="container-fluid">
@@ -80,6 +79,9 @@
 </body>
 
 </html>
+
+<script>const BASE_URL = "<?php echo $_ENV['BASE_URL']; ?>";</script>
+
 <!-- Boostrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
