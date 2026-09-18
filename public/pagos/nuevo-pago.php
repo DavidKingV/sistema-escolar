@@ -170,7 +170,7 @@
                                     <option selected value="0">Asignatura (solo para Examen Extraordinario)</option>
                                 </select>
                             </div>
-                            <div class="col-md" id="childSubjectDiv" style="display: none;">
+                            <div class="col-md" id="childSubjectDiv" hidden>
                                 <label for="childSubjectName">SubMateria <span class="text-danger">*</span></label>
                                 <label id="childSubjectName-error" class="error text-bg-danger" for="childSubjectName"
                                     style="font-size: 12px; border-radius: 10px; padding: 0px 5px;"></label>

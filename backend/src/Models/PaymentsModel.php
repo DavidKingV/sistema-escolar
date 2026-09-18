@@ -366,7 +366,11 @@ class PaymentsModel
         );
 
         if (!$payment["success"]) {
-            return $payment;
+            return [
+                "success" => true,
+                "message" => $payment["message"],
+                "data" => ["status" => "PENDING"]
+            ];
         }
 
         return [
@@ -405,10 +409,31 @@ class PaymentsModel
         );
     }
 
-    public function checkIfPaymentMade(
-        int $studentId,
-        int $paymentDay
-    ): array {
+    public function checkIfPaymentMade(int $studentId): array
+    {
+        $paymentConfiguration = DatabaseHelper::selectOne(
+            $this->connection,
+            "
+                SELECT payment_day
+                FROM payments_dates
+                WHERE id_student = ?;
+            ",
+            "i",
+            [$studentId]
+        );
+
+        if (
+            !($paymentConfiguration['success'] ?? false)
+            && ($paymentConfiguration['message'] ?? '')
+                !== 'No se encontró el registro solicitado.'
+        ) {
+            return $paymentConfiguration;
+        }
+
+        $paymentDay = ($paymentConfiguration['success'] ?? false)
+            ? (int) $paymentConfiguration['data']['payment_day']
+            : null;
+
         $payment = DatabaseHelper::selectOne(
             $this->connection,
             "
@@ -416,10 +441,12 @@ class PaymentsModel
                     payment_date,
                     total,
                     CASE
+                        WHEN ? IS NULL THEN 'PAID_WITHOUT_DUE_DATE'
                         WHEN DAY(payment_date) <= ? THEN 'ON_TIME'
                         ELSE 'EXTEMPORANEO'
                     END AS status,
-                    extra
+                    extra,
+                    ? AS payment_day
                 FROM students_payments
                 WHERE id_student = ?
                     AND isDeleted = 0
@@ -429,8 +456,8 @@ class PaymentsModel
                 ORDER BY payment_date ASC
                 LIMIT 1;
             ",
-            "ii",
-            [$paymentDay, $studentId]
+            "iiii",
+            [$paymentDay, $paymentDay, $paymentDay, $studentId]
         );
 
         if (!$payment["success"]) {
@@ -444,7 +471,10 @@ class PaymentsModel
             return [
                 "success" => true,
                 "message" => "No se encontraron pagos para este mes; podrían aplicarse recargos.",
-                "data" => ["status" => "PENDING"]
+                "data" => [
+                    "status" => "PENDING",
+                    "payment_day" => $paymentDay
+                ]
             ];
         }
 

@@ -349,7 +349,7 @@ class SubjectsModel
                     LEFT JOIN carreers_subjects cs
                         ON s.id = cs.id_subject
                         AND cs.id_carreer = ?
-                    WHERE cs.id_subject IS NULL
+                    WHERE cs.id_subject
                         AND s.nombre LIKE ?
                     ORDER BY s.nombre ASC
                     LIMIT ? OFFSET ?;

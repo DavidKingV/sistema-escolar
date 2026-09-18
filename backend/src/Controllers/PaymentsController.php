@@ -80,7 +80,9 @@ class PaymentsController
         }
 
         $concept = trim($paymentDataArray['paymentConcept']);
-        $concept_subject = !empty($paymentDataArray['subjectConcept']) ? trim($paymentDataArray['subjectConcept']) : NULL;
+        $concept_subject = !empty($paymentDataArray['subjectConceptText'])
+            ? trim($paymentDataArray['subjectConceptText'])
+            : NULL;
         $concept_subject_child = !empty($paymentDataArray['childSubjectName']) ? trim($paymentDataArray['childSubjectName']) : NULL;
         $concept_carreer = !empty($paymentDataArray['careerName']) ? trim($paymentDataArray['careerName']) : NULL;
         $concept_month = trim($paymentDataArray['paymentMonth']);
@@ -434,15 +436,13 @@ class PaymentsController
         return $this->payments->verifyMonthlyPayment($studentId);
     }
 
-    public function checkIfPaymentMade(
-        int $studentId,
-        int $paymentDay
-    ): array {
+    public function checkIfPaymentMade(mixed $studentId = null): array
+    {
         if ($error = Validation::id($studentId)) {
             return $error;
         }
 
-        return $this->payments->checkIfPaymentMade($studentId, $paymentDay);
+        return $this->payments->checkIfPaymentMade((int) $studentId);
     }
 
     public function sendPaymentReceipt(int $studentId, int $paymentId): array
